@@ -13,7 +13,7 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
         return element;
     }
     getChildren(element?: EntryItem): vscode.ProviderResult<EntryItem[]> {
-        if (element) {//子节点
+        //if (element) {//子节点
             var childs = [];
             for (let index = 0; index < 3; index++) {
                 let str = index.toString();
@@ -25,8 +25,9 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
                 childs[index] = item;
             }
             return childs;
-        } else { //根节点
-            return [new EntryItem("root",vscode.TreeItemCollapsibleState.Collapsed)];
-        }
+        // } 
+        // else { //根节点
+        //     return [new EntryItem("root",vscode.TreeItemCollapsibleState.Collapsed)];
+        // }
     }
 }

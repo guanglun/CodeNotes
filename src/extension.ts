@@ -14,11 +14,6 @@ export function activate(context: vscode.ExtensionContext) {
 		
 	});
 
-	//vscode.window.registerTreeDataProvider("sidebar_test", new DataProvider());
-
-	// require('./sidebar.ts')(context);
-	// context.subscriptions.push(disposable);
-
 	const sidebar_test = new sidebar.EntryList();
 	vscode.window.registerTreeDataProvider("sidebar_test_id1",sidebar_test);
 	vscode.commands.registerCommand("sidebar_test_id1.openChild",args => {
