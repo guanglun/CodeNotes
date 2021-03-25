@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:hello-code.helloWorld"
+		"onCommand:hello-code.helloWorld",
+		"onView:sidebar_test_id1"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -26,6 +27,31 @@
 					"when": "editorFocus",
 					"command": "hello-code.helloWorld",
 					"group": "navigation"
+				}
+			]
+		},
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "sidebar_test",
+					"title": "测试",
+					"icon": "images/refresh.svg"
+				}
+			]
+		},
+		"views": {
+			"sidebar_test": [
+				{
+					"id": "sidebar_test_id1",
+					"name": "测试1"
+				},
+				{
+					"id": "sidebar_test_id2",
+					"name": "测试2"
+				},
+				{
+					"id": "sidebar_test_id3",
+					"name": "测试3"
 				}
 			]
 		}
