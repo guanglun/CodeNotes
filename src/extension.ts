@@ -7,14 +7,25 @@ import * as sidebar from './test';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
+	const sidebar_test = new sidebar.EntryList();
+
 	console.log('Congratulations, your extension "hello-code" is now active!');
 
-	let disposable = vscode.commands.registerCommand('hello-code.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from hello-code!');
+	// let disposable = vscode.commands.registerCommand('hello-code.helloWorld', () => {
+	// 	vscode.window.showInformationMessage('Hello World from hello-code!'); 
 		
-	});
+	// });
 
-	const sidebar_test = new sidebar.EntryList();
+	let command = vscode.commands.registerTextEditorCommand('hello-code.helloWorld', function(textEditor, edit) {
+		const text = textEditor.document.getText(textEditor.selection);
+		console.log(textEditor.document.fileName);
+		console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
+		console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
+		console.log('选中的文本是:', text);
+		sidebar_test.insert(textEditor.document.fileName);
+	  });
+
+	
 
 	vscode.window.registerTreeDataProvider("sidebar_test_id1",sidebar_test);
 	vscode.commands.registerCommand("sidebar_test_id1.openChild",args => {
