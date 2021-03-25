@@ -15,8 +15,10 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const sidebar_test = new sidebar.EntryList();
+
 	vscode.window.registerTreeDataProvider("sidebar_test_id1",sidebar_test);
 	vscode.commands.registerCommand("sidebar_test_id1.openChild",args => {
+		sidebar_test.refresh2();
         vscode.window.showInformationMessage(args);
     });
 }
