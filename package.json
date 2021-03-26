@@ -87,6 +87,7 @@
 		"vscode-test": "^1.5.0"
 	},
 	"dependencies": {
+		"json": "^10.0.0",
 		"jsplumb": "^2.15.5"
 	}
 }

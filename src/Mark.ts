@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as sidebar from './sidebar';
 
+
 export class MMark {
     public textEditor: vscode.TextEditor;
     public entryItem: sidebar.EntryItem;
@@ -19,15 +20,23 @@ export class Mark{
     //private maps: Array<Map>[];
     private context: vscode.ExtensionContext;
     private sidebarView: sidebar.EntryList;
-
+    
     constructor(context: vscode.ExtensionContext,sidebarView: sidebar.EntryList) {
         this.context = context;
         this.sidebarView = sidebarView;
 
         console.log(this.context.storageUri);
-        this.context.workspaceState.update(this.value,null);
+        this.context.secrets.delete(this.value);
+        //this.context.workspaceState.update(this.value);
         this.marks = <MMark[]>this.context.workspaceState.get(this.value);
         this.dump();
+
+        const json = "{'1':'a'}";
+        
+
+        const jsonStr = JSON.parse(json);
+        console.log(jsonStr);
+
     }
     
     public insert(textEditor: vscode.TextEditor)
@@ -36,11 +45,11 @@ export class Mark{
         const entryItem = this.sidebarView.insert(textEditor.document.getText(textEditor.selection));
         this.sidebarView.refresh();
         console.log('111...');
-        //this.marks.push(new MMark(textEditor,entryItem));
+        this.marks.push(new MMark(textEditor,entryItem));
         console.log('222...');
         
         this.dump();
-        //delete this.marks[1];
+
         console.log('333...');
         this.save();
         console.log('444...');
