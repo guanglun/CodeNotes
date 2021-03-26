@@ -1,15 +1,17 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as sidebar from './test';
+import * as sidebar from './sidebar';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as Mark from './Mark';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const sidebar_test = new sidebar.EntryList();
+	const sidebarView = new sidebar.EntryList();
+	const mark = new Mark.Mark(context,sidebarView);
 
 	console.log('Congratulations, your extension "hello-code" is now active!');
 
@@ -19,23 +21,46 @@ export function activate(context: vscode.ExtensionContext) {
 	// });
 
 	let command = vscode.commands.registerTextEditorCommand('hello-code.helloWorld', function(textEditor, edit) {
-		const text = textEditor.document.getText(textEditor.selection);
-		console.log(textEditor.document.fileName);
-		console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
-		console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
-		console.log('选中的文本是:', text);
-		sidebar_test.insert(textEditor.document.fileName);
+		// const text = textEditor.document.getText(textEditor.selection);
+		// console.log(textEditor.document.fileName);
+		// console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
+		// console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
+		// console.log('选中的文本是:', text);
+
+
+		
+		mark.insert(textEditor);
 	  });
 
 	
 
-	vscode.window.registerTreeDataProvider("sidebar_test_id1",sidebar_test);
+	vscode.window.registerTreeDataProvider("sidebar_test_id1",sidebarView);
 	vscode.commands.registerCommand("sidebar_test_id1.openChild",args => {
-		sidebar_test.refresh2();
-        vscode.window.showInformationMessage(args);
+		console.log('click!!');
+
+		const mmark = mark.match(undefined,<sidebar.EntryItem>args);
+		console.log('click22!!');
+		if(mmark !== undefined)
+		{console.log('click33!!');
+			vscode.window.showInformationMessage(mmark.textEditor.document.fileName);
+			console.log(mmark.textEditor.document.fileName);
+		}else{
+			console.log('click44!!');
+		}
+
+        
     });
-
-
+	// const str:string[] = ['a','b','c']; 
+	// console.log('dump...');
+	// console.log(context.workspaceState.get('test'));
+	// context.workspaceState.update('test',str);
+	// console.log('dump...');
+	// console.log(context.workspaceState.get('test'));
+	// str.push('d');
+	// context.workspaceState.update('test',str);
+	// console.log('dump...');
+	// console.log(context.workspaceState.get('test'));
+		//context.workspaceState.get(this.value)
 
 
 	context.subscriptions.push(vscode.commands.registerCommand('hello-code.openWebview', function (uri) {
@@ -51,6 +76,28 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 		panel.webview.html = getWebViewContent(context,'src/view/index.html');
 		}));
+
+
+		// vscode.workspace.openTextDocument(vscode.Uri.file("文件路径)).then(
+		// 	document => vscode.window.showTextDocument(document)
+		// )
+		// console.log(context.storageUri?.path);
+		// console.log(context.globalStorageUri.path);
+		
+
+		// const map = new Map();
+		// map.set('a', 1);
+		// map.set('b', 2);
+		// map.set('c', 3);
+
+		// const maps = [];
+		// maps.push(map);
+		// maps.push(map);
+		// maps.push(map);
+
+		// context.workspaceState.update("set",maps);
+		// console.log(context.workspaceState.get('set'));
+		mark.load();
 }
 
 /**

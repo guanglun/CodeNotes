@@ -24,10 +24,11 @@
     </head>
     
     <body>
-      <div id="diagramContainer">
+      <!-- <div id="diagramContainer"> -->
         <div id="item_left" class="item"></div>
         <div id="item_right" class="item" style="left:150px;"></div>
-      </div>
+        <div id="item_right0" class="item" style="left:300px;"></div>
+      <!-- </div> -->
       <script src="../../node_modules/jsplumb/dist/js/jsplumb.min.js"></script>
     
       <script>
@@ -36,11 +37,22 @@
           jsPlumb.connect({
             source: 'item_left',
             target: 'item_right',
-            endpoint: 'Rectangle'
+            endpoint: 'Dot',
+            connector: ['Flowchart'],
+            anchor: ['Left', 'Right']
           })
     
+          jsPlumb.connect({
+            source: 'item_right',
+            target: 'item_right0',
+            endpoint: 'Dot',
+            connector: ['Flowchart'],
+            anchor: ['Left', 'Right']
+          })
+
           jsPlumb.draggable('item_left')
           jsPlumb.draggable('item_right')
+          jsPlumb.draggable('item_right0')
         })
       </script>
     </body>
