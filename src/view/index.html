@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!-- saved from url=(0057)https://wdd.js.org/jsplumb-chinese-tutorial/demos/01.html -->
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #diagramContainer {
+            padding: 20px;
+            width: 80%;
+            height: 200px;
+            border: 1px solid gray;
+        }
+
+        .item {
+            height: 80px;
+            width: 80px;
+            border: 1px solid blue;
+            float: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="diagramContainer">
+        <div id="item_left" class="item jtk-endpoint-anchor jtk-connected"></div>
+        <div id="item_right" class="item jtk-endpoint-anchor jtk-connected" style="margin-left:50px;"></div>
+    </div>
+    <script src="node_modules/jsplumb/index.d.ts"></script>
+
+    <script>
+        /* global jsPlumb */
+        jsPlumb.ready(function () {
+            jsPlumb.connect({
+                source: 'item_left',
+                target: 'item_right',
+                endpoint: 'Dot'
+            })
+        })
+    </script>
+
+
+    <div class="jtk-endpoint jtk-endpoint-anchor jtk-draggable jtk-droppable"
+        style="position: absolute; height: 20px; width: 20px; left: 60px; top: 101px;"><svg
+            style="position:absolute;left:0px;top:0px" width="20" height="20" pointer-events="all" position="absolute"
+            version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="10" r="10" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#456" stroke="none"
+                style=""></circle>
+        </svg></div>
+    <div class="jtk-endpoint jtk-endpoint-anchor jtk-draggable jtk-droppable"
+        style="position: absolute; height: 20px; width: 20px; left: 192px; top: 101px;"><svg
+            style="position:absolute;left:0px;top:0px" width="20" height="20" pointer-events="all" position="absolute"
+            version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="10" r="10" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#456" stroke="none"
+                style=""></circle>
+        </svg></div><svg style="position:absolute;left:69.5px;top:110.5px" width="133" height="151"
+        pointer-events="none" position="absolute" version="1.1" xmlns="http://www.w3.org/2000/svg"
+        class="jtk-connector">
+        <path d="M 0 0 C 10 150 122 150 132 0 " transform="translate(0.5,0.5)" pointer-events="visibleStroke"
+            version="1.1" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#456" style=""></path>
+    </svg>
+</body>
+
+</html>
