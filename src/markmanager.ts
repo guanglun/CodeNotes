@@ -2,13 +2,14 @@ import * as vscode from 'vscode';
 import * as sidebar from './sidebar';
 import * as database from './database';
 import * as mark  from './mark';
+import * as path  from 'path';
 
 export class MMark {
-    public textEditor: vscode.TextEditor;
+    public te: vscode.TextEditor;
     public entryItem: sidebar.EntryItem;
 
-    constructor(textEditor: vscode.TextEditor,entryItem: sidebar.EntryItem) {
-        this.textEditor = textEditor;
+    constructor(te: vscode.TextEditor,entryItem: sidebar.EntryItem) {
+        this.te = te;
         this.entryItem = entryItem;
     }
 }
@@ -33,13 +34,23 @@ export class markmanager{
         this.db = db;
     }
 
-    public insert(textEditor: vscode.TextEditor)
+    public insert(te: vscode.TextEditor)
     {
         if(this.db && this.el)
         {
-            const name = "[M]" + textEditor.document.getText(textEditor.selection);
-            const mk = new mark.mark(++this.db.lastId,name);
+            
+            const name = "[M]" + path.basename(te.document.fileName) + " " + te.selection.active.line;//te.document.getText(te.selection);
+            const mk = new mark.mark(++this.db.lastId,
+                name,
+                mark.mark.FLAG_SELECT,
+                te.document.fileName,
+                te.selection.start.line,
+                te.selection.start.character,
+                te.selection.end.line,
+                te.selection.end.character,
+                );
     
+
             this.db.insertDB(mk);
             this.el.insert(mk);
             this.el.refresh();
@@ -62,6 +73,32 @@ export class markmanager{
         {
             this.db.checkLoadDB();
             this.db.loadDB();
+        }
+    }
+
+    public click(id:number)
+    {
+        if(this.db && this.el)
+        {
+            const mk = this.db.mkmap.get(id);
+            if(mk)
+            {
+                if(mk.flag == mark.mark.FLAG_SELECT)
+                {
+                    if(mk.file_path)
+                    {
+                        console.log("open... "+mk.file_path);
+                        const uri = vscode.Uri.file(mk.file_path);
+                        vscode.workspace.openTextDocument(uri).then(
+                            document => {
+                                //document.
+                                vscode.window.showTextDocument(document)
+                            }
+                        )
+                    }
+
+                }
+            }
         }
     }
 }

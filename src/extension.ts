@@ -31,29 +31,22 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let command = vscode.commands.registerTextEditorCommand('codenotes.helloWorld', function (textEditor, edit) {
-		// const text = textEditor.document.getText(textEditor.selection);
-		// console.log(textEditor.document.fileName);
-		// console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
-		// console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
-		// console.log('选中的文本是:', text);
-		mm.insert(textEditor);
+		const text = textEditor.document.getText(textEditor.selection);
+		console.log(textEditor.document.fileName);
+		console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
+		console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
+		console.log('选中的文本是:', text);
+		console.log(textEditor.selection.anchor.line +" " +textEditor.selection.anchor.character);
+		console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
+
+
+		//mm.insert(textEditor);
 	});
 
 	vscode.window.registerTreeDataProvider("sidebar_test_id1", el);
-	vscode.commands.registerCommand("sidebar_test_id1.openChild", args => {
-		console.log('click!!');
-
-		// const mmark = mark.match(undefined,<sidebar.EntryItem>args);
-		// console.log('click22!!');
-		// if(mmark !== undefined)
-		// {console.log('click33!!');
-		// 	vscode.window.showInformationMessage(mmark.textEditor.document.fileName);
-		// 	console.log(mmark.textEditor.document.fileName);
-		// }else{
-		// 	console.log('click44!!');
-		// }
-
-
+	vscode.commands.registerCommand("sidebar_test_id1.openChild", (args: number) => {
+		console.log('click id : '+args);
+		mm.click(args);
 	});
 	// const str:string[] = ['a','b','c']; 
 	// console.log('dump...');

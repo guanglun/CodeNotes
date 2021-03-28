@@ -12,7 +12,13 @@ export class database {
         "CREATE TABLE " + database.TABLE_NAME + " (\
         id   INTEGER PRIMARY KEY\
                      UNIQUE,\
-        name VARCHAR\
+        name VARCHAR,\
+        flag INTEGER,\
+        file_name VARCHAR,\
+        start_line INTEGER,\
+        start INTEGER,\
+        end_line INTEGER,\
+        end INTEGER\
     );";
 
 
@@ -59,7 +65,20 @@ export class database {
             if (res.length) {
                 this.mkmap.clear();
                 for (let i = 0; i < res.length; i++) {
-                    const mk = new mark.mark(res[i].id, res[i].name)
+                    const mk = new mark.mark(
+                        res[i].id, 
+                        res[i].name,
+                        res[i].flag,
+                        res[i].file_name,
+                        res[i].start_line,
+                        res[i].start,
+                        res[i].end_line,
+                        res[i].end,
+                        
+                        
+                        
+                        
+                        )
                     this.mkmap.set(mk.id, mk);
                     if (this.el)
                         this.el.insert(mk);
@@ -99,18 +118,21 @@ export class database {
 
     insertDB(mark: mark.mark) {
         if (this.db) {
-            if (mark.id == 0) {
-                this.db.run("insert into " + database.TABLE_NAME + " values ( NULL , \"" + mark.name + "\" )", function (err) {
+            const dbexc = "insert into " + database.TABLE_NAME + " values ( " + 
+            mark.id + " , "  +
+            "\"" + mark.name + "\" , "  +
+            mark.flag + " , "  +
+            "\"" + mark.file_path + "\" , "  +
+            mark.start_line + " , "  +
+            mark.start + " , "  +
+            mark.end_line + " , "  +
+            mark.end + 
+            ")";
+            console.log(dbexc);
+                this.db.run(dbexc, function (err) {
                     if (err) throw err;
                     console.log("Insert Data Success!");
                 });
-            } else {
-                this.db.run("insert into " + database.TABLE_NAME + " values ( " + mark.id + " , \"" + mark.name + "\" )", function (err) {
-                    if (err) throw err;
-                    console.log("Insert Data Success!");
-                });
-            }
-
         }
     }
 
