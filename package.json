@@ -1,6 +1,6 @@
 {
-	"name": "hello-code",
-	"displayName": "hello-code",
+	"name": "codenotes",
+	"displayName": "codenotes",
 	"description": "Yes",
 	"version": "0.0.1",
 	"engines": {
@@ -10,41 +10,41 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:hello-code.helloWorld",
+		"onCommand:codenotes.helloWorld",
 		"onView:sidebar_test_id1"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "hello-code.helloWorld",
+				"command": "codenotes.helloWorld",
 				"title": "Hello World"
 			},
 			{
-				"command": "hello-code.openWebview",
+				"command": "codenotes.openWebview",
 				"title": "Open Web View"
+			},
+			{
+				"command": "codenotes.deleteItem",
+				"title": "Delete"
 			}
 		],
 		"menus": {
 			"editor/context": [
 				{
 					"when": "editorFocus",
-					"command": "hello-code.helloWorld",
+					"command": "codenotes.helloWorld",
 					"group": "navigation"
 				},
 				{
 					"when": "editorFocus",
-					"command": "hello-code.openWebview",
+					"command": "codenotes.openWebview",
 					"group": "navigation"
 				}
 			],
 			"view/item/context": [				
 			{
-				"command": "hello-code.helloWorld",
-				"group": "navigation"
-			},
-			{
-				"command": "hello-code.openWebview",
+				"command": "codenotes.deleteItem",
 				"group": "navigation"
 			}]
 		},

@@ -13,30 +13,34 @@ import * as database from './database';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const sidebarView = new sidebar.EntryList();
-	const db = new database.database(context,sidebarView);
-	const mm = new markmanager.markmanager(context,sidebarView,db);
+	const el = new sidebar.EntryList();
+	const db = new database.database(context);
+	const mm = new markmanager.markmanager(context);
 
-	console.log('Congratulations, your extension "hello-code" is now active!');
+	db.init(el,mm);
+	mm.init(el,db);
 
-	// let disposable = vscode.commands.registerCommand('hello-code.helloWorld', () => {
-	// 	vscode.window.showInformationMessage('Hello World from hello-code!'); 
-		
-	// });
+	vscode.commands.registerCommand
+	vscode.commands.registerCommand('codenotes.deleteItem', (res: sidebar.EntryItem) => {
+		if(res.command && res.command.arguments)
+		{
+			mm.delete(res.command.arguments[0]);
+			//console.log(res.command.arguments);
+		}
+			
+	});
 
-	let command = vscode.commands.registerTextEditorCommand('hello-code.helloWorld', function(textEditor, edit) {
+	let command = vscode.commands.registerTextEditorCommand('codenotes.helloWorld', function (textEditor, edit) {
 		// const text = textEditor.document.getText(textEditor.selection);
 		// console.log(textEditor.document.fileName);
 		// console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
 		// console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
 		// console.log('选中的文本是:', text);
-		//mm.insert(textEditor);
-	  });
+		mm.insert(textEditor);
+	});
 
-	
-
-	vscode.window.registerTreeDataProvider("sidebar_test_id1",sidebarView);
-	vscode.commands.registerCommand("sidebar_test_id1.openChild",args => {
+	vscode.window.registerTreeDataProvider("sidebar_test_id1", el);
+	vscode.commands.registerCommand("sidebar_test_id1.openChild", args => {
 		console.log('click!!');
 
 		// const mmark = mark.match(undefined,<sidebar.EntryItem>args);
@@ -49,8 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
 		// 	console.log('click44!!');
 		// }
 
-        
-    });
+
+	});
 	// const str:string[] = ['a','b','c']; 
 	// console.log('dump...');
 	// console.log(context.workspaceState.get('test'));
@@ -61,10 +65,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// context.workspaceState.update('test',str);
 	// console.log('dump...');
 	// console.log(context.workspaceState.get('test'));
-		//context.workspaceState.get(this.value)
+	//context.workspaceState.get(this.value)
 
 
-	context.subscriptions.push(vscode.commands.registerCommand('hello-code.openWebview', function (uri) {
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {
 		// 建立webview
 		const panel = vscode.window.createWebviewPanel(
 			'testWebview', // viewType
@@ -75,16 +79,11 @@ export function activate(context: vscode.ExtensionContext) {
 				retainContextWhenHidden: true, // webview被隐藏时保持状态，避免被重置
 			}
 		);
-		panel.webview.html = getWebViewContent(context,'src/view/index.html');
-		}));
+		panel.webview.html = getWebViewContent(context, 'src/view/index.html');
+	}));
 
 
-		// vscode.workspace.openTextDocument(vscode.Uri.file("文件路径)).then(
-		// 	document => vscode.window.showTextDocument(document)
-		// )
-		// console.log(context.storageUri?.path);
-		// console.log(context.globalStorageUri.path);	
-
+	mm.load();
 }
 
 /**
@@ -92,17 +91,17 @@ export function activate(context: vscode.ExtensionContext) {
  * @param {*} context 上下文
  * @param {*} templatePath 相对于插件根目录的html文件相对路径
  */
- function getWebViewContent(context: vscode.ExtensionContext, templatePath: string) {
-    const resourcePath = path.join(context.extensionPath, templatePath);
-    const dirPath = path.dirname(resourcePath);
-    let html = fs.readFileSync(resourcePath, 'utf-8');
-    // vscode不支持直接加载本地资源，须要替换成其专有路径格式，这里只是简单的将样式和JS的路径替换
-    html = html.replace(/(<link.+?href="|<script.+?src="|<img.+?src=")(.+?)"/g, (m, $1, $2) => {
-        return $1 + vscode.Uri.file(path.resolve(dirPath, $2)).with({ scheme: 'vscode-resource' }).toString() + '"';
-    });
-    return html;
+function getWebViewContent(context: vscode.ExtensionContext, templatePath: string) {
+	const resourcePath = path.join(context.extensionPath, templatePath);
+	const dirPath = path.dirname(resourcePath);
+	let html = fs.readFileSync(resourcePath, 'utf-8');
+	// vscode不支持直接加载本地资源，须要替换成其专有路径格式，这里只是简单的将样式和JS的路径替换
+	html = html.replace(/(<link.+?href="|<script.+?src="|<img.+?src=")(.+?)"/g, (m, $1, $2) => {
+		return $1 + vscode.Uri.file(path.resolve(dirPath, $2)).with({ scheme: 'vscode-resource' }).toString() + '"';
+	});
+	return html;
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
 

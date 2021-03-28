@@ -1,6 +1,6 @@
-# hello-code README
+# codenotes README
 
-This is the README for your extension "hello-code". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "codenotes". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 

@@ -3,6 +3,7 @@ import * as sqlite3 from 'sqlite3';
 import * as fs from 'fs';
 import * as mark from './mark';
 import * as sidebar from './sidebar';
+import * as markmanager from './markmanager';
 
 export class database {
     private static DATABASE_PATH = ".codenotes";
@@ -14,10 +15,13 @@ export class database {
         name VARCHAR\
     );";
 
-    private db: sqlite3.Database | undefined;
-    private mkmap: Map<number, mark.mark> = new Map<number, mark.mark>();
+
+    public mkmap: Map<number, mark.mark> = new Map<number, mark.mark>();
     private context: vscode.ExtensionContext;
-    private sidebarView: sidebar.EntryList;
+    private el: sidebar.EntryList | undefined;
+    private db: sqlite3.Database | undefined;
+    private mm: markmanager.markmanager | undefined;
+    public lastId = 0;
 
     /**
    * 读取路径信息
@@ -37,28 +41,39 @@ export class database {
         });
     }
 
-
-    constructor(context: vscode.ExtensionContext,sidebarView: sidebar.EntryList) {
+    constructor(context: vscode.ExtensionContext) {
         this.context = context;
-        this.sidebarView = sidebarView;
+    }
 
-        this.checkLoadDB();
-        const promise = this.loadDBIntoMem();
+    public init(el: sidebar.EntryList, mm: markmanager.markmanager) {
+        this.el = el;
+        this.mm = mm;
+    }
 
-        promise.then((res: any)=> {
+    loadDB() {
+        const promise = this.loadDBIntoMemPromise();
+
+
+        promise.then((res: any) => {
             console.log(res);
-            if(res.length)
-            for(let i = 0;i<res.length;i++)
-            {
-                this.mkmap.set(res[i].id, new mark.mark(res[i].id, res[i].name));
-                this.sidebarView.insert(res[i].name);
+            if (res.length) {
+                this.mkmap.clear();
+                for (let i = 0; i < res.length; i++) {
+                    const mk = new mark.mark(res[i].id, res[i].name)
+                    this.mkmap.set(mk.id, mk);
+                    if (this.el)
+                        this.el.insert(mk);
+                }
+                this.lastId = res[res.length - 1].id;
+                if (this.el)
+                    this.el.refresh();
             }
-            this.sidebarView.refresh();
-                
-            console.log(this.mkmap);
+            //console.log(this.mkmap);
         }, err => {
             console.error(err)
         })
+
+
     }
 
     createTable() {
@@ -84,17 +99,23 @@ export class database {
 
     insertDB(mark: mark.mark) {
         if (this.db) {
-            console.log("insert into " + database.TABLE_NAME + " values ( NULL , \"" + mark.name + "\" )");
+            if (mark.id == 0) {
+                this.db.run("insert into " + database.TABLE_NAME + " values ( NULL , \"" + mark.name + "\" )", function (err) {
+                    if (err) throw err;
+                    console.log("Insert Data Success!");
+                });
+            } else {
+                this.db.run("insert into " + database.TABLE_NAME + " values ( " + mark.id + " , \"" + mark.name + "\" )", function (err) {
+                    if (err) throw err;
+                    console.log("Insert Data Success!");
+                });
+            }
 
-            this.db.run("insert into " + database.TABLE_NAME + " values ( NULL , \"" + mark.name + "\" )", function (err) {
-                if (err) throw err;
-                console.log("Insert Data Success!");
-            });
         }
     }
 
 
-    checkLoadDB() {
+    public checkLoadDB() {
         if (vscode.workspace.workspaceFolders) {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
             var folderUri = vscode.Uri.file(rootUri.fsPath + "\\" + database.DATABASE_PATH);
@@ -109,31 +130,28 @@ export class database {
                 }
             });
             this.createTable();
-            //this.showDB();
         }
     }
 
-
-    
-
-
-
-
-
-
-    loadDBIntoMem() {
-
-        return new Promise( (resolve, reject) => {
-            if(this.db)
-            this.db.all("select * from " + database.TABLE_NAME, function (err, rows) {
-                if(err)
-                    reject(new Error("array length invalid"));
-                else
-                    resolve(rows);
-                }
-            );
-        });
+    deleteDB(id: number) {
+        if (this.db)
+            this.db.run("delete from " + database.TABLE_NAME + " WHERE id = " + id, function (err) {
+                if (err) throw err;
+                console.log("Delete Data Success!");
+            });
     }
 
+    loadDBIntoMemPromise() {
+        return new Promise((resolve, reject) => {
+            if (this.db)
+                this.db.all("select * from " + database.TABLE_NAME, function (err, rows) {
+                    if (err)
+                        reject(new Error("array length invalid"));
+                    else
+                        resolve(rows);
+                }
+                );
+        });
+    }
 }
 
