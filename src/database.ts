@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as sqlite3 from 'sqlite3';
 import * as fs from 'fs';
 import * as mark from './mark';
+import * as sidebar from './sidebar';
 
 export class database {
     private static DATABASE_PATH = ".codenotes";
@@ -14,7 +15,9 @@ export class database {
     );";
 
     private db: sqlite3.Database | undefined;
-
+    private mkmap: Map<number, mark.mark> = new Map<number, mark.mark>();
+    private context: vscode.ExtensionContext;
+    private sidebarView: sidebar.EntryList;
 
     /**
    * 读取路径信息
@@ -35,9 +38,27 @@ export class database {
     }
 
 
-    constructor() {
+    constructor(context: vscode.ExtensionContext,sidebarView: sidebar.EntryList) {
+        this.context = context;
+        this.sidebarView = sidebarView;
+
         this.checkLoadDB();
-        this.loadDBIntoMem();
+        const promise = this.loadDBIntoMem();
+
+        promise.then((res: any)=> {
+            console.log(res);
+            if(res.length)
+            for(let i = 0;i<res.length;i++)
+            {
+                this.mkmap.set(res[i].id, new mark.mark(res[i].id, res[i].name));
+                this.sidebarView.insert(res[i].name);
+            }
+            this.sidebarView.refresh();
+                
+            console.log(this.mkmap);
+        }, err => {
+            console.error(err)
+        })
     }
 
     createTable() {
@@ -69,8 +90,6 @@ export class database {
                 if (err) throw err;
                 console.log("Insert Data Success!");
             });
-
-            this.loadDBIntoMem();
         }
     }
 
@@ -95,7 +114,7 @@ export class database {
     }
 
 
-    private mkmap: Map<number, mark.mark> = new Map<number, mark.mark>();
+    
 
 
 
@@ -104,9 +123,7 @@ export class database {
 
     loadDBIntoMem() {
 
-        console.log("start...1");
-
-        let promise = new Promise( (resolve, reject) => {
+        return new Promise( (resolve, reject) => {
             if(this.db)
             this.db.all("select * from " + database.TABLE_NAME, function (err, rows) {
                 if(err)
@@ -116,34 +133,6 @@ export class database {
                 }
             );
         });
-
-        console.log("start...2");
-
-        promise.then((res: any)=> {
-            console.log(res);
-            if(res.length)
-            for(let i = 0;i<res.length;i++)
-                this.mkmap.set((res)[i].id, new mark.mark((res)[i].id, (res)[i].name));
-            console.log(this.mkmap);
-        }, err => {
-            console.error(err)
-        })
-
-        console.log("start...3");
-
-        // if (this.db) {
-
-        //     let mk = new mark.mark(undefined, undefined);
-        //     this.db.each(
-        //         "select * from " + database.TABLE_NAME,
-        //         function (err, row) {
-        //             if (err) throw err;
-        //             console.log(row);
-        //             //mkmap.set(row.id, new mark.mark(row.id, row.name));
-
-        //         }
-        //     );
-        // }
     }
 
 }

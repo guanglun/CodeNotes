@@ -48,11 +48,11 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
 
 
     insert(name: string){
-        console.log('insert...');
+        console.log('insert...' + name);
         const entryItem = new EntryItem(name,vscode.TreeItemCollapsibleState.None);
         
         entryItem.command = {command:"sidebar_test_id1.openChild", //命令id
-        title:"标题",
+        title:"title",
         arguments:[entryItem] //命令接收的参数
         };
 

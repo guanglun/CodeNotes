@@ -14,7 +14,7 @@ import * as database from './database';
 export function activate(context: vscode.ExtensionContext) {
 
 	const sidebarView = new sidebar.EntryList();
-	const db = new database.database();
+	const db = new database.database(context,sidebarView);
 	const mm = new markmanager.markmanager(context,sidebarView,db);
 
 	console.log('Congratulations, your extension "hello-code" is now active!');
@@ -30,10 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
 		// console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
 		// console.log('选中的文本是:', text);
-
-
-		
-		mm.insert(textEditor);
+		//mm.insert(textEditor);
 	  });
 
 	
@@ -42,15 +39,15 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand("sidebar_test_id1.openChild",args => {
 		console.log('click!!');
 
-		const mmark = mark.match(undefined,<sidebar.EntryItem>args);
-		console.log('click22!!');
-		if(mmark !== undefined)
-		{console.log('click33!!');
-			vscode.window.showInformationMessage(mmark.textEditor.document.fileName);
-			console.log(mmark.textEditor.document.fileName);
-		}else{
-			console.log('click44!!');
-		}
+		// const mmark = mark.match(undefined,<sidebar.EntryItem>args);
+		// console.log('click22!!');
+		// if(mmark !== undefined)
+		// {console.log('click33!!');
+		// 	vscode.window.showInformationMessage(mmark.textEditor.document.fileName);
+		// 	console.log(mmark.textEditor.document.fileName);
+		// }else{
+		// 	console.log('click44!!');
+		// }
 
         
     });
@@ -86,24 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// 	document => vscode.window.showTextDocument(document)
 		// )
 		// console.log(context.storageUri?.path);
-		// console.log(context.globalStorageUri.path);
-		
-
-		// const map = new Map();
-		// map.set('a', 1);
-		// map.set('b', 2);
-		// map.set('c', 3);
-
-		// const maps = [];
-		// maps.push(map);
-		// maps.push(map);
-		// maps.push(map);
-
-		// context.workspaceState.update("set",maps);
-		// console.log(context.workspaceState.get('set'));
-		//mark.load();
-
-		
+		// console.log(context.globalStorageUri.path);	
 
 }
 

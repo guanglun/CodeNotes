@@ -37,7 +37,16 @@
 					"command": "hello-code.openWebview",
 					"group": "navigation"
 				}
-			]
+			],
+			"view/item/context": [				
+			{
+				"command": "hello-code.helloWorld",
+				"group": "navigation"
+			},
+			{
+				"command": "hello-code.openWebview",
+				"group": "navigation"
+			}]
 		},
 		"viewsContainers": {
 			"activitybar": [
