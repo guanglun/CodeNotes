@@ -5,6 +5,7 @@ import * as sidebar from './sidebar';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as Mark from './Mark';
+import * as database from './database';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -12,6 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const sidebarView = new sidebar.EntryList();
 	const mark = new Mark.Mark(context,sidebarView);
+	const db = new database.database();
 
 	console.log('Congratulations, your extension "hello-code" is now active!');
 
@@ -97,7 +99,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// context.workspaceState.update("set",maps);
 		// console.log(context.workspaceState.get('set'));
-		mark.load();
+		//mark.load();
+
+
+
+
+
+		const uri = vscode.Uri.file("./");
+		
+		vscode.workspace.fs.createDirectory(uri);
+		
+
 }
 
 /**

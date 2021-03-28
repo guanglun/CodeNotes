@@ -31,12 +31,6 @@ export class Mark{
         this.marks = <MMark[]>this.context.workspaceState.get(this.value);
         this.dump();
 
-        const json = "{'1':'a'}";
-        
-
-        const jsonStr = JSON.parse(json);
-        console.log(jsonStr);
-
     }
     
     public insert(textEditor: vscode.TextEditor)
