@@ -3,6 +3,7 @@ import * as sidebar from './sidebar';
 import * as database from './database';
 import * as mark  from './mark';
 import * as path  from 'path';
+import { Position } from 'vscode';
 
 export class MMark {
     public te: vscode.TextEditor;
@@ -40,14 +41,16 @@ export class markmanager{
         {
             
             const name = "[M]" + path.basename(te.document.fileName) + " " + te.selection.active.line;
+
+
             const mk = new mark.mark(++this.db.lastId,
                 name,
-                mark.mark.FLAG_SELECT,
+                0,
                 te.document.fileName,
-                te.selection.start.line,
-                te.selection.start.character,
-                te.selection.end.line,
-                te.selection.end.character,
+                te.selection.anchor.line,
+                te.selection.anchor.character,
+                te.selection.active.line,
+                te.selection.active.character,
                 );
     
 
@@ -76,6 +79,8 @@ export class markmanager{
         }
     }
 
+
+    //文件插入内容请看:http://www.voidcn.com/article/p-kyntjbrl-bvo.html
     public click(id:number)
     {
         if(this.db && this.el)
@@ -83,21 +88,21 @@ export class markmanager{
             const mk = this.db.mkmap.get(id);
             if(mk)
             {
-                if(mk.flag === mark.mark.FLAG_SELECT)
-                {
+
                     if(mk.file_path)
                     {
-                        console.log("open... "+mk.file_path);
+
                         const uri = vscode.Uri.file(mk.file_path);
-                        vscode.workspace.openTextDocument(uri).then(
-                            document => {
-                                //document.
-                                vscode.window.showTextDocument(document);
-                            }
-                        )
+                        vscode.workspace.openTextDocument(uri).then(document => {
+                            vscode.window.showTextDocument(document).then(textEditor =>{
+                                textEditor.selection = new vscode.Selection(new Position(mk.anchor_line,mk.anchor_character),
+                                new Position(mk.active_line,mk.active_character));
+
+                            })
+                        });
                     }
 
-                }
+                
             }
         }
     }

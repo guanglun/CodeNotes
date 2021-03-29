@@ -5,17 +5,15 @@ export class mark {
     public name: string | undefined;
     public flag: number = 0;
     public file_path: string | undefined;
-    public start_line: number = 0;
-    public start: number = 0;
-    public end_line: number = 0;
-    public end: number = 0;
+    public anchor_line: number = 0;
+    public anchor_character: number = 0;
+    public active_line: number = 0;
+    public active_character: number = 0;
 
-    public static FLAG_SELECT = 0;
-    public static FLAG_CURSOR = 1;
+    //public static FLAG_SELECT = 0;
+    //public static FLAG_CURSOR = 1;
 
-
-
-    constructor(id?: number, name?: string, flag?: number, file_path?: string, start_line?: number, start?: number, end_line?: number, end?: number) {
+    constructor(id?: number, name?: string, flag?: number, file_path?: string, anchor_line?: number, anchor_character?: number, active_line?: number, active_character?: number) {
         if (id)
             this.id = id;
         if (name)
@@ -24,15 +22,14 @@ export class mark {
             this.flag = flag;
         if (file_path)
             this.file_path = file_path;
-        if (start_line)
-            this.start_line = start_line;
-        if (start)
-            this.start = start;
-        if (start)
-            this.start = start;
-        if (end_line)
-            this.end_line = end_line;
-        if (end)
-            this.end = end;
+        if (anchor_line)
+            this.anchor_line = anchor_line;
+        if (anchor_character)
+            this.anchor_character = anchor_character;
+        if (active_line)
+            this.active_line = active_line;
+        if (active_character)
+            this.active_character = active_character;
+
     }
 }

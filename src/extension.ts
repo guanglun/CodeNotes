@@ -40,6 +40,9 @@ export function activate(context: vscode.ExtensionContext) {
 		console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
 
 
+		//console.log(textEditor.document. +" " +textEditor.selection.active.character);
+
+
 		mm.insert(textEditor);
 	});
 

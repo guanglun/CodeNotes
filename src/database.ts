@@ -15,10 +15,10 @@ export class database {
         name VARCHAR,\
         flag INTEGER,\
         file_name VARCHAR,\
-        start_line INTEGER,\
-        start INTEGER,\
-        end_line INTEGER,\
-        end INTEGER\
+        anchor_line INTEGER,\
+        anchor_character INTEGER,\
+        active_line INTEGER,\
+        active_character INTEGER\
     );";
 
 
@@ -70,10 +70,10 @@ export class database {
                         res[i].name,
                         res[i].flag,
                         res[i].file_name,
-                        res[i].start_line,
-                        res[i].start,
-                        res[i].end_line,
-                        res[i].end,
+                        res[i].anchor_line,
+                        res[i].anchor_character,
+                        res[i].active_line,
+                        res[i].active_character,
                         
                         
                         
@@ -123,10 +123,10 @@ export class database {
             "\"" + mk.name + "\" , "  +
             mk.flag + " , "  +
             "\"" + mk.file_path + "\" , "  +
-            mk.start_line + " , "  +
-            mk.start + " , "  +
-            mk.end_line + " , "  +
-            mk.end + 
+            mk.anchor_line + " , "  +
+            mk.anchor_character + " , "  +
+            mk.active_line + " , "  +
+            mk.active_character + 
             ")";
             console.log(dbexc);
                 this.db.run(dbexc, function (err) {
