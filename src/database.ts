@@ -18,8 +18,12 @@ export class database {
         anchor_line INTEGER,\
         anchor_character INTEGER,\
         active_line INTEGER,\
-        active_character INTEGER\
-    );";
+        active_character INTEGER,\
+        start_line INTEGER,\
+        start_character INTEGER,\
+        end_line INTEGER,\
+        end_character INTEGER \
+        );";
 
 
     public mkmap: Map<number, mark.mark> = new Map<number, mark.mark>();
@@ -75,7 +79,10 @@ export class database {
                         res[i].active_line,
                         res[i].active_character,
                         
-                        
+                        res[i].start_line,
+                        res[i].start_character,
+                        res[i].end_line,
+                        res[i].end_character,
                         
                         
                         )
@@ -123,10 +130,16 @@ export class database {
             "\"" + mk.name + "\" , "  +
             mk.flag + " , "  +
             "\"" + mk.file_path + "\" , "  +
+
             mk.anchor_line + " , "  +
             mk.anchor_character + " , "  +
             mk.active_line + " , "  +
-            mk.active_character + 
+            mk.active_character + " , "  +
+
+            mk.start_line + " , "  +
+            mk.start_character + " , "  +
+            mk.end_line + " , "  +
+            mk.end_character  +            
             ")";
             console.log(dbexc);
                 this.db.run(dbexc, function (err) {

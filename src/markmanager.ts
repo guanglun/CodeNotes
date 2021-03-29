@@ -40,7 +40,7 @@ export class markmanager{
         if(this.db && this.el)
         {
             
-            const name = "[M]" + path.basename(te.document.fileName) + " " + te.selection.active.line;
+            const name = path.basename(te.document.fileName) + " " + te.selection.active.line;
 
 
             const mk = new mark.mark(++this.db.lastId,
@@ -51,6 +51,10 @@ export class markmanager{
                 te.selection.anchor.character,
                 te.selection.active.line,
                 te.selection.active.character,
+                te.selection.start.line,
+                te.selection.start.character,
+                te.selection.end.line,
+                te.selection.end.character,                
                 );
     
 
@@ -97,7 +101,8 @@ export class markmanager{
                             vscode.window.showTextDocument(document).then(textEditor =>{
                                 textEditor.selection = new vscode.Selection(new Position(mk.anchor_line,mk.anchor_character),
                                 new Position(mk.active_line,mk.active_character));
-
+                                textEditor.revealRange(new vscode.Range(new Position(mk.start_line,mk.start_character),
+                                new Position(mk.end_line,mk.end_character)));
                             })
                         });
                     }

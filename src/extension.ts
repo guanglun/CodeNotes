@@ -31,13 +31,13 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let command = vscode.commands.registerTextEditorCommand('codenotes.helloWorld', function (textEditor, edit) {
-		const text = textEditor.document.getText(textEditor.selection);
-		console.log(textEditor.document.fileName);
-		console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
-		console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
-		console.log('选中的文本是:', text);
-		console.log(textEditor.selection.anchor.line +" " +textEditor.selection.anchor.character);
-		console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
+		// const text = textEditor.document.getText(textEditor.selection);
+		// console.log(textEditor.document.fileName);
+		// console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
+		// console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
+		// console.log('选中的文本是:', text);
+		// console.log(textEditor.selection.anchor.line +" " +textEditor.selection.anchor.character);
+		// console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
 
 
 		//console.log(textEditor.document. +" " +textEditor.selection.active.character);

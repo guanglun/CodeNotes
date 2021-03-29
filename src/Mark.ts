@@ -10,10 +10,18 @@ export class mark {
     public active_line: number = 0;
     public active_character: number = 0;
 
+    public start_line: number = 0;
+    public start_character: number = 0;
+    public end_line: number = 0;
+    public end_character: number = 0;
+
     //public static FLAG_SELECT = 0;
     //public static FLAG_CURSOR = 1;
 
-    constructor(id?: number, name?: string, flag?: number, file_path?: string, anchor_line?: number, anchor_character?: number, active_line?: number, active_character?: number) {
+    constructor(id?: number, name?: string, flag?: number, file_path?: string, 
+        anchor_line?: number, anchor_character?: number, active_line?: number, active_character?: number,
+        start_line?: number, start_character?: number, end_line?: number, end_character?: number) {
+
         if (id)
             this.id = id;
         if (name)
@@ -22,6 +30,7 @@ export class mark {
             this.flag = flag;
         if (file_path)
             this.file_path = file_path;
+            
         if (anchor_line)
             this.anchor_line = anchor_line;
         if (anchor_character)
@@ -30,6 +39,15 @@ export class mark {
             this.active_line = active_line;
         if (active_character)
             this.active_character = active_character;
+
+        if (start_line)
+            this.start_line = start_line;
+        if (start_character)
+            this.start_character = start_character;
+        if (end_line)
+            this.end_line = end_line;
+        if (end_character)
+            this.end_character = end_character;            
 
     }
 }
