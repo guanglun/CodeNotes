@@ -116,23 +116,25 @@ export class database {
 
     }
 
-    insertDB(mark: mark.mark) {
+    insertDB(mk: mark.mark) {
         if (this.db) {
             const dbexc = "insert into " + database.TABLE_NAME + " values ( " + 
-            mark.id + " , "  +
-            "\"" + mark.name + "\" , "  +
-            mark.flag + " , "  +
-            "\"" + mark.file_path + "\" , "  +
-            mark.start_line + " , "  +
-            mark.start + " , "  +
-            mark.end_line + " , "  +
-            mark.end + 
+            mk.id + " , "  +
+            "\"" + mk.name + "\" , "  +
+            mk.flag + " , "  +
+            "\"" + mk.file_path + "\" , "  +
+            mk.start_line + " , "  +
+            mk.start + " , "  +
+            mk.end_line + " , "  +
+            mk.end + 
             ")";
             console.log(dbexc);
                 this.db.run(dbexc, function (err) {
                     if (err) throw err;
                     console.log("Insert Data Success!");
                 });
+
+            this.mkmap.set(mk.id, mk);
         }
     }
 

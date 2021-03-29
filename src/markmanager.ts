@@ -39,7 +39,7 @@ export class markmanager{
         if(this.db && this.el)
         {
             
-            const name = "[M]" + path.basename(te.document.fileName) + " " + te.selection.active.line;//te.document.getText(te.selection);
+            const name = "[M]" + path.basename(te.document.fileName) + " " + te.selection.active.line;
             const mk = new mark.mark(++this.db.lastId,
                 name,
                 mark.mark.FLAG_SELECT,
@@ -83,7 +83,7 @@ export class markmanager{
             const mk = this.db.mkmap.get(id);
             if(mk)
             {
-                if(mk.flag == mark.mark.FLAG_SELECT)
+                if(mk.flag === mark.mark.FLAG_SELECT)
                 {
                     if(mk.file_path)
                     {
@@ -92,7 +92,7 @@ export class markmanager{
                         vscode.workspace.openTextDocument(uri).then(
                             document => {
                                 //document.
-                                vscode.window.showTextDocument(document)
+                                vscode.window.showTextDocument(document);
                             }
                         )
                     }

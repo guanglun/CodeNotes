@@ -42,11 +42,12 @@
 					"group": "navigation"
 				}
 			],
-			"view/item/context": [				
-			{
-				"command": "codenotes.deleteItem",
-				"group": "navigation"
-			}]
+			"view/item/context": [
+				{
+					"command": "codenotes.deleteItem",
+					"group": "navigation"
+				}
+			]
 		},
 		"viewsContainers": {
 			"activitybar": [

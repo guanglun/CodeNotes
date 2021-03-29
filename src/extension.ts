@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
 		console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
 
 
-		//mm.insert(textEditor);
+		mm.insert(textEditor);
 	});
 
 	vscode.window.registerTreeDataProvider("sidebar_test_id1", el);
