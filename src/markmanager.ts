@@ -155,12 +155,13 @@ export class markmanager{
                                     //outlineColor: '#fff'
                                     //backgroundColor: '#fff'
                                     //border: '1px solid red;'
-                                    gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\bookmark-line.svg",
+                                    gutterIconSize:"18px",
+                                    gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
                                     before: { 
                                         // contentIconPath: "C:\\Users\\27207\\hello-code\\images\\draft-fill.svg",
                                         // width:"1em",
                                         // height:"1em",
-                                        contentText:"✰",
+                                        contentText:"✎",
                                         color:"#FF00FF",
                                         //backgroundColor:"#00FFFF",
                                         //fontStyle:"italic",
