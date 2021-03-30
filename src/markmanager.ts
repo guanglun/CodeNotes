@@ -83,6 +83,46 @@ export class markmanager{
         }
     }
 
+    clamp(n:number, min:number, max:number) {
+        if (n < min) {
+            return min;
+        }
+        if (n > max) {
+            return max;
+        }
+        return n;
+    }
+
+    safeParseInt(n: any, defaultValue: number) {
+        if (typeof n === 'number') {
+            return Math.round(n);
+        }
+        let r = parseInt(n);
+        if (isNaN(r)) {
+            return defaultValue;
+        }
+        return r;
+    }
+
+    readEditorLineHeight() {
+        const MINIMUM_LINE_HEIGHT = 8;
+        const MAXIMUM_LINE_HEIGHT = 150;
+        const GOLDEN_LINE_HEIGHT_RATIO = (process.platform === 'darwin') ? 1.5 : 1.35;
+    
+        let editorConfig = vscode.workspace.getConfiguration('editor');
+        let fontSize = editorConfig.get<number>('fontSize');
+
+        let configuredLineHeight = editorConfig.get('lineHeight');
+    
+        let lineHeight = this.safeParseInt(configuredLineHeight, 0);
+        lineHeight = this.clamp(lineHeight, 0, MAXIMUM_LINE_HEIGHT);
+        if (lineHeight === 0 && fontSize) {
+            lineHeight = Math.round(GOLDEN_LINE_HEIGHT_RATIO * fontSize);
+        } else if (lineHeight < MINIMUM_LINE_HEIGHT) {
+            lineHeight = MINIMUM_LINE_HEIGHT;
+        }
+        return lineHeight;
+    }
 
     //文件插入内容请看:http://www.voidcn.com/article/p-kyntjbrl-bvo.html
     public click(id:number)
@@ -103,7 +143,37 @@ export class markmanager{
                                 new Position(mk.active_line,mk.active_character));
                                 textEditor.revealRange(new vscode.Range(new Position(mk.start_line,mk.start_character),
                                 new Position(mk.end_line,mk.end_character)));
-                            })
+
+
+
+                                let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
+                                let fontSize = editorConfig.get<number>('fontSize');
+                                
+                                console.log(this.readEditorLineHeight());
+                                const hight = this.readEditorLineHeight();
+                                let decorationType = vscode.window.createTextEditorDecorationType({
+                                    //outlineColor: '#fff'
+                                    //backgroundColor: '#fff'
+                                    //border: '1px solid red;'
+                                    gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\bookmark-line.svg",
+                                    before: { 
+                                        // contentIconPath: "C:\\Users\\27207\\hello-code\\images\\draft-fill.svg",
+                                        // width:"1em",
+                                        // height:"1em",
+                                        contentText:"✰",
+                                        color:"#FF00FF",
+                                        //backgroundColor:"#00FFFF",
+                                        //fontStyle:"italic",
+                                        //border: "solid red",
+                           
+                                        //margin: '0px 10px 0px 10px'
+                                }
+                                });
+
+                                textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.start_line,mk.start_character),
+                                    new Position(mk.end_line,mk.end_character))]);
+                                
+                            });
                         });
                     }
 
