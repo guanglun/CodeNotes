@@ -1,24 +1,35 @@
 import * as vscode from 'vscode';
 import * as sidebar from './sidebar';
 import * as database from './database';
-import * as mark  from './mark';
-import * as path  from 'path';
+import * as mark from './mark';
+import * as path from 'path';
 import { Position } from 'vscode';
 
 export class MMark {
     public te: vscode.TextEditor;
     public entryItem: sidebar.EntryItem;
 
-    constructor(te: vscode.TextEditor,entryItem: sidebar.EntryItem) {
+    constructor(te: vscode.TextEditor, entryItem: sidebar.EntryItem) {
         this.te = te;
         this.entryItem = entryItem;
     }
 }
 
-export class markmanager{
+export enum ShowColorType {
+    SCT_CLICK,
+    SCT_SHOW,
+    SCT_CLEAR
+}
+
+export enum TEColorManagerType {
+    TECMT_INIT,
+    TECMT_CLEAR
+}
+
+export class markmanager {
     private value = "Marks";
-    private maps: Map<string, any>[] = []; 
-    public marks: MMark[]=[];
+    private maps: Map<string, any>[] = [];
+    public marks: MMark[] = [];
     //private maps = new Map([[string,"22"]]);
     //private maps: Array<Map>[];
     private context: vscode.ExtensionContext;
@@ -28,18 +39,15 @@ export class markmanager{
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
-    
-    public init(el: sidebar.EntryList,db: database.database)
-    {
+
+    public init(el: sidebar.EntryList, db: database.database) {
         this.el = el;
         this.db = db;
     }
 
-    public insert(te: vscode.TextEditor)
-    {
-        if(this.db && this.el)
-        {
-            
+    public insert(te: vscode.TextEditor) {
+        if (this.db && this.el) {
+
             const name = path.basename(te.document.fileName) + " " + te.selection.active.line;
 
 
@@ -54,9 +62,9 @@ export class markmanager{
                 te.selection.start.line,
                 te.selection.start.character,
                 te.selection.end.line,
-                te.selection.end.character,                
-                );
-    
+                te.selection.end.character,
+            );
+
 
             this.db.insertDB(mk);
             this.el.insert(mk);
@@ -64,122 +72,135 @@ export class markmanager{
         }
 
     }
-    
-    public delete(id: number)
-    {
-        if(this.db && this.el)
-        {
+
+    public delete(id: number) {
+        if (this.db && this.el) {
+
+            const mk = this.db.mkmap.get(id);
+            this.TEColorManager(TEColorManagerType.TECMT_CLEAR,mk);
             this.db.deleteDB(id);
             this.el.delete(id);
             this.el.refresh();
+
+
         }
     }
 
-    public load(){
-        if(this.db)
-        {
+    public load() {
+        if (this.db) {
             this.db.checkLoadDB();
             this.db.loadDB();
         }
     }
 
-    clamp(n:number, min:number, max:number) {
-        if (n < min) {
-            return min;
+    public TEColorManager(type: TEColorManagerType, mk?: mark.mark) {
+        if (type === TEColorManagerType.TECMT_INIT) {
+            vscode.window.visibleTextEditors.forEach(editor => {
+                if (editor && this.db) {
+                    this.db.mkmap.forEach((value, key, map) => {
+                        if (value.file_path === editor.document.fileName) {
+
+                            this.showColor(editor, value, ShowColorType.SCT_SHOW);
+                        }
+                    });
+                }
+            });
         }
-        if (n > max) {
-            return max;
+        if (type === TEColorManagerType.TECMT_CLEAR) {
+            vscode.window.visibleTextEditors.forEach(editor => {
+                if (editor && mk) {
+                    if (mk.file_path === editor.document.fileName) {
+                        this.showColor(editor, mk, ShowColorType.SCT_CLEAR);
+                    }
+                }
+            });
         }
-        return n;
     }
 
-    safeParseInt(n: any, defaultValue: number) {
-        if (typeof n === 'number') {
-            return Math.round(n);
-        }
-        let r = parseInt(n);
-        if (isNaN(r)) {
-            return defaultValue;
-        }
-        return r;
-    }
+    public showColor(textEditor: vscode.TextEditor, mk: mark.mark, en: ShowColorType) {
 
-    readEditorLineHeight() {
-        const MINIMUM_LINE_HEIGHT = 8;
-        const MAXIMUM_LINE_HEIGHT = 150;
-        const GOLDEN_LINE_HEIGHT_RATIO = (process.platform === 'darwin') ? 1.5 : 1.35;
-    
-        let editorConfig = vscode.workspace.getConfiguration('editor');
-        let fontSize = editorConfig.get<number>('fontSize');
 
-        let configuredLineHeight = editorConfig.get('lineHeight');
-    
-        let lineHeight = this.safeParseInt(configuredLineHeight, 0);
-        lineHeight = this.clamp(lineHeight, 0, MAXIMUM_LINE_HEIGHT);
-        if (lineHeight === 0 && fontSize) {
-            lineHeight = Math.round(GOLDEN_LINE_HEIGHT_RATIO * fontSize);
-        } else if (lineHeight < MINIMUM_LINE_HEIGHT) {
-            lineHeight = MINIMUM_LINE_HEIGHT;
+        if (en === ShowColorType.SCT_CLICK) {
+            textEditor.selection = new vscode.Selection(new Position(mk.anchor_line, mk.anchor_character),
+                new Position(mk.active_line, mk.active_character));
+
+            textEditor.revealRange(new vscode.Range(new Position(mk.start_line, mk.start_character),
+                new Position(mk.end_line, mk.end_character)));
         }
-        return lineHeight;
+
+
+        if (en === ShowColorType.SCT_SHOW) {
+            // let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
+            // let fontSize = editorConfig.get<number>('fontSize');
+
+            let decorationType = vscode.window.createTextEditorDecorationType({
+                //outlineColor: '#fff'
+                //backgroundColor: '#fff'
+                //border: '1px solid red;'
+                gutterIconSize: "14px",
+                gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
+                backgroundColor: "#FF000050",
+                opacity: "1",
+                borderRadius: "4px",
+                //border: "solid blue",
+                //     before: { 
+                //         // contentIconPath: "C:\\Users\\27207\\hello-code\\images\\draft-fill.svg",
+                //         // width:"1em",
+                //         // height:"1em",
+                //         contentText:"✎",
+                //         color:"#FF00FF",
+                //         backgroundColor:"red transparent",
+                //         //fontStyle:"italic",
+                //         //border: "solid red",
+
+                //         //margin: '0px 10px 0px 10px'
+                // }
+            });
+
+            textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.start_line, mk.start_character),
+                new Position(mk.end_line, mk.end_character))]);
+        }
+
+        if (en === ShowColorType.SCT_CLEAR) {
+
+
+            
+            let decorationType = vscode.window.createTextEditorDecorationType({
+
+                gutterIconSize: "14px",
+                gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
+                backgroundColor: "#FFFFFFFF",
+                opacity: "1",
+                borderRadius: "4px",
+
+            });
+     
+            textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.start_line, mk.start_character),
+                new Position(mk.end_line, mk.end_character))]);
+
+        }
     }
 
     //文件插入内容请看:http://www.voidcn.com/article/p-kyntjbrl-bvo.html
-    public click(id:number)
-    {
-        if(this.db && this.el)
-        {
+    public click(id: number) {
+        if (this.db && this.el) {
             const mk = this.db.mkmap.get(id);
-            if(mk)
-            {
+            if (mk) {
 
-                    if(mk.file_path)
-                    {
+                if (mk.file_path) {
 
-                        const uri = vscode.Uri.file(mk.file_path);
-                        vscode.workspace.openTextDocument(uri).then(document => {
-                            vscode.window.showTextDocument(document).then(textEditor =>{
-                                textEditor.selection = new vscode.Selection(new Position(mk.anchor_line,mk.anchor_character),
-                                new Position(mk.active_line,mk.active_character));
-                                textEditor.revealRange(new vscode.Range(new Position(mk.start_line,mk.start_character),
-                                new Position(mk.end_line,mk.end_character)));
+                    const uri = vscode.Uri.file(mk.file_path);
+                    vscode.workspace.openTextDocument(uri).then(document => {
+                        vscode.window.showTextDocument(document).then(textEditor => {
 
+                            this.showColor(textEditor, mk, ShowColorType.SCT_CLICK);
 
-
-                                let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
-                                let fontSize = editorConfig.get<number>('fontSize');
-                                
-                                console.log(this.readEditorLineHeight());
-                                const hight = this.readEditorLineHeight();
-                                let decorationType = vscode.window.createTextEditorDecorationType({
-                                    //outlineColor: '#fff'
-                                    //backgroundColor: '#fff'
-                                    //border: '1px solid red;'
-                                    gutterIconSize:"18px",
-                                    gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
-                                    before: { 
-                                        // contentIconPath: "C:\\Users\\27207\\hello-code\\images\\draft-fill.svg",
-                                        // width:"1em",
-                                        // height:"1em",
-                                        contentText:"✎",
-                                        color:"#FF00FF",
-                                        //backgroundColor:"#00FFFF",
-                                        //fontStyle:"italic",
-                                        //border: "solid red",
-                           
-                                        //margin: '0px 10px 0px 10px'
-                                }
-                                });
-
-                                textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.start_line,mk.start_character),
-                                    new Position(mk.end_line,mk.end_character))]);
-                                
-                            });
                         });
-                    }
-
-                
+                    });
+                }
             }
         }
     }
+
 }
+

@@ -87,12 +87,13 @@ export class database {
                         
                         )
                     this.mkmap.set(mk.id, mk);
-                    if (this.el)
-                        this.el.insert(mk);
+                    this.el?.insert(mk);
                 }
                 this.lastId = res[res.length - 1].id;
-                if (this.el)
-                    this.el.refresh();
+                
+                this.el?.refresh();
+
+                this.mm?.TEColorManager(markmanager.TEColorManagerType.TECMT_INIT);
             }
             //console.log(this.mkmap);
         }, err => {

@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as markmanager from './markmanager';
 import * as mark from './mark';
 import * as database from './database';
+import { TextEncoder } from 'node:util';
 
 
 // this method is called when your extension is activated
@@ -48,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.window.registerTreeDataProvider("sidebar_test_id1", el);
 	vscode.commands.registerCommand("sidebar_test_id1.openChild", (args: number) => {
-		console.log('click id : '+args);
+		//console.log('click id : '+args);
 		mm.click(args);
 	});
 	// const str:string[] = ['a','b','c']; 
@@ -80,6 +81,48 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	mm.load();
+
+
+// 	const hover = vscode.languages.registerHoverProvider('*', {
+// 		provideHover(document, position, token) {
+// 		  const fileName    = document.fileName;
+// 		  const workDir     = path.dirname(fileName);
+// 		  const word        = document.getText(document.getWordRangeAtPosition(position));
+// 		  // console.log(1, document)
+// 		  // console.log(2, position)
+// 		  // console.log(3, token)
+// 		  console.log(4, '这个就是悬停的文字', word)
+// 		  // 支持markdown语法
+// 		  return new vscode.Hover(
+// 		  `### 我就是返回的信息!
+// 			1. 第一项：
+// 			  - 第一个元素
+// 			  -
+// 			  - 第二个元素
+// 			2. 第二项：
+// 			  - 第一个元素
+// 			  - 第二个元素
+// 		`+word);
+// 		}
+// 	   }
+// 	  );
+  
+//   context.subscriptions.push(hover);
+
+	vscode.window.onDidChangeActiveTextEditor(editor => {  
+		if(editor) { 
+			db.mkmap.forEach((value, key, map)=>
+            {
+                if(value.file_path === editor.document.fileName)
+				{
+					
+					mm.showColor(editor,value,markmanager.ShowColorType.SCT_SHOW);
+				}
+            });
+		}  
+	});
+
+
 }
 
 /**
