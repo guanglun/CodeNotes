@@ -57,7 +57,7 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
         {
             const entryItem = new EntryItem(mk.name,vscode.TreeItemCollapsibleState.None);
         
-            entryItem.command = {command:"sidebar_test_id1.openChild", 
+            entryItem.command = {command:"sidebar_marks_all.openChild", 
             title:"title",
             arguments:[mk.id] 
             };

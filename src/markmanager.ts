@@ -40,7 +40,6 @@ export class markmanager {
 
             const name = path.basename(te.document.fileName) + " " + te.selection.active.line;
 
-
             const mk = new mark.mark(++this.db.lastId,
                 name,
                 0,
@@ -58,6 +57,7 @@ export class markmanager {
             this.db.insertDB(mk);
             this.el.insert(mk);
             this.el.refresh();
+
             if(vscode.window.activeTextEditor?.document.fileName == mk.file_path)
             {
                 this.TEColorManager(TEColorManagerType.TECMT_SHOW,mk);
@@ -116,10 +116,7 @@ export class markmanager {
         }
     }
 
-    
-
     public showColor(textEditor: vscode.TextEditor, mk: mark.mark, en: ShowColorType) {
-
 
         if (en === ShowColorType.SCT_CLICK) {
             textEditor.selection = new vscode.Selection(new Position(mk.anchor_line, mk.anchor_character),
@@ -128,7 +125,6 @@ export class markmanager {
             textEditor.revealRange(new vscode.Range(new Position(mk.start_line, mk.start_character),
                 new Position(mk.end_line, mk.end_character)));
         }
-
 
         if (en === ShowColorType.SCT_SHOW) {
             // let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');

@@ -48,8 +48,8 @@ export function activate(context: vscode.ExtensionContext) {
 		mm.insert(textEditor);
 	});
 
-	vscode.window.registerTreeDataProvider("sidebar_test_id1", el);
-	vscode.commands.registerCommand("sidebar_test_id1.openChild", (args: number) => {
+	vscode.window.registerTreeDataProvider("sidebar_marks_all", el);
+	vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
 		//console.log('click id : '+args);
 		mm.click(args);
 	});
