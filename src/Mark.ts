@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { EntryItem } from './sidebar';
+import * as sidebar_all from './sidebar_all';
 
 export class mark {
 
@@ -60,11 +60,11 @@ export class mdata {
 
     public decorationType: vscode.TextEditorDecorationType | undefined;
 
-    public eitem: EntryItem | undefined;
+    public eitem: sidebar_all.EntryItem | undefined;
 
-    public setEntryItem(el:EntryItem)
+    public setEntryItem(el_all:sidebar_all.EntryItem)
     {
-        this.eitem = el;
+        this.eitem = el_all;
     }
 
     public setDecorationType(dt:vscode.TextEditorDecorationType)

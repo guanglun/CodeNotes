@@ -17,7 +17,7 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
     //     new EntryItem("1",vscode.TreeItemCollapsibleState.None),
     //     new EntryItem("2",vscode.TreeItemCollapsibleState.None),
     //     new EntryItem("3",vscode.TreeItemCollapsibleState.None),
-    // ];    
+    // ];
 
     private db: database.database | undefined;
 
@@ -58,7 +58,7 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
             const entryItem = new EntryItem(mk.name,vscode.TreeItemCollapsibleState.None);
         
             entryItem.command = {command:"sidebar_marks_all.openChild", 
-            title:"title",
+            title:"codenotes",
             arguments:[mk.id] 
             };
 

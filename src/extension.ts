@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as sidebar from './sidebar';
+import * as sidebar_all from './sidebar_all';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as markmanager from './markmanager';
@@ -14,16 +14,16 @@ import { TextEncoder } from 'node:util';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const el = new sidebar.EntryList();
+	const el_all = new sidebar_all.EntryList();
 	const db = new database.database(context);
 	const mm = new markmanager.markmanager(context);
 
-	db.init(el,mm);
-	mm.init(el,db);
-	el.init(db);
+	db.init(el_all,mm);
+	mm.init(el_all,db);
+	el_all.init(db);
 	
 	vscode.commands.registerCommand
-	vscode.commands.registerCommand('codenotes.deleteItem', (res: sidebar.EntryItem) => {
+	vscode.commands.registerCommand('codenotes.deleteItem', (res: sidebar_all.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			mm.delete(res.command.arguments[0]);
@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 			
 	});
 
-	let command = vscode.commands.registerTextEditorCommand('codenotes.helloWorld', function (textEditor, edit) {
+	let command = vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
 		// const text = textEditor.document.getText(textEditor.selection);
 		// console.log(textEditor.document.fileName);
 		// console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
@@ -40,31 +40,16 @@ export function activate(context: vscode.ExtensionContext) {
 		// console.log('选中的文本是:', text);
 		// console.log(textEditor.selection.anchor.line +" " +textEditor.selection.anchor.character);
 		// console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
-
-
-		//console.log(textEditor.document. +" " +textEditor.selection.active.character);
-
+		// console.log(textEditor.document. +" " +textEditor.selection.active.character);
 
 		mm.insert(textEditor);
 	});
 
-	vscode.window.registerTreeDataProvider("sidebar_marks_all", el);
+	vscode.window.registerTreeDataProvider("sidebar_marks_all", el_all);
 	vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
 		//console.log('click id : '+args);
 		mm.click(args);
 	});
-	// const str:string[] = ['a','b','c']; 
-	// console.log('dump...');
-	// console.log(context.workspaceState.get('test'));
-	// context.workspaceState.update('test',str);
-	// console.log('dump...');
-	// console.log(context.workspaceState.get('test'));
-	// str.push('d');
-	// context.workspaceState.update('test',str);
-	// console.log('dump...');
-	// console.log(context.workspaceState.get('test'));
-	//context.workspaceState.get(this.value)
-
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {
 		// 建立webview
@@ -80,9 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 		panel.webview.html = getWebViewContent(context, 'src/view/index.html');
 	}));
 
-
 	mm.load();
-
 
 // 	const hover = vscode.languages.registerHoverProvider('*', {
 // 		provideHover(document, position, token) {
@@ -107,7 +90,6 @@ export function activate(context: vscode.ExtensionContext) {
 // 		}
 // 	   }
 // 	  );
-  
 //   context.subscriptions.push(hover);
 
 	vscode.window.onDidChangeActiveTextEditor(editor => {  
@@ -116,14 +98,11 @@ export function activate(context: vscode.ExtensionContext) {
             {
                 if(value.file_path === editor.document.fileName)
 				{
-					
 					mm.showColor(editor,value,markmanager.ShowColorType.SCT_SHOW);
 				}
             });
 		}  
 	});
-
-	
 }
 
 /**

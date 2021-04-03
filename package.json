@@ -10,15 +10,15 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:codenotes.helloWorld",
-		"onView:sidebar_test_id1"
+		"onCommand:codenotes.insertmark",
+		"onView:sidebar_marks_all"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "codenotes.helloWorld",
-				"title": "Hello World"
+				"command": "codenotes.insertmark",
+				"title": "Insert Mark"
 			},
 			{
 				"command": "codenotes.openWebview",
@@ -33,7 +33,7 @@
 			"editor/context": [
 				{
 					"when": "editorFocus",
-					"command": "codenotes.helloWorld",
+					"command": "codenotes.insertmark",
 					"group": "navigation"
 				},
 				{
@@ -52,21 +52,21 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "sidebar_test",
-					"title": "测试",
+					"id": "sidebar_codenotes",
+					"title": "codenotes",
 					"icon": "images/refresh.svg"
 				}
 			]
 		},
 		"views": {
-			"sidebar_test": [
+			"sidebar_codenotes": [
 				{
-					"id": "sidebar_test_id1",
-					"name": "测试1"
+					"id": "sidebar_marks_ctrl",
+					"name": "标签操作"
 				},
 				{
-					"id": "sidebar_test_id2",
-					"name": "测试2"
+					"id": "sidebar_marks_now",
+					"name": "当前页标签"
 				},
 				{
 					"id": "sidebar_marks_all",

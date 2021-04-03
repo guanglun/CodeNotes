@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as sqlite3 from 'sqlite3';
 import * as fs from 'fs';
 import * as mark from './mark';
-import * as sidebar from './sidebar';
+import * as sidebar_all from './sidebar_all';
 import * as markmanager from './markmanager';
 
 export class database {
@@ -28,7 +28,7 @@ export class database {
 
     public mkmap: Map<number, mark.mark> = new Map<number, mark.mark>();
     private context: vscode.ExtensionContext;
-    private el: sidebar.EntryList | undefined;
+    private el_all: sidebar_all.EntryList | undefined;
     private db: sqlite3.Database | undefined;
     private mm: markmanager.markmanager | undefined;
     public lastId = 0;
@@ -55,8 +55,8 @@ export class database {
         this.context = context;
     }
 
-    public init(el: sidebar.EntryList, mm: markmanager.markmanager) {
-        this.el = el;
+    public init(el_all: sidebar_all.EntryList, mm: markmanager.markmanager) {
+        this.el_all = el_all;
         this.mm = mm;
     }
 
@@ -87,11 +87,11 @@ export class database {
                         
                         )
                     this.mkmap.set(mk.id, mk);
-                    this.el?.insert(mk);
+                    this.el_all?.insert(mk);
                 }
                 this.lastId = res[res.length - 1].id;
                 
-                this.el?.refresh();
+                this.el_all?.refresh();
 
                 this.mm?.TEColorManager(markmanager.TEColorManagerType.TECMT_INIT);
             }
