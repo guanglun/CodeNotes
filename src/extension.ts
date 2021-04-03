@@ -20,7 +20,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	db.init(el,mm);
 	mm.init(el,db);
-
+	el.init(db);
+	
 	vscode.commands.registerCommand
 	vscode.commands.registerCommand('codenotes.deleteItem', (res: sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
@@ -122,7 +123,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}  
 	});
 
-
+	
 }
 
 /**

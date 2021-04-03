@@ -4,16 +4,8 @@ import * as database from './database';
 import * as mark from './mark';
 import * as path from 'path';
 import { Position } from 'vscode';
+import { mainModule } from 'node:process';
 
-export class MMark {
-    public te: vscode.TextEditor;
-    public entryItem: sidebar.EntryItem;
-
-    constructor(te: vscode.TextEditor, entryItem: sidebar.EntryItem) {
-        this.te = te;
-        this.entryItem = entryItem;
-    }
-}
 
 export enum ShowColorType {
     SCT_CLICK,
@@ -23,15 +15,13 @@ export enum ShowColorType {
 
 export enum TEColorManagerType {
     TECMT_INIT,
+    TECMT_SHOW,
     TECMT_CLEAR
 }
 
 export class markmanager {
-    private value = "Marks";
-    private maps: Map<string, any>[] = [];
-    public marks: MMark[] = [];
-    //private maps = new Map([[string,"22"]]);
-    //private maps: Array<Map>[];
+
+
     private context: vscode.ExtensionContext;
     private el: sidebar.EntryList | undefined;
     private db: database.database | undefined;
@@ -40,7 +30,7 @@ export class markmanager {
         this.context = context;
     }
 
-    public init(el: sidebar.EntryList, db: database.database) {
+    public init(el:sidebar.EntryList,db: database.database) {
         this.el = el;
         this.db = db;
     }
@@ -65,24 +55,24 @@ export class markmanager {
                 te.selection.end.character,
             );
 
-
             this.db.insertDB(mk);
             this.el.insert(mk);
             this.el.refresh();
+            if(vscode.window.activeTextEditor?.document.fileName == mk.file_path)
+            {
+                this.TEColorManager(TEColorManagerType.TECMT_SHOW,mk);
+            }
         }
 
     }
 
     public delete(id: number) {
         if (this.db && this.el) {
-
             const mk = this.db.mkmap.get(id);
             this.TEColorManager(TEColorManagerType.TECMT_CLEAR,mk);
             this.db.deleteDB(id);
-            this.el.delete(id);
+            this.db.mkmap.delete(id);
             this.el.refresh();
-
-
         }
     }
 
@@ -106,6 +96,15 @@ export class markmanager {
                 }
             });
         }
+        if (type === TEColorManagerType.TECMT_SHOW) {
+            vscode.window.visibleTextEditors.forEach(editor => {
+                if (editor && mk) {
+                    if (mk.file_path === editor.document.fileName) {
+                        this.showColor(editor, mk, ShowColorType.SCT_SHOW);
+                    }
+                }
+            });
+        }        
         if (type === TEColorManagerType.TECMT_CLEAR) {
             vscode.window.visibleTextEditors.forEach(editor => {
                 if (editor && mk) {
@@ -116,6 +115,8 @@ export class markmanager {
             });
         }
     }
+
+    
 
     public showColor(textEditor: vscode.TextEditor, mk: mark.mark, en: ShowColorType) {
 
@@ -133,7 +134,7 @@ export class markmanager {
             // let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
             // let fontSize = editorConfig.get<number>('fontSize');
 
-            let decorationType = vscode.window.createTextEditorDecorationType({
+            const decorationType = vscode.window.createTextEditorDecorationType({
                 //outlineColor: '#fff'
                 //backgroundColor: '#fff'
                 //border: '1px solid red;'
@@ -157,27 +158,21 @@ export class markmanager {
                 // }
             });
 
+            mk.mdata?.setDecorationType(decorationType);
+
             textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.start_line, mk.start_character),
                 new Position(mk.end_line, mk.end_character))]);
         }
 
         if (en === ShowColorType.SCT_CLEAR) {
-
-
             
-            let decorationType = vscode.window.createTextEditorDecorationType({
+            if(mk.mdata?.decorationType)
+            {
+                mk.mdata.decorationType.dispose();
 
-                gutterIconSize: "14px",
-                gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
-                backgroundColor: "#FFFFFFFF",
-                opacity: "1",
-                borderRadius: "4px",
-
-            });
-     
-            textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.start_line, mk.start_character),
-                new Position(mk.end_line, mk.end_character))]);
-
+                textEditor.setDecorations(mk.mdata.decorationType, [new vscode.Range(new Position(mk.start_line, mk.start_character),
+                    new Position(mk.end_line, mk.end_character))]);
+            }
         }
     }
 

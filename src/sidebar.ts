@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as mark  from './mark';
+import * as database from './database';
+import { CONNREFUSED } from 'node:dns';
 
 // 树节点
 export class EntryItem extends vscode.TreeItem
@@ -17,21 +19,26 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
     //     new EntryItem("3",vscode.TreeItemCollapsibleState.None),
     // ];    
 
-    private childs: EntryItem[] = [];
-    private eimap: Map<number, EntryItem> = new Map<number, EntryItem>();
+    private db: database.database | undefined;
 
     private _onDidChangeTreeData: vscode.EventEmitter<EntryItem | undefined | null | void> = new vscode.EventEmitter<EntryItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<EntryItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
+    public init(db: database.database) {
+        this.db = db;
+    }
+
     getTreeItem(element: EntryItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
     }
+
     getChildren(element?: EntryItem): vscode.ProviderResult<EntryItem[]> {
-        //if (element) {//子节点
+        //if (element) {
             const item: EntryItem[] = [];
-            this.eimap.forEach((value, key, map)=>
+            this.db?.mkmap.forEach((value, key, map)=>
             {
-                item.push(value);
+                if(value.mdata?.eitem)
+                    item.push(value.mdata.eitem);
             });
             return item;
         // } 
@@ -39,10 +46,10 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
         //     return [new EntryItem("root",vscode.TreeItemCollapsibleState.Collapsed)];
         // }
     }
-    refresh(): void {
-        console.log('refresh...');
+
+    refresh(){
         this._onDidChangeTreeData.fire();
-      }
+    }
 
 
     insert(mk: mark.mark){
@@ -54,13 +61,8 @@ export class EntryList implements vscode.TreeDataProvider<EntryItem>
             title:"title",
             arguments:[mk.id] 
             };
-            this.eimap.set(mk.id,entryItem);
+
+            mk.mdata?.setEntryItem(entryItem);
         }
     }
-
-    delete(id:number)
-    {
-        this.eimap.delete(id);
-    }
-
 }

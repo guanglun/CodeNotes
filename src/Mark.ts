@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+import { EntryItem } from './sidebar';
 
 export class mark {
 
@@ -17,6 +19,8 @@ export class mark {
 
     //public static FLAG_SELECT = 0;
     //public static FLAG_CURSOR = 1;
+
+    public mdata = new mdata();
 
     constructor(id?: number, name?: string, flag?: number, file_path?: string, 
         anchor_line?: number, anchor_character?: number, active_line?: number, active_character?: number,
@@ -48,6 +52,24 @@ export class mark {
             this.end_line = end_line;
         if (end_character)
             this.end_character = end_character;            
-
+        
     }
+}
+
+export class mdata {
+
+    public decorationType: vscode.TextEditorDecorationType | undefined;
+
+    public eitem: EntryItem | undefined;
+
+    public setEntryItem(el:EntryItem)
+    {
+        this.eitem = el;
+    }
+
+    public setDecorationType(dt:vscode.TextEditorDecorationType)
+    {
+        this.decorationType = dt;
+    }
+
 }
