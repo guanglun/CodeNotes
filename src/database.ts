@@ -92,7 +92,7 @@ export class DataBase {
                 this.lastId = res[res.length - 1].id;
 
                 this.sidebar?.elAll?.refresh();
-                
+
                 this.mm?.reloadNowItem();
                 this.mm?.teColorManager(markmanager.TEColorManagerType.tecmtInit);
             }
@@ -123,6 +123,14 @@ export class DataBase {
             });
         }
 
+    }
+
+    updateName(id: number,name: string)
+    {
+        this.db?.run("update " + DataBase.tableName + " set name = " + name.toString() + " WHERE id = " + id, function(err) {
+            if (err) {throw err;}
+            console.log("Update Data Success!");
+          });
     }
 
     insertDB(mk: mark.Mark) {

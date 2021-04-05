@@ -42,12 +42,12 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
         // }
     }
 
-    refresh(){
+    public refresh(){
         this._onDidChangeTreeData.fire();
     }
 
 
-    insert(mk: mark.Mark){
+    public insert(mk: mark.Mark){
         if(mk.name)
         {
             const entryItem = new sidebar.EntryItem(mk.name,vscode.TreeItemCollapsibleState.None);
@@ -58,6 +58,18 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
             };
 
             mk.mdata?.setEntryItemAll(entryItem);
+        }
+    }
+
+    public reloadItemName(mk: mark.Mark)
+    {        
+        if(mk.name)
+        {
+            if(mk.mdata.eitemAll)
+            {
+                delete mk.mdata.eitemAll;
+            }
+            this.insert(mk);
         }
     }
 }

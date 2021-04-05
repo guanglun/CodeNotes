@@ -23,13 +23,32 @@ export function activate(context: vscode.ExtensionContext) {
 
 	sd.elNow.init(db);
 	sd.elAll.init(db);
-	
+
+
 	vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
+			//vscode.window.setStatusBarMessage('Delete ' + res.command.arguments[0],3000);
 			mm.delete(res.command.arguments[0]);
 		}
 	});
+
+	vscode.commands.registerCommand('codenotes.renameItem', (res: Sidebar.EntryItem) => {
+		if(res.command && res.command.arguments)
+		{
+			mm.renameItem(res.command.arguments[0]);
+		}
+	});
+
+	// vscode.commands.registerCommand('sidebar_marks_ctrl.init', (res: Sidebar.EntryItem) => {
+	// 	console.log("init notecode");
+	// 	// if(res.command && res.command.arguments)
+	// 	// {
+	// 	// 	mm.renameItem(res.command.arguments[0]);
+	// 	// }
+	// });
+
+	
 
 	let command = vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
 		// const text = textEditor.document.getText(textEditor.selection);
@@ -40,6 +59,8 @@ export function activate(context: vscode.ExtensionContext) {
 		// console.log(textEditor.selection.anchor.line +" " +textEditor.selection.anchor.character);
 		// console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
 		// console.log(textEditor.document. +" " +textEditor.selection.active.character);
+		//vscode.window.setStatusBarMessage('Insert',3000);
+
 
 		mm.insert(textEditor);
 	});
@@ -52,6 +73,12 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider("sidebar_marks_now", sd.elNow);
 	vscode.commands.registerCommand("sidebar_marks_now.openChild", (args: number) => {
 		mm.click(args);
+	});
+
+	vscode.window.registerTreeDataProvider("sidebar_marks_ctrl", sd.elCtrl);
+	vscode.commands.registerCommand("sidebar_marks_ctrl.openChild", (args: number) => {
+		//mm.click(args);
+		console.log(args);
 	});
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {

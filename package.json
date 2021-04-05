@@ -28,6 +28,10 @@
 			{
 				"command": "codenotes.deleteItem",
 				"title": "Delete"
+			},
+			{
+				"command": "codenotes.renameItem",
+				"title": "Rename"
 			}
 		],
 		"menus": {
@@ -47,6 +51,10 @@
 				{
 					"command": "codenotes.deleteItem",
 					"group": "navigation"
+				},
+				{
+					"command": "codenotes.renameItem",
+					"group": "navigation"
 				}
 			]
 		},
@@ -63,15 +71,15 @@
 			"sidebar_codenotes": [
 				{
 					"id": "sidebar_marks_ctrl",
-					"name": "标签操作"
+					"name": "CodeNotes Ctrl"
 				},
 				{
 					"id": "sidebar_marks_now",
-					"name": "当前页标签"
+					"name": "CodeNotes Marks Now"
 				},
 				{
 					"id": "sidebar_marks_all",
-					"name": "所有标签"
+					"name": "CodeNotes Marks All"
 				}
 			]
 		}

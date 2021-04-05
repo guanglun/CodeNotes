@@ -38,7 +38,8 @@ export class MarkManager {
     public insert(te: vscode.TextEditor) {
         if (this.db && this.sidebar) {
 
-            const name = path.basename(te.document.fileName) + " " + te.selection.active.line;
+            const name = "["+path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" +
+            te.selection.anchor.character;
 
             const mk = new mark.Mark(++this.db.lastId,
                 name,
@@ -84,6 +85,47 @@ export class MarkManager {
         }
     }
 
+    private renameItemPromise() {
+        return new Promise((resolve, reject) => {
+            vscode.window.showInputBox(
+                { // 这个对象中所有参数都是可选参数
+                    password:false, 			// 输入内容是否是密码
+                    ignoreFocusOut:true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
+                    placeHolder:'Rename Item', 	// 在输入框内的提示信息
+                    prompt:'Rename Item', 		// 在输入框下方的提示信息
+                    //validateInput:function(text){return text;} // 对输入内容进行验证并返回
+                }).then(function(msg){
+                if(msg)
+                {
+                    resolve(msg);
+                }else{
+                    reject(new Error("array length invalid"));
+                }
+            });
+        });
+    }
+
+    public renameItem(id: number)
+    {
+        const promise = this.renameItemPromise();
+        promise.then((res: any) => {
+            const mk = this.db?.mkmap.get(id);
+            if(mk)
+            {
+                mk.setName(res);
+                this.db?.updateName(id,res);
+                this.sidebar?.elNow.reloadItemName(mk);
+                this.sidebar?.elAll.reloadItemName(mk);
+
+                this.sidebar?.elNow.refresh();
+                this.sidebar?.elAll.refresh();
+            }
+        });
+        
+
+
+    }
+
     public reloadNowItem()
     {
         if(vscode.window.activeTextEditor)
@@ -101,7 +143,6 @@ export class MarkManager {
         }
 
     }
-
 
     public load() {
         if (this.db) {
