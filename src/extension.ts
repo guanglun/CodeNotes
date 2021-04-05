@@ -1,31 +1,28 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as sidebar from './sidebar/sidebar';
+import * as Sidebar from './sidebar/Sidebar';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as markmanager from './markmanager';
-import * as mark from './mark';
-import * as database from './database';
-import { TextEncoder } from 'node:util';
+import * as markmanager from './MarkManager';
+import * as database from './DataBase';
+
 
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const sd = new sidebar.sidebar();
+	const sd = new Sidebar.Sidebar();
 
-
-	const db = new database.database(context);
-	const mm = new markmanager.markmanager(context);
+	const db = new database.DataBase(context);
+	const mm = new markmanager.MarkManager(context);
 
 	db.init(sd,mm);
 	mm.init(sd,db);
-	sd.el_all.init(db);
+	sd.elAll.init(db);
 	
-	vscode.commands.registerCommand
-	vscode.commands.registerCommand('codenotes.deleteItem', (res: sidebar.EntryItem) => {
+	vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			mm.delete(res.command.arguments[0]);
@@ -47,10 +44,14 @@ export function activate(context: vscode.ExtensionContext) {
 		mm.insert(textEditor);
 	});
 
-	vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.el_all);
+	vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll);
 	vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
-		//console.log('click id : '+args);
 		mm.click(args);
+	});
+
+	vscode.window.registerTreeDataProvider("sidebar_marks_now", sd.elNow);
+	vscode.commands.registerCommand("sidebar_marks_now.openChild", (args: number) => {
+		
 	});
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {
@@ -98,9 +99,9 @@ export function activate(context: vscode.ExtensionContext) {
 		if(editor) { 
 			db.mkmap.forEach((value, key, map)=>
             {
-                if(value.file_path === editor.document.fileName)
+                if(value.filePath === editor.document.fileName)
 				{
-					mm.showColor(editor,value,markmanager.ShowColorType.SCT_SHOW);
+					mm.showColor(editor,value,markmanager.ShowColorType.sctShow);
 				}
             });
 		}  

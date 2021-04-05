@@ -1,37 +1,36 @@
 import * as vscode from 'vscode';
-import * as sidebar from './sidebar/sidebar';
-import * as database from './database';
+import * as Sidebar from './sidebar/Sidebar';
+import * as database from './DataBase';
 import * as mark from './mark';
 import * as path from 'path';
 import { Position } from 'vscode';
-import { mainModule } from 'node:process';
 
 
 export enum ShowColorType {
-    SCT_CLICK,
-    SCT_SHOW,
-    SCT_CLEAR
+    sctClick,
+    sctShow,
+    sctClear
 }
 
 export enum TEColorManagerType {
-    TECMT_INIT,
-    TECMT_SHOW,
-    TECMT_CLEAR
+    tecmtInit,
+    tecmtShow,
+    tecmtClear
 }
 
-export class markmanager {
+export class MarkManager {
 
 
     private context: vscode.ExtensionContext;
-    private sidebar: sidebar.sidebar | undefined;
+    private sidebar: Sidebar.Sidebar | undefined;
 
-    private db: database.database | undefined;
+    private db: database.DataBase | undefined;
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
 
-    public init(sidebar: sidebar.sidebar,db: database.database) {
+    public init(sidebar: Sidebar.Sidebar,db: database.DataBase) {
         this.sidebar = sidebar;
         this.db = db;
     }
@@ -41,7 +40,7 @@ export class markmanager {
 
             const name = path.basename(te.document.fileName) + " " + te.selection.active.line;
 
-            const mk = new mark.mark(++this.db.lastId,
+            const mk = new mark.Mark(++this.db.lastId,
                 name,
                 0,
                 te.document.fileName,
@@ -56,24 +55,24 @@ export class markmanager {
             );
 
             this.db.insertDB(mk);
-            this.sidebar.el_all?.insert(mk);
-            this.sidebar.el_all?.refresh();
+            this.sidebar.elAll?.insert(mk);
+            this.sidebar.elAll?.refresh();
 
-            if(vscode.window.activeTextEditor?.document.fileName === mk.file_path)
+            if(vscode.window.activeTextEditor?.document.fileName === mk.filePath)
             {
-                this.TEColorManager(TEColorManagerType.TECMT_SHOW,mk);
+                this.teColorManager(TEColorManagerType.tecmtShow,mk);
             }
         }
 
     }
 
     public delete(id: number) {
-        if (this.db && this.sidebar?.el_all) {
+        if (this.db && this.sidebar?.elAll) {
             const mk = this.db.mkmap.get(id);
-            this.TEColorManager(TEColorManagerType.TECMT_CLEAR,mk);
+            this.teColorManager(TEColorManagerType.tecmtClear,mk);
             this.db.deleteDB(id);
             this.db.mkmap.delete(id);
-            this.sidebar.el_all.refresh();
+            this.sidebar.elAll.refresh();
         }
     }
 
@@ -84,50 +83,50 @@ export class markmanager {
         }
     }
 
-    public TEColorManager(type: TEColorManagerType, mk?: mark.mark) {
-        if (type === TEColorManagerType.TECMT_INIT) {
+    public teColorManager(type: TEColorManagerType, mk?: mark.Mark) {
+        if (type === TEColorManagerType.tecmtInit) {
             vscode.window.visibleTextEditors.forEach(editor => {
                 if (editor && this.db) {
                     this.db.mkmap.forEach((value, key, map) => {
-                        if (value.file_path === editor.document.fileName) {
+                        if (value.filePath === editor.document.fileName) {
 
-                            this.showColor(editor, value, ShowColorType.SCT_SHOW);
+                            this.showColor(editor, value, ShowColorType.sctShow);
                         }
                     });
                 }
             });
         }
-        if (type === TEColorManagerType.TECMT_SHOW) {
+        if (type === TEColorManagerType.tecmtShow) {
             vscode.window.visibleTextEditors.forEach(editor => {
                 if (editor && mk) {
-                    if (mk.file_path === editor.document.fileName) {
-                        this.showColor(editor, mk, ShowColorType.SCT_SHOW);
+                    if (mk.filePath === editor.document.fileName) {
+                        this.showColor(editor, mk, ShowColorType.sctShow);
                     }
                 }
             });
         }        
-        if (type === TEColorManagerType.TECMT_CLEAR) {
+        if (type === TEColorManagerType.tecmtClear) {
             vscode.window.visibleTextEditors.forEach(editor => {
                 if (editor && mk) {
-                    if (mk.file_path === editor.document.fileName) {
-                        this.showColor(editor, mk, ShowColorType.SCT_CLEAR);
+                    if (mk.filePath === editor.document.fileName) {
+                        this.showColor(editor, mk, ShowColorType.sctClear);
                     }
                 }
             });
         }
     }
 
-    public showColor(textEditor: vscode.TextEditor, mk: mark.mark, en: ShowColorType) {
+    public showColor(textEditor: vscode.TextEditor, mk: mark.Mark, en: ShowColorType) {
 
-        if (en === ShowColorType.SCT_CLICK) {
-            textEditor.selection = new vscode.Selection(new Position(mk.anchor_line, mk.anchor_character),
-                new Position(mk.active_line, mk.active_character));
+        if (en === ShowColorType.sctClick) {
+            textEditor.selection = new vscode.Selection(new Position(mk.anchorLine, mk.anchorCharacter),
+                new Position(mk.activeLine, mk.activeCharacter));
 
-            textEditor.revealRange(new vscode.Range(new Position(mk.start_line, mk.start_character),
-                new Position(mk.end_line, mk.end_character)));
+            textEditor.revealRange(new vscode.Range(new Position(mk.startLine, mk.startCharacter),
+                new Position(mk.endLine, mk.endCharacter)));
         }
 
-        if (en === ShowColorType.SCT_SHOW) {
+        if (en === ShowColorType.sctShow) {
             // let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
             // let fontSize = editorConfig.get<number>('fontSize');
 
@@ -157,35 +156,35 @@ export class markmanager {
 
             mk.mdata?.setDecorationType(decorationType);
 
-            textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.start_line, mk.start_character),
-                new Position(mk.end_line, mk.end_character))]);
+            textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.startLine, mk.startCharacter),
+                new Position(mk.endLine, mk.endCharacter))]);
         }
 
-        if (en === ShowColorType.SCT_CLEAR) {
+        if (en === ShowColorType.sctClear) {
             
             if(mk.mdata?.decorationType)
             {
                 mk.mdata.decorationType.dispose();
 
-                textEditor.setDecorations(mk.mdata.decorationType, [new vscode.Range(new Position(mk.start_line, mk.start_character),
-                    new Position(mk.end_line, mk.end_character))]);
+                textEditor.setDecorations(mk.mdata.decorationType, [new vscode.Range(new Position(mk.startLine, mk.startCharacter),
+                    new Position(mk.endLine, mk.endCharacter))]);
             }
         }
     }
 
     //文件插入内容请看:http://www.voidcn.com/article/p-kyntjbrl-bvo.html
     public click(id: number) {
-        if (this.db && this.sidebar?.el_all) {
+        if (this.db && this.sidebar?.elAll) {
             const mk = this.db.mkmap.get(id);
             if (mk) {
 
-                if (mk.file_path) {
+                if (mk.filePath) {
 
-                    const uri = vscode.Uri.file(mk.file_path);
+                    const uri = vscode.Uri.file(mk.filePath);
                     vscode.workspace.openTextDocument(uri).then(document => {
                         vscode.window.showTextDocument(document).then(textEditor => {
 
-                            this.showColor(textEditor, mk, ShowColorType.SCT_CLICK);
+                            this.showColor(textEditor, mk, ShowColorType.sctClick);
 
                         });
                     });

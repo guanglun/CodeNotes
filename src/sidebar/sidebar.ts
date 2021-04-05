@@ -1,13 +1,11 @@
 import * as vscode from 'vscode';
-import * as sidebar_all from './sidebar_all';
-import * as sidebar_now from './sidebar_now';
+import * as SidebarAll from './SidebarAll';
+import * as SidebarNow from './SidebarNow';
 
-export class sidebar {
+export class Sidebar {
 
-    public el_all: sidebar_all.EntryList = new sidebar_all.EntryList();
-    public el_now: sidebar_now.EntryList = new sidebar_now.EntryList();
-
-
+    public elAll: SidebarAll.EntryList = new SidebarAll.EntryList();
+    public elNow: SidebarNow.EntryList = new SidebarNow.EntryList();
 
     constructor() {
 
@@ -16,4 +14,5 @@ export class sidebar {
 
 // 树节点
 export class EntryItem extends vscode.TreeItem {
+
 }

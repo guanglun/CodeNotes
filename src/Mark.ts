@@ -1,74 +1,75 @@
 import * as vscode from 'vscode';
-import * as sidebar from './sidebar/sidebar';
+import * as sidebar from './sidebar/Sidebar';
 
-export class mark {
+export class Mark {
 
     public id: number = 0;
     public name: string | undefined;
     public flag: number = 0;
-    public file_path: string | undefined;
-    public anchor_line: number = 0;
-    public anchor_character: number = 0;
-    public active_line: number = 0;
-    public active_character: number = 0;
 
-    public start_line: number = 0;
-    public start_character: number = 0;
-    public end_line: number = 0;
-    public end_character: number = 0;
+    public filePath: string | undefined;
+    public anchorLine: number = 0;
+    public anchorCharacter: number = 0;
+    public activeLine: number = 0;
+    public activeCharacter: number = 0;
+
+    public startLine: number = 0;
+    public startCharacter: number = 0;
+    public endLine: number = 0;
+    public endCharacter: number = 0;
 
     //public static FLAG_SELECT = 0;
     //public static FLAG_CURSOR = 1;
 
-    public mdata = new mdata();
+    public mdata = new Mdata();
 
-    constructor(id?: number, name?: string, flag?: number, file_path?: string, 
-        anchor_line?: number, anchor_character?: number, active_line?: number, active_character?: number,
-        start_line?: number, start_character?: number, end_line?: number, end_character?: number) {
+    constructor(id?: number, name?: string, flag?: number, filePath?: string, 
+        anchorLine?: number, anchorCharacter?: number, activeLine?: number, activeCharacter?: number,
+        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number) {
 
         if (id)
-            this.id = id;
+            {this.id = id;}
         if (name)
-            this.name = name;
+            {this.name = name;}
         if (flag)
-            this.flag = flag;
-        if (file_path)
-            this.file_path = file_path;
-        if (anchor_line)
-            this.anchor_line = anchor_line;
-        if (anchor_character)
-            this.anchor_character = anchor_character;
-        if (active_line)
-            this.active_line = active_line;
-        if (active_character)
-            this.active_character = active_character;
-        if (start_line)
-            this.start_line = start_line;
-        if (start_character)
-            this.start_character = start_character;
-        if (end_line)
-            this.end_line = end_line;
-        if (end_character)
-            this.end_character = end_character;            
+            {this.flag = flag;}
+        if (filePath)
+            {this.filePath = filePath;}
+        if (anchorLine)
+            {this.anchorLine = anchorLine;}
+        if (anchorCharacter)
+            {this.anchorCharacter = anchorCharacter;}
+        if (activeLine)
+            {this.activeLine = activeLine;}
+        if (activeCharacter)
+            {this.activeCharacter = activeCharacter;}
+        if (startLine)
+            {this.startLine = startLine;}
+        if (startCharacter)
+            {this.startCharacter = startCharacter;}
+        if (endLine)
+            {this.endLine = endLine;}
+        if (endCharacter)
+            {this.endCharacter = endCharacter;}            
         
     }
 }
 
-export class mdata {
+export class Mdata {
 
     public decorationType: vscode.TextEditorDecorationType | undefined;
 
-    public eitem_all: sidebar.EntryItem | undefined;
-    public eitem_now: sidebar.EntryItem | undefined;
+    public eitemAll: sidebar.EntryItem | undefined;
+    public eitemNow: sidebar.EntryItem | undefined;
 
     public setEntryItemAll(el: sidebar.EntryItem)
     {
-        this.eitem_all = el;
+        this.eitemAll = el;
     }
 
     public setEntryItemNow(el: sidebar.EntryItem)
     {
-        this.eitem_now = el;
+        this.eitemNow = el;
     }
 
     public setDecorationType(dt:vscode.TextEditorDecorationType)

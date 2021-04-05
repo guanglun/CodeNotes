@@ -1,13 +1,8 @@
 import * as vscode from 'vscode';
-import * as mark  from './../mark';
-import * as database from './../database';
-import * as sidebar from './sidebar';
+import * as mark  from '../mark';
+import * as database from '../DataBase';
+import * as sidebar from './Sidebar';
 
-import { CONNREFUSED } from 'node:dns';
-
-
-
-//树的内容组织管理
 export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
 {
 
@@ -17,12 +12,12 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
     //     new sidebar.EntryItem("3",vscode.TreeItemCollapsibleState.None),
     // ];
 
-    private db: database.database | undefined;
+    private db: database.DataBase | undefined;
 
     private _onDidChangeTreeData: vscode.EventEmitter<sidebar.EntryItem | undefined | null | void> = new vscode.EventEmitter<sidebar.EntryItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<sidebar.EntryItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
-    public init(db: database.database) {
+    public init(db: database.DataBase) {
         this.db = db;
     }
 
@@ -35,8 +30,10 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
             const item: sidebar.EntryItem[] = [];
             this.db?.mkmap.forEach((value, key, map)=>
             {
-                if(value.mdata?.eitem_all)
-                    item.push(value.mdata.eitem_all);
+                if(value.mdata?.eitemAll)
+                {
+                    item.push(value.mdata.eitemAll);
+                }
             });
             return item;
         // } 
@@ -50,7 +47,7 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
     }
 
 
-    insert(mk: mark.mark){
+    insert(mk: mark.Mark){
         if(mk.name)
         {
             const entryItem = new sidebar.EntryItem(mk.name,vscode.TreeItemCollapsibleState.None);
