@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as sidebar_all from './sidebar_all';
+import * as sidebar from './sidebar/sidebar';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as markmanager from './markmanager';
@@ -14,16 +14,18 @@ import { TextEncoder } from 'node:util';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const el_all = new sidebar_all.EntryList();
+	const sd = new sidebar.sidebar();
+
+
 	const db = new database.database(context);
 	const mm = new markmanager.markmanager(context);
 
-	db.init(el_all,mm);
-	mm.init(el_all,db);
-	el_all.init(db);
+	db.init(sd,mm);
+	mm.init(sd,db);
+	sd.el_all.init(db);
 	
 	vscode.commands.registerCommand
-	vscode.commands.registerCommand('codenotes.deleteItem', (res: sidebar_all.EntryItem) => {
+	vscode.commands.registerCommand('codenotes.deleteItem', (res: sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			mm.delete(res.command.arguments[0]);
@@ -45,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 		mm.insert(textEditor);
 	});
 
-	vscode.window.registerTreeDataProvider("sidebar_marks_all", el_all);
+	vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.el_all);
 	vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
 		//console.log('click id : '+args);
 		mm.click(args);

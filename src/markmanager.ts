@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as sidebar_all from './sidebar_all';
+import * as sidebar from './sidebar/sidebar';
 import * as database from './database';
 import * as mark from './mark';
 import * as path from 'path';
@@ -23,20 +23,21 @@ export class markmanager {
 
 
     private context: vscode.ExtensionContext;
-    private el_all: sidebar_all.EntryList | undefined;
+    private sidebar: sidebar.sidebar | undefined;
+
     private db: database.database | undefined;
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
 
-    public init(el_all:sidebar_all.EntryList,db: database.database) {
-        this.el_all = el_all;
+    public init(sidebar: sidebar.sidebar,db: database.database) {
+        this.sidebar = sidebar;
         this.db = db;
     }
 
     public insert(te: vscode.TextEditor) {
-        if (this.db && this.el_all) {
+        if (this.db && this.sidebar) {
 
             const name = path.basename(te.document.fileName) + " " + te.selection.active.line;
 
@@ -55,10 +56,10 @@ export class markmanager {
             );
 
             this.db.insertDB(mk);
-            this.el_all.insert(mk);
-            this.el_all.refresh();
+            this.sidebar.el_all?.insert(mk);
+            this.sidebar.el_all?.refresh();
 
-            if(vscode.window.activeTextEditor?.document.fileName == mk.file_path)
+            if(vscode.window.activeTextEditor?.document.fileName === mk.file_path)
             {
                 this.TEColorManager(TEColorManagerType.TECMT_SHOW,mk);
             }
@@ -67,12 +68,12 @@ export class markmanager {
     }
 
     public delete(id: number) {
-        if (this.db && this.el_all) {
+        if (this.db && this.sidebar?.el_all) {
             const mk = this.db.mkmap.get(id);
             this.TEColorManager(TEColorManagerType.TECMT_CLEAR,mk);
             this.db.deleteDB(id);
             this.db.mkmap.delete(id);
-            this.el_all.refresh();
+            this.sidebar.el_all.refresh();
         }
     }
 
@@ -174,7 +175,7 @@ export class markmanager {
 
     //文件插入内容请看:http://www.voidcn.com/article/p-kyntjbrl-bvo.html
     public click(id: number) {
-        if (this.db && this.el_all) {
+        if (this.db && this.sidebar?.el_all) {
             const mk = this.db.mkmap.get(id);
             if (mk) {
 

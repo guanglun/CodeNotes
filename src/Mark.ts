@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as sidebar_all from './sidebar_all';
+import * as sidebar from './sidebar/sidebar';
 
 export class mark {
 
@@ -34,7 +34,6 @@ export class mark {
             this.flag = flag;
         if (file_path)
             this.file_path = file_path;
-            
         if (anchor_line)
             this.anchor_line = anchor_line;
         if (anchor_character)
@@ -43,7 +42,6 @@ export class mark {
             this.active_line = active_line;
         if (active_character)
             this.active_character = active_character;
-
         if (start_line)
             this.start_line = start_line;
         if (start_character)
@@ -60,11 +58,17 @@ export class mdata {
 
     public decorationType: vscode.TextEditorDecorationType | undefined;
 
-    public eitem: sidebar_all.EntryItem | undefined;
+    public eitem_all: sidebar.EntryItem | undefined;
+    public eitem_now: sidebar.EntryItem | undefined;
 
-    public setEntryItem(el_all:sidebar_all.EntryItem)
+    public setEntryItemAll(el: sidebar.EntryItem)
     {
-        this.eitem = el_all;
+        this.eitem_all = el;
+    }
+
+    public setEntryItemNow(el: sidebar.EntryItem)
+    {
+        this.eitem_now = el;
     }
 
     public setDecorationType(dt:vscode.TextEditorDecorationType)
