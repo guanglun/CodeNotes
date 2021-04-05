@@ -62,19 +62,46 @@ export class MarkManager {
             {
                 this.teColorManager(TEColorManagerType.tecmtShow,mk);
             }
+
+            if(vscode.window.activeTextEditor?.document.fileName === mk.filePath)
+            {
+                this.sidebar.elNow?.insert(mk);
+                this.sidebar.elNow?.refresh();
+            }
+
         }
 
     }
 
     public delete(id: number) {
-        if (this.db && this.sidebar?.elAll) {
+        if (this.db && this.sidebar) {
             const mk = this.db.mkmap.get(id);
             this.teColorManager(TEColorManagerType.tecmtClear,mk);
             this.db.deleteDB(id);
             this.db.mkmap.delete(id);
+            this.sidebar.elNow.refresh();
             this.sidebar.elAll.refresh();
         }
     }
+
+    public reloadNowItem()
+    {
+        if(vscode.window.activeTextEditor)
+        {
+
+            this.db?.mkmap.forEach((value, key, map)=>
+            {
+                delete value.mdata.eitemNow;
+                if(value.filePath === vscode.window.activeTextEditor?.document.fileName)
+                {
+                    this.sidebar?.elNow.insert(value);
+                }
+            });
+            this.sidebar?.elNow.refresh();
+        }
+
+    }
+
 
     public load() {
         if (this.db) {

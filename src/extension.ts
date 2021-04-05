@@ -20,15 +20,15 @@ export function activate(context: vscode.ExtensionContext) {
 
 	db.init(sd,mm);
 	mm.init(sd,db);
+
+	sd.elNow.init(db);
 	sd.elAll.init(db);
 	
 	vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			mm.delete(res.command.arguments[0]);
-			//console.log(res.command.arguments);
 		}
-			
 	});
 
 	let command = vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.window.registerTreeDataProvider("sidebar_marks_now", sd.elNow);
 	vscode.commands.registerCommand("sidebar_marks_now.openChild", (args: number) => {
-		
+		mm.click(args);
 	});
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {
@@ -104,6 +104,8 @@ export function activate(context: vscode.ExtensionContext) {
 					mm.showColor(editor,value,markmanager.ShowColorType.sctShow);
 				}
             });
+
+			mm.reloadNowItem();
 		}  
 	});
 }

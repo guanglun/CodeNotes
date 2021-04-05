@@ -92,7 +92,8 @@ export class DataBase {
                 this.lastId = res[res.length - 1].id;
 
                 this.sidebar?.elAll?.refresh();
-
+                
+                this.mm?.reloadNowItem();
                 this.mm?.teColorManager(markmanager.TEColorManagerType.tecmtInit);
             }
             //console.log(this.mkmap);

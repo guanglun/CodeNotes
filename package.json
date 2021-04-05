@@ -11,6 +11,7 @@
 	],
 	"activationEvents": [
 		"onCommand:codenotes.insertmark",
+		"onView:sidebar_marks_now",
 		"onView:sidebar_marks_all"
 	],
 	"main": "./out/extension.js",

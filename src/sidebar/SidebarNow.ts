@@ -31,9 +31,9 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
             const item: sidebar.EntryItem[] = [];
             this.db?.mkmap.forEach((value, key, map)=>
             {
-                if(value.mdata?.eitemAll)
+                if(value.mdata?.eitemNow)
                 {
-                    item.push(value.mdata.eitemAll);
+                    item.push(value.mdata.eitemNow);
                 }
             });
             return item;
@@ -58,7 +58,7 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
             arguments:[mk.id] 
             };
 
-            mk.mdata?.setEntryItemAll(entryItem);
+            mk.mdata?.setEntryItemNow(entryItem);
         }
     }
 }
