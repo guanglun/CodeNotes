@@ -1,12 +1,10 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as Sidebar from './sidebar/Sidebar';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as markmanager from './MarkManager';
 import * as database from './DataBase';
-
+import * as Sidebar from './sidebar/Sidebar';
+import * as markmanager from './MarkManager';
+import * as SidebarWeb from './sidebar/SidebarWeb';
 
 
 // this method is called when your extension is activated
@@ -24,7 +22,14 @@ export function activate(context: vscode.ExtensionContext) {
 	sd.elNow.init(db);
 	sd.elAll.init(db);
 
+	sd.setSWeb(new SidebarWeb.SidebarWeb(context,mm,db));
 
+	if(sd.sweb)
+	{
+		context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider("sidebar_web", sd.sweb));
+	}
+	
 	vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
@@ -39,16 +44,6 @@ export function activate(context: vscode.ExtensionContext) {
 			mm.renameItem(res.command.arguments[0]);
 		}
 	});
-
-	// vscode.commands.registerCommand('sidebar_marks_ctrl.init', (res: Sidebar.EntryItem) => {
-	// 	console.log("init notecode");
-	// 	// if(res.command && res.command.arguments)
-	// 	// {
-	// 	// 	mm.renameItem(res.command.arguments[0]);
-	// 	// }
-	// });
-
-	
 
 	let command = vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
 		// const text = textEditor.document.getText(textEditor.selection);
@@ -65,6 +60,8 @@ export function activate(context: vscode.ExtensionContext) {
 		mm.insert(textEditor);
 	});
 
+
+
 	vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll);
 	vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
 		mm.click(args);
@@ -75,11 +72,11 @@ export function activate(context: vscode.ExtensionContext) {
 		mm.click(args);
 	});
 
-	vscode.window.registerTreeDataProvider("sidebar_marks_ctrl", sd.elCtrl);
-	vscode.commands.registerCommand("sidebar_marks_ctrl.openChild", (args: number) => {
-		//mm.click(args);
-		console.log(args);
-	});
+	// vscode.window.registerTreeDataProvider("sidebar_marks_ctrl", sd.elCtrl);
+	// vscode.commands.registerCommand("sidebar_marks_ctrl.openChild", (args: number) => {
+	// 	//mm.click(args);
+	// 	console.log(args);
+	// });
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {
 		// 建立webview
@@ -92,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
 				retainContextWhenHidden: true, // webview被隐藏时保持状态，避免被重置
 			}
 		);
-		panel.webview.html = getWebViewContent(context, 'src/view/index.html');
+		panel.webview.html = SidebarWeb.getWebViewContent(context, 'src/view/index.html');
 	}));
 
 	mm.load();
@@ -137,21 +134,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 }
 
-/**
- * 从某个HTML文件读取能被Webview加载的HTML内容
- * @param {*} context 上下文
- * @param {*} templatePath 相对于插件根目录的html文件相对路径
- */
-function getWebViewContent(context: vscode.ExtensionContext, templatePath: string) {
-	const resourcePath = path.join(context.extensionPath, templatePath);
-	const dirPath = path.dirname(resourcePath);
-	let html = fs.readFileSync(resourcePath, 'utf-8');
-	// vscode不支持直接加载本地资源，须要替换成其专有路径格式，这里只是简单的将样式和JS的路径替换
-	html = html.replace(/(<link.+?href="|<script.+?src="|<img.+?src=")(.+?)"/g, (m, $1, $2) => {
-		return $1 + vscode.Uri.file(path.resolve(dirPath, $2)).with({ scheme: 'vscode-resource' }).toString() + '"';
-	});
-	return html;
-}
+
 
 // this method is called when your extension is deactivated
 export function deactivate() { }

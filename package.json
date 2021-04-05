@@ -12,7 +12,8 @@
 	"activationEvents": [
 		"onCommand:codenotes.insertmark",
 		"onView:sidebar_marks_now",
-		"onView:sidebar_marks_all"
+		"onView:sidebar_marks_all",
+		"onView:sidebar_web"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -69,9 +70,12 @@
 		},
 		"views": {
 			"sidebar_codenotes": [
+
 				{
-					"id": "sidebar_marks_ctrl",
-					"name": "CodeNotes Ctrl"
+					"type": "webview",
+					"id": "sidebar_web",
+					"name": "CodeNotes Menu",
+					"contextualTitle": "CodeNotesMenu"
 				},
 				{
 					"id": "sidebar_marks_now",
@@ -81,6 +85,7 @@
 					"id": "sidebar_marks_all",
 					"name": "CodeNotes Marks All"
 				}
+				
 			]
 		}
 	},

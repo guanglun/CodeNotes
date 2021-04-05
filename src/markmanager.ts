@@ -20,7 +20,6 @@ export enum TEColorManagerType {
 
 export class MarkManager {
 
-
     private context: vscode.ExtensionContext;
     private sidebar: Sidebar.Sidebar | undefined;
 
@@ -147,7 +146,6 @@ export class MarkManager {
     public load() {
         if (this.db) {
             this.db.checkLoadDB();
-            this.db.loadDB();
         }
     }
 

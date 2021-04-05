@@ -31,7 +31,7 @@ export class DataBase {
     private context: vscode.ExtensionContext;
     private sidebar: Sidebar.Sidebar | undefined;
 
-
+    public isDBInit = false;
     private db: sqlite3.Database | undefined;
     private mm: markmanager.MarkManager | undefined;
     public lastId = 0;
@@ -40,17 +40,28 @@ export class DataBase {
    * 读取路径信息
    * @param {string} filepath 路径
    */
-    private exist(path: string) {
-        fs.stat(path, function (err, result) {
-            if (err) {
-                fs.mkdir(path, function (err) {
-                    console.log(err);
-                    return false;
-                });
-            } else {
-                return true;
-            }
-            return true;
+    private creatPromise(path: string) {
+        return new Promise((resolve, reject) => {
+            fs.stat(path, function (err, result) {
+                if (err) {
+                    fs.mkdir(path, function (err) {
+                        if (err) { resolve(false); }
+                        else { resolve(true); }
+                    });
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
+    private existPromise(path: string) {
+
+        return new Promise((resolve, reject) => {
+            fs.stat(path, function (err, result) {
+                if (err) { resolve(false); }
+                else { resolve(true); }
+            });
         });
     }
 
@@ -105,13 +116,22 @@ export class DataBase {
     }
 
     createTable() {
-        if (this.db) {
-            this.db.run(DataBase.creatTable, function (err) {
+
+        new Promise((resolve, reject) => {
+            this.db?.run(DataBase.creatTable, function (err) {
                 if (err) { throw err; }
-                console.log("Create Table Success!");
-                return true;
+                else{
+                    resolve(true);
+                }
+                
             });
-        }
+        }).then((res: any) => {
+            this.sidebar?.sweb?.initSuccess();
+        });
+
+
+
+
     }
 
     showDB() {
@@ -125,12 +145,11 @@ export class DataBase {
 
     }
 
-    updateName(id: number,name: string)
-    {
-        this.db?.run("update " + DataBase.tableName + " set name = " + name.toString() + " WHERE id = " + id, function(err) {
-            if (err) {throw err;}
+    updateName(id: number, name: string) {
+        this.db?.run("update " + DataBase.tableName + " set name = " + name.toString() + " WHERE id = " + id, function (err) {
+            if (err) { throw err; }
             console.log("Update Data Success!");
-          });
+        });
     }
 
     insertDB(mk: mark.Mark) {
@@ -161,22 +180,54 @@ export class DataBase {
         }
     }
 
-
     public checkLoadDB() {
         if (vscode.workspace.workspaceFolders) {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
-            var folderUri = vscode.Uri.file(rootUri.fsPath + "\\" + DataBase.databasePath);
+            var pathDB = rootUri.fsPath + "\\" + DataBase.databasePath + "\\notes.db";
+            const promise = this.existPromise(pathDB);
+            promise.then((res: any) => {
 
-            this.exist(folderUri.fsPath);
+                if (res === true) {
+                    new Promise((resolve, reject) => {
+                        this.db = new sqlite3.Database(pathDB, function (err) {
+                            if (err) {
+                                console.log("load database error,", err.message);
+                            } else {
+                                resolve(true);
+                            }
+                        });
+                    }).then((res: any) => {
+                        this.loadDB();
+                        this.isDBInit = true;
+                        this.sidebar?.sweb?.initSuccess();
+                    });
 
-            this.db = new sqlite3.Database(folderUri.fsPath + "\\notes.db", function (err) {
-                if (err) {
-                    console.log("load database error,", err.message);
-                } else {
-                    console.log("load database success");
                 }
             });
-            this.createTable();
+        }
+    }
+
+    public creatCodeNotes() {
+        if (vscode.workspace.workspaceFolders && this.isDBInit === false) {
+            var rootUri = vscode.workspace.workspaceFolders[0].uri;
+            var folderUri = vscode.Uri.file(rootUri.fsPath + "\\" + DataBase.databasePath);
+
+            const promise = this.creatPromise(folderUri.fsPath);
+            promise.then((res: any) => {
+
+                new Promise((resolve, reject) => {
+                    this.db = new sqlite3.Database(folderUri.fsPath + "\\notes.db", function (err) {
+                        if (err) {
+                            console.log("load database error,", err.message);
+                        } else {
+                            resolve(true);
+                        }
+                    });
+                }).then((res: any) => {
+                    this.createTable();
+                    this.isDBInit = true;
+                });
+            });
         }
     }
 
@@ -200,5 +251,6 @@ export class DataBase {
             }
         });
     }
+
 }
 

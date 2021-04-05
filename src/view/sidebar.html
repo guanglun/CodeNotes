@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+</head>
+
+<body style="text-align: center">
+
+  <button onclick="InitCodeNotes()" type="button" id="InitCodeNotes" style="cursor: pointer;width:100%;height:30px;">Init CodeNotes</button>
+  
+  
+  <script type="text/javascript">
+    const tsvscode = acquireVsCodeApi();
+    
+    function InitCodeNotes()
+    {
+      tsvscode.postMessage({ type: "InitCodeNotes"});
+    }
+
+    window.addEventListener('message', event => {
+      var initBt = document.getElementById("InitCodeNotes");
+
+			const message = event.data;
+      switch(message.command)
+      {
+          case 'InitSuccess':
+            initBt.hidden = true;
+          break;
+          default:
+            break;
+      }
+  });
+
+
+  </script>
+</body>
+
+</html>
