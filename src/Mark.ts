@@ -18,9 +18,6 @@ export class Mark {
     public endLine: number = 0;
     public endCharacter: number = 0;
 
-    //public static FLAG_SELECT = 0;
-    //public static FLAG_CURSOR = 1;
-
     public mdata = new Mdata();
 
     constructor(id?: number, name?: string, flag?: number, filePath?: string, 
@@ -52,6 +49,11 @@ export class Mark {
         if (endCharacter)
             {this.endCharacter = endCharacter;}            
         
+    }
+
+    public setName(name: string)
+    {
+        this.name = name;
     }
 }
 
