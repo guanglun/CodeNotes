@@ -10,8 +10,8 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
   _doc?: vscode.TextDocument;
 
-  
-  constructor(private readonly context: vscode.ExtensionContext,private readonly mm: markmanager.MarkManager,
+
+  constructor(private readonly context: vscode.ExtensionContext, private readonly mm: markmanager.MarkManager,
     private readonly db: database.DataBase) { }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -25,9 +25,15 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
     webviewView.webview.onDidReceiveMessage(async (data): Promise<void> => {
-      if(data.type === "InitCodeNotes")
-      {
+      if (data.type === "InitCodeNotes") {
         this.db.creatCodeNotes();
+      }else if (data.type === "SWEBStart") {
+        if(this.db.isDBInit === true)
+        {
+          this.webShowMenu();
+        }else{
+          this.webShowInit();
+        }
       }
     });
   }
@@ -36,14 +42,18 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
     this._view = panel;
   }
 
-  public initSuccess(){
-    console.log('this._view?.webview.postMessage({ command: "InitSuccess" });');
-    this._view?.webview.postMessage({ command: "InitSuccess" });
+  public webShowInit() {
+    this._view?.webview.postMessage({ command: "ShowInit" });
+  }
+
+  public webShowMenu() {
+    this._view?.webview.postMessage({ command: "ShowMenu" });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
+    console.log('_getHtmlForWebview');
 
-  return getWebViewContent(this.context,'src/view/sidebar.html');
+    return getWebViewContent(this.context, 'src/view/sidebar.html');
   }
 }
 

@@ -120,18 +120,14 @@ export class DataBase {
         new Promise((resolve, reject) => {
             this.db?.run(DataBase.creatTable, function (err) {
                 if (err) { throw err; }
-                else{
+                else {
                     resolve(true);
                 }
-                
+
             });
         }).then((res: any) => {
-            this.sidebar?.sweb?.initSuccess();
+            this.sidebar?.sweb?.webShowMenu();
         });
-
-
-
-
     }
 
     showDB() {
@@ -199,7 +195,7 @@ export class DataBase {
                     }).then((res: any) => {
                         this.loadDB();
                         this.isDBInit = true;
-                        this.sidebar?.sweb?.initSuccess();
+                        this.sidebar?.sweb?.webShowMenu();
                     });
 
                 }

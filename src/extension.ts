@@ -26,8 +26,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	if(sd.sweb)
 	{
-		context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider("sidebar_web", sd.sweb));
+		
+		//context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider("sidebar_web", sd.sweb);//);
 	}
 	
 	vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
@@ -132,6 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
 			mm.reloadNowItem();
 		}  
 	});
+	
 }
 
 

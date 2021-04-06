@@ -7,26 +7,40 @@
 
 <body style="text-align: center">
 
-  <button onclick="InitCodeNotes()" type="button" id="InitCodeNotes" style="cursor: pointer;width:100%;height:30px;">Init CodeNotes</button>
-  
+  <h2 style="cursor: pointer;width:100%;">CodeNotes</h2>
+  <button onclick="InitCodeNotes()" type="button" id="btInitCodeNotes" style="cursor: pointer;width:100%;height:30px;" hidden="true">Init CodeNotes</button>
+  <button onclick="HelloCodeNotes()" type="button" id="btHelloCodeNotes" style="cursor: pointer;width:100%;height:30px;" hidden="true">Hello CodeNotes</button>
   
   <script type="text/javascript">
     const tsvscode = acquireVsCodeApi();
-    
+    tsvscode.postMessage({ type: "SWEBStart"});
+
     function InitCodeNotes()
     {
       tsvscode.postMessage({ type: "InitCodeNotes"});
     }
 
+    function HelloCodeNotes()
+    {
+      tsvscode.postMessage({ type: "InitCodeNotes"});
+    }
+    
+
     window.addEventListener('message', event => {
-      var initBt = document.getElementById("InitCodeNotes");
+      var btInitCodeNotes = document.getElementById("btInitCodeNotes");
+      var btHelloCodeNotes = document.getElementById("btHelloCodeNotes");
 
 			const message = event.data;
       switch(message.command)
       {
-          case 'InitSuccess':
-            initBt.hidden = true;
+          case 'ShowInit':
+          btInitCodeNotes.hidden = false;
+          btHelloCodeNotes.hidden = true;
           break;
+          case 'ShowMenu':
+          btInitCodeNotes.hidden = true;
+          btHelloCodeNotes.hidden = false;
+          break;          
           default:
             break;
       }
