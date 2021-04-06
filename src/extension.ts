@@ -46,6 +46,13 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	vscode.commands.registerCommand('codenotes.editItem', (res: Sidebar.EntryItem) => {
+		if(res.command && res.command.arguments)
+		{
+			mm.editItem(res.command.arguments[0]);
+		}
+	});
+
 	let command = vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
 		// const text = textEditor.document.getText(textEditor.selection);
 		// console.log(textEditor.document.fileName);
@@ -111,6 +118,67 @@ export function activate(context: vscode.ExtensionContext) {
 		}  
 	});
 	
+	vscode.workspace.onDidSaveTextDocument((editor => {  
+		console.log(editor.fileName);
+
+		db?.mkmap.forEach((mk, key, map)=>
+		{
+			if(mk.filePath === editor.fileName)
+			{
+				db.updateRange(mk);
+			}
+		});
+	}));
+
+	vscode.workspace.onDidCloseTextDocument((editor => {  
+		console.log(editor.fileName);
+
+		db?.mkmap.forEach((mk, key, map)=>
+		{
+			if(mk.filePath === editor.fileName)
+			{
+				mk.resetRange();
+			}
+		});
+	}));
+
+	vscode.workspace.onDidChangeTextDocument(editor => {  
+	
+		console.log("==============1");
+		
+		editor.contentChanges.forEach((value, key, map)=>
+		{
+			
+			console.log(key+":"+value.range.start.line +" " + value.range.end.line);
+			console.log(key+":"+value.range.start.character +" " + value.range.end.character);
+			console.log(key+":"+value.text.length + " "+ value.text);
+			console.log(value);
+		}
+		);
+
+
+
+		editor.contentChanges.forEach((cc, key, map)=>
+		{
+			db?.mkmap.forEach((mk, key, map)=>
+			{
+				if(mk.filePath === editor.document.fileName)
+				{
+					mm.onChnageDoc(mk,cc);
+				}
+			});
+
+		});
+
+		
+		// console.log(editor.contentChanges[1].range.start.line +" " + editor.contentChanges[1].range.start.character);
+		// console.log(editor.contentChanges[1].range.end.line +" " + editor.contentChanges[1].range.end.character);
+
+		//console.log(editor.contentChanges.length);
+	});
+
+
+
 }
 
 

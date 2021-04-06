@@ -33,6 +33,10 @@
 			{
 				"command": "codenotes.renameItem",
 				"title": "Rename"
+			},
+			{
+				"command": "codenotes.editItem",
+				"title": "Edit"
 			}
 		],
 		"menus": {
@@ -55,6 +59,10 @@
 				},
 				{
 					"command": "codenotes.renameItem",
+					"group": "navigation"
+				},
+				{
+					"command": "codenotes.editItem",
 					"group": "navigation"
 				}
 			]

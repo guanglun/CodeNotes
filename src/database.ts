@@ -142,11 +142,26 @@ export class DataBase {
     }
 
     updateName(id: number, name: string) {
-        console.log("updateName!");
+
         this.db?.run("update " + DataBase.tableName + " set name = '" + name + "' WHERE id = " + id, function (err) {
             if (err) { console.log(err); throw err; }
             console.log("Update Data Success!");
         });
+    }
+
+    async updateRange(mk:mark.Mark) {
+
+        await this.db?.run("update " + DataBase.tableName + 
+        " set start_line = " + mk.startLine + 
+        ", start_character = " + mk.startCharacter + 
+        ", end_line = " + mk.endLine + 
+        ", end_character = " + mk.endCharacter +
+        " WHERE id = " + mk.id, function (err) {
+            if (err) { console.log(err); throw err; }
+            console.log("Update Data Success!");
+        });
+
+        mk.writeRange();
     }
 
     insertDB(mk: mark.Mark) {

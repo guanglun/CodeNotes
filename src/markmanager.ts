@@ -39,7 +39,7 @@ export class MarkManager {
 
             const name = "["+path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" +
             te.selection.anchor.character;
-
+            
             const mk = new mark.Mark(++this.db.lastId,
                 name,
                 0,
@@ -120,9 +120,17 @@ export class MarkManager {
                 this.sidebar?.elAll.refresh();
             }
         });
+    }
+
+    public editItem(id: number)
+    {
+
+            const mk = this.db?.mkmap.get(id);
+            if(mk)
+            {
+                console.log(mk.textEditor);
+            }
         
-
-
     }
 
     public reloadNowItem()
@@ -184,18 +192,19 @@ export class MarkManager {
 
     public showColor(textEditor: vscode.TextEditor, mk: mark.Mark, en: ShowColorType) {
 
+        
         if (en === ShowColorType.sctClick) {
-            textEditor.selection = new vscode.Selection(new Position(mk.anchorLine, mk.anchorCharacter),
-                new Position(mk.activeLine, mk.activeCharacter));
+            textEditor.selection = new vscode.Selection(new Position(mk.startLine, mk.startCharacter),
+                new Position(mk.endLine, mk.endCharacter));
 
             textEditor.revealRange(new vscode.Range(new Position(mk.startLine, mk.startCharacter),
-                new Position(mk.endLine, mk.endCharacter)));
+                new Position(mk.endLine, mk.endCharacter)), vscode.TextEditorRevealType.InCenter);
         }
 
         if (en === ShowColorType.sctShow) {
             // let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
             // let fontSize = editorConfig.get<number>('fontSize');
-
+            
             const decorationType = vscode.window.createTextEditorDecorationType({
                 //outlineColor: '#fff'
                 //backgroundColor: '#fff'
@@ -221,9 +230,11 @@ export class MarkManager {
             });
 
             mk.mdata?.setDecorationType(decorationType);
+            
+            const range = new vscode.Range(new Position(mk.startLine, mk.startCharacter),
+                new Position(mk.endLine, mk.endCharacter));
 
-            textEditor.setDecorations(decorationType, [new vscode.Range(new Position(mk.startLine, mk.startCharacter),
-                new Position(mk.endLine, mk.endCharacter))]);
+            textEditor.setDecorations(decorationType, [range]);
         }
 
         if (en === ShowColorType.sctClear) {
@@ -321,12 +332,26 @@ export class MarkManager {
                 }else{
                     return new vscode.Hover(note);
                 }
-                
-
             }
            }
           );
+
+          
     }
 
+    public onChnageDoc(mk: mark.Mark,cc: vscode.TextDocumentContentChangeEvent)
+    {
+        //console.log(mk.startLine + " " +mk.endLine);
+        //console.log(mk.startCharacter + " " +mk.endCharacter);
+
+        if(cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character && cc.text.length === 1)
+        {
+            console.log(cc.range.start.line + " " +mk.endLine + " " +cc.range.start.character + " " +mk.endCharacter);
+            if(cc.range.start.line === mk.endLine && cc.range.start.character <= mk.endCharacter)
+            {
+                mk.endCharacter++;
+            }
+        }
+    }
 }
 

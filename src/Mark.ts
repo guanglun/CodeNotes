@@ -18,43 +18,72 @@ export class Mark {
     public endLine: number = 0;
     public endCharacter: number = 0;
 
+    public newRange: vscode.Range | undefined;
+
     public mdata = new Mdata();
 
-    constructor(id?: number, name?: string, flag?: number, filePath?: string, 
+    public textEditor: vscode.TextEditor | undefined;
+
+    private startLineDB: number = 0;
+    private startCharacterDB: number = 0;
+    private endLineDB: number = 0;
+    private endCharacterDB: number = 0;
+
+    constructor(id?: number, name?: string, flag?: number, filePath?: string,
         anchorLine?: number, anchorCharacter?: number, activeLine?: number, activeCharacter?: number,
         startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number) {
 
-        if (id)
-            {this.id = id;}
-        if (name)
-            {this.name = name;}
-        if (flag)
-            {this.flag = flag;}
-        if (filePath)
-            {this.filePath = filePath;}
-        if (anchorLine)
-            {this.anchorLine = anchorLine;}
-        if (anchorCharacter)
-            {this.anchorCharacter = anchorCharacter;}
-        if (activeLine)
-            {this.activeLine = activeLine;}
-        if (activeCharacter)
-            {this.activeCharacter = activeCharacter;}
-        if (startLine)
-            {this.startLine = startLine;}
-        if (startCharacter)
-            {this.startCharacter = startCharacter;}
-        if (endLine)
-            {this.endLine = endLine;}
-        if (endCharacter)
-            {this.endCharacter = endCharacter;}            
-        
+        if (id) { this.id = id; }
+        if (name) { this.name = name; }
+        if (flag) { this.flag = flag; }
+        if (filePath) { this.filePath = filePath; }
+        if (anchorLine) { this.anchorLine = anchorLine; }
+        if (anchorCharacter) { this.anchorCharacter = anchorCharacter; }
+        if (activeLine) { this.activeLine = activeLine; }
+        if (activeCharacter) { this.activeCharacter = activeCharacter; }
+
+
+        if (startLine) {
+            this.startLine = startLine;
+            this.startLineDB = startLine;
+        }
+        if (startCharacter) {
+            this.startCharacter = startCharacter;
+            this.startCharacterDB = startCharacter;
+        }
+        if (endLine) {
+            this.endLine = endLine;
+            this.endLineDB = endLine;
+        }
+        if (endCharacter) {
+            this.endCharacter = endCharacter;
+            this.endCharacterDB = endCharacter;
+        }
+
     }
 
-    public setName(name: string)
-    {
+    public setName(name: string) {
         this.name = name;
     }
+
+    public setTextEditor(textEditor: vscode.TextEditor) {
+        this.textEditor = textEditor;
+    }
+
+    public resetRange() {
+        this.startLine = this.startLineDB;
+        this.startCharacter = this.startCharacterDB;
+        this.endLine = this.endLineDB;
+        this.endCharacter = this.endCharacterDB;
+    }
+
+    public writeRange() {
+        this.startLineDB = this.startLine;
+        this.startCharacterDB = this.startCharacter;
+        this.endLineDB = this.endLine;
+        this.endCharacterDB = this.endCharacter;
+    }
+
 }
 
 export class Mdata {
@@ -64,18 +93,15 @@ export class Mdata {
     public eitemAll: sidebar.EntryItem | undefined;
     public eitemNow: sidebar.EntryItem | undefined;
 
-    public setEntryItemAll(el: sidebar.EntryItem)
-    {
+    public setEntryItemAll(el: sidebar.EntryItem) {
         this.eitemAll = el;
     }
 
-    public setEntryItemNow(el: sidebar.EntryItem)
-    {
+    public setEntryItemNow(el: sidebar.EntryItem) {
         this.eitemNow = el;
     }
 
-    public setDecorationType(dt:vscode.TextEditorDecorationType)
-    {
+    public setDecorationType(dt: vscode.TextEditorDecorationType) {
         this.decorationType = dt;
     }
 
