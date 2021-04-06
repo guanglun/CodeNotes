@@ -28,7 +28,7 @@ export class DataBase {
 
 
     public mkmap: Map<number, mark.Mark> = new Map<number, mark.Mark>();
-    private context: vscode.ExtensionContext;
+    public context: vscode.ExtensionContext;
     private sidebar: Sidebar.Sidebar | undefined;
 
     public isDBInit = false;

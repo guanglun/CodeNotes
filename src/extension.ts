@@ -5,7 +5,7 @@ import * as database from './DataBase';
 import * as Sidebar from './sidebar/Sidebar';
 import * as markmanager from './MarkManager';
 import * as SidebarWeb from './sidebar/SidebarWeb';
-
+import * as path from 'path';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -95,30 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	mm.load();
 
-// 	const hover = vscode.languages.registerHoverProvider('*', {
-// 		provideHover(document, position, token) {
-// 		  const fileName    = document.fileName;
-// 		  const workDir     = path.dirname(fileName);
-// 		  const word        = document.getText(document.getWordRangeAtPosition(position));
-// 		  // console.log(1, document)
-// 		  // console.log(2, position)
-// 		  // console.log(3, token)
-// 		  console.log(4, '这个就是悬停的文字', word)
-// 		  // 支持markdown语法
-// 		  return new vscode.Hover(
-// 		  `### 我就是返回的信息!
-// 			1. 第一项：
-// 			  - 第一个元素
-// 			  -
-// 			  - 第二个元素
-// 			2. 第二项：
-// 			  - 第一个元素
-// 			  - 第二个元素
-// 		`+word);
-// 		}
-// 	   }
-// 	  );
-//   context.subscriptions.push(hover);
+	context.subscriptions.push(mm.getHoverProvider(db));
 
 	vscode.window.onDidChangeActiveTextEditor(editor => {  
 		if(editor) { 

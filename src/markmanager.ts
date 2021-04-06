@@ -259,5 +259,74 @@ export class MarkManager {
         }
     }
 
+    public static checkPoint(mk:mark.Mark,p:Position):boolean
+    {
+        if(mk.startLine <= p.line &&  p.line <= mk.endLine)
+        {
+            if(mk.startCharacter <= p.character &&  p.character <= mk.endCharacter)
+            {
+                return true;
+            }else if(mk.startCharacter >= p.character &&  p.character >= mk.endCharacter)
+            {
+                return true;
+            }
+        }else if(mk.startLine >= p.line &&  p.line >= mk.endLine)
+        {
+            if(mk.startCharacter <= p.character &&  p.character <= mk.endCharacter)
+            {
+                return true;
+            }else if(mk.startCharacter >= p.character &&  p.character >= mk.endCharacter)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public getHoverProvider(db: database.DataBase)
+    {
+        return vscode.languages.registerHoverProvider('*', {
+            provideHover(document, position, token) {
+                
+                const fileName    = document.fileName;
+                const workDir     = path.dirname(fileName);
+                const word        = document.getText(document.getWordRangeAtPosition(position));
+
+                //![123](../images/icon.png)   \r\n
+                //let noteHead        = '#### CodeNotes   \r\n';
+                let note = "";
+                
+                
+                db?.mkmap.forEach((value, key, map)=>
+                {
+                  if(value.filePath ===  fileName)
+                  {
+                      if(MarkManager.checkPoint(value,position) === true)
+                      {
+                        note += "* " + value.name +"   \r\n";
+                      }
+                          
+                  }
+                });
+  
+                // console.log(1, noteHead)
+                // console.log(2, position)
+                // console.log(3, token)
+                // console.log(4, '这个就是悬停的文字', word);
+                
+                if("" === note)
+                {
+                    return undefined;
+                }else{
+                    return new vscode.Hover(note);
+                }
+                
+
+            }
+           }
+          );
+    }
+
 }
 

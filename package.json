@@ -20,11 +20,11 @@
 		"commands": [
 			{
 				"command": "codenotes.insertmark",
-				"title": "Insert Mark"
+				"title": "CodeNotes Insert Mark"
 			},
 			{
 				"command": "codenotes.openWebview",
-				"title": "Open Web View"
+				"title": "CodeNotes Open Web View"
 			},
 			{
 				"command": "codenotes.deleteItem",
