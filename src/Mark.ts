@@ -71,6 +71,7 @@ export class Mark {
     }
 
     public resetRange() {
+        console.log("######### resetRange");
         this.startLine = this.startLineDB;
         this.startCharacter = this.startCharacterDB;
         this.endLine = this.endLineDB;
@@ -78,6 +79,8 @@ export class Mark {
     }
 
     public writeRange() {
+        console.log("######### writeRange");
+
         this.startLineDB = this.startLine;
         this.startCharacterDB = this.startCharacter;
         this.endLineDB = this.endLine;

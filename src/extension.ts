@@ -119,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	
 	vscode.workspace.onDidSaveTextDocument((editor => {  
-		console.log(editor.fileName);
+		//console.log(editor.fileName);
 
 		db?.mkmap.forEach((mk, key, map)=>
 		{
@@ -131,30 +131,32 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	vscode.workspace.onDidCloseTextDocument((editor => {  
-		console.log(editor.fileName);
+		console.log("Close....... " + editor.fileName);
 
-		db?.mkmap.forEach((mk, key, map)=>
-		{
-			if(mk.filePath === editor.fileName)
-			{
-				mk.resetRange();
-			}
-		});
+		// db?.mkmap.forEach((mk, key, map)=>
+		// {
+		// 	if(mk.filePath === editor.fileName)
+		// 	{
+		// 		mk.resetRange();
+		// 	}
+		// });
+
+		console.log("exit Close....... " + editor.fileName);
 	}));
 
 	vscode.workspace.onDidChangeTextDocument(editor => {  
 	
-		console.log("==============1");
+		// console.log("==============1");
 		
-		editor.contentChanges.forEach((value, key, map)=>
-		{
+		// editor.contentChanges.forEach((value, key, map)=>
+		// {
 			
-			console.log(key+":"+value.range.start.line +" " + value.range.end.line);
-			console.log(key+":"+value.range.start.character +" " + value.range.end.character);
-			console.log(key+":"+value.text.length + " "+ value.text);
-			console.log(value);
-		}
-		);
+		// 	console.log(key+":"+value.range.start.line +" " + value.range.end.line);
+		// 	console.log(key+":"+value.range.start.character +" " + value.range.end.character);
+		// 	console.log(key+":"+value.text.length + " "+ value.text);
+		// 	console.log(value);
+		// }
+		// );
 
 
 

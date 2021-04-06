@@ -341,15 +341,26 @@ export class MarkManager {
 
     public onChnageDoc(mk: mark.Mark,cc: vscode.TextDocumentContentChangeEvent)
     {
-        //console.log(mk.startLine + " " +mk.endLine);
-        //console.log(mk.startCharacter + " " +mk.endCharacter);
 
+        console.log("***************");
+        console.log(mk.startLine + " " +mk.endLine);
+        console.log(mk.startCharacter + " " +mk.endCharacter);
+        console.log(cc.text.search('\r') );
+        
         if(cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character && cc.text.length === 1)
         {
-            console.log(cc.range.start.line + " " +mk.endLine + " " +cc.range.start.character + " " +mk.endCharacter);
+
             if(cc.range.start.line === mk.endLine && cc.range.start.character <= mk.endCharacter)
             {
                 mk.endCharacter++;
+            }
+        }else if(cc.text.search('\r') >= 0 && cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character )
+        {
+
+            if(cc.range.start.line < mk.startLine)
+            {
+                mk.startLine++;
+                mk.endLine++;
             }
         }
     }
