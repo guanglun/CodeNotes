@@ -29,7 +29,7 @@ export class MarkManager {
         this.context = context;
     }
 
-    public init(sidebar: Sidebar.Sidebar,db: database.DataBase) {
+    public init(sidebar: Sidebar.Sidebar, db: database.DataBase) {
         this.sidebar = sidebar;
         this.db = db;
     }
@@ -37,9 +37,9 @@ export class MarkManager {
     public insert(te: vscode.TextEditor) {
         if (this.db && this.sidebar) {
 
-            const name = "["+path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" +
-            te.selection.anchor.character;
-            
+            const name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" +
+                te.selection.anchor.character;
+
             const mk = new mark.Mark(++this.db.lastId,
                 name,
                 0,
@@ -58,13 +58,11 @@ export class MarkManager {
             this.sidebar.elAll?.insert(mk);
             this.sidebar.elAll?.refresh();
 
-            if(vscode.window.activeTextEditor?.document.fileName === mk.filePath)
-            {
-                this.teColorManager(TEColorManagerType.tecmtShow,mk);
+            if (vscode.window.activeTextEditor?.document.fileName === mk.filePath) {
+                this.teColorManager(TEColorManagerType.tecmtShow, mk);
             }
 
-            if(vscode.window.activeTextEditor?.document.fileName === mk.filePath)
-            {
+            if (vscode.window.activeTextEditor?.document.fileName === mk.filePath) {
                 this.sidebar.elNow?.insert(mk);
                 this.sidebar.elNow?.refresh();
             }
@@ -76,7 +74,7 @@ export class MarkManager {
     public delete(id: number) {
         if (this.db && this.sidebar) {
             const mk = this.db.mkmap.get(id);
-            this.teColorManager(TEColorManagerType.tecmtClear,mk);
+            this.teColorManager(TEColorManagerType.tecmtClear, mk);
             this.db.deleteDB(id);
             this.db.mkmap.delete(id);
             this.sidebar.elNow.refresh();
@@ -88,35 +86,30 @@ export class MarkManager {
         return new Promise((resolve, reject) => {
             vscode.window.showInputBox(
                 { // 这个对象中所有参数都是可选参数
-                    password:false, 			// 输入内容是否是密码
-                    ignoreFocusOut:true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
-                    placeHolder:'Rename Item', 	// 在输入框内的提示信息
-                    prompt:'Rename Item', 		// 在输入框下方的提示信息
+                    password: false, 			// 输入内容是否是密码
+                    ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
+                    placeHolder: 'Rename Item', 	// 在输入框内的提示信息
+                    prompt: 'Rename Item', 		// 在输入框下方的提示信息
                     //validateInput:function(text){return text;} // 对输入内容进行验证并返回
-                }).then(function(msg){
-                if(msg)
-                {
-                    resolve(msg);
-                }else{
-                    reject(new Error("array length invalid"));
-                }
-            });
+                }).then(function (msg) {
+                    if (msg) {
+                        resolve(msg);
+                    } else {
+                        reject(new Error("array length invalid"));
+                    }
+                });
         });
     }
 
-    public renameItem(id: number)
-    {
+    public renameItem(id: number) {
         const promise = this.renameItemPromise();
         promise.then((res: any) => {
             const mk = this.db?.mkmap.get(id);
-            if(mk)
-            {
-                if(mk.filePath)
-                    {mk.setName("["+path.basename(mk.filePath) + "] " + res);}
-                else
-                    {mk.setName("[-] " + res);}
+            if (mk) {
+                if (mk.filePath) { mk.setName("[" + path.basename(mk.filePath) + "] " + res); }
+                else { mk.setName("[-] " + res); }
 
-                this.db?.updateName(id,res);
+                this.db?.updateName(id, res);
                 this.sidebar?.elNow.reloadItemName(mk);
                 this.sidebar?.elAll.reloadItemName(mk);
 
@@ -126,27 +119,21 @@ export class MarkManager {
         });
     }
 
-    public editItem(id: number)
-    {
+    public editItem(id: number) {
 
-            const mk = this.db?.mkmap.get(id);
-            if(mk)
-            {
-                console.log(mk.textEditor);
-            }
-        
+        const mk = this.db?.mkmap.get(id);
+        if (mk) {
+            console.log(mk.textEditor);
+        }
+
     }
 
-    public reloadNowItem()
-    {
-        if(vscode.window.activeTextEditor)
-        {
+    public reloadNowItem() {
+        if (vscode.window.activeTextEditor) {
 
-            this.db?.mkmap.forEach((value, key, map)=>
-            {
+            this.db?.mkmap.forEach((value, key, map) => {
                 delete value.mdata.eitemNow;
-                if(value.filePath === vscode.window.activeTextEditor?.document.fileName)
-                {
+                if (value.filePath === vscode.window.activeTextEditor?.document.fileName) {
                     this.sidebar?.elNow.insert(value);
                 }
             });
@@ -182,7 +169,7 @@ export class MarkManager {
                     }
                 }
             });
-        }        
+        }
         if (type === TEColorManagerType.tecmtClear) {
             vscode.window.visibleTextEditors.forEach(editor => {
                 if (editor && mk) {
@@ -196,7 +183,7 @@ export class MarkManager {
 
     public async showColor(textEditor: vscode.TextEditor, mk: mark.Mark, en: ShowColorType) {
 
-        
+
         if (en === ShowColorType.sctClick) {
             // textEditor.selection = new vscode.Selection(new Position(mk.startLine, mk.startCharacter),
             //     new Position(mk.endLine, mk.endCharacter));
@@ -208,12 +195,12 @@ export class MarkManager {
                 // mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine,mk.endCharacter));
 
                 textEditor.selection = new vscode.Selection(textEditor.document.positionAt(mk.startOffsetMark),
-                textEditor.document.positionAt(mk.endOffsetMark));
+                    textEditor.document.positionAt(mk.endOffsetMark));
             }
 
 
             textEditor.revealRange(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-            textEditor.document.positionAt(mk.endOffsetMark)));
+                textEditor.document.positionAt(mk.endOffsetMark)));
 
             // textEditor.revealRange(new vscode.Range(new Position(mk.startLine, mk.startCharacter),
             //     new Position(mk.endLine, mk.endCharacter)), vscode.TextEditorRevealType.InCenter);
@@ -222,7 +209,7 @@ export class MarkManager {
         if (en === ShowColorType.sctShow) {
             // let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
             // let fontSize = editorConfig.get<number>('fontSize');
-            
+
             const decorationType = vscode.window.createTextEditorDecorationType({
                 gutterIconSize: "14px",
                 gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
@@ -245,20 +232,19 @@ export class MarkManager {
             });
 
             mk.mdata?.setDecorationType(decorationType);
-            
+
             const range = new vscode.Range(new Position(mk.startLine, mk.startCharacter),
                 new Position(mk.endLine, mk.endCharacter));
 
             textEditor.setDecorations(decorationType, [range]);
 
-            mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine,mk.startCharacter));
-            mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine,mk.endCharacter));
+            mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine, mk.startCharacter));
+            mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine, mk.endCharacter));
         }
 
         if (en === ShowColorType.sctClear) {
-            
-            if(mk.mdata?.decorationType)
-            {
+
+            if (mk.mdata?.decorationType) {
                 mk.mdata.decorationType.dispose();
 
                 textEditor.setDecorations(mk.mdata.decorationType, [new vscode.Range(new Position(mk.startLine, mk.startCharacter),
@@ -278,7 +264,7 @@ export class MarkManager {
                     const uri = vscode.Uri.file(mk.filePath);
                     vscode.workspace.openTextDocument(uri).then(document => {
                         vscode.window.showTextDocument(document).then(textEditor => {
-                            
+
                             this.showColor(textEditor, mk, ShowColorType.sctClick);
 
                         });
@@ -288,24 +274,17 @@ export class MarkManager {
         }
     }
 
-    public static checkPoint(mk:mark.Mark,p:Position):boolean
-    {
-        if(mk.startLine <= p.line &&  p.line <= mk.endLine)
-        {
-            if(mk.startCharacter <= p.character &&  p.character <= mk.endCharacter)
-            {
+    public static checkPoint(mk: mark.Mark, p: Position): boolean {
+        if (mk.startLine <= p.line && p.line <= mk.endLine) {
+            if (mk.startCharacter <= p.character && p.character <= mk.endCharacter) {
                 return true;
-            }else if(mk.startCharacter >= p.character &&  p.character >= mk.endCharacter)
-            {
+            } else if (mk.startCharacter >= p.character && p.character >= mk.endCharacter) {
                 return true;
             }
-        }else if(mk.startLine >= p.line &&  p.line >= mk.endLine)
-        {
-            if(mk.startCharacter <= p.character &&  p.character <= mk.endCharacter)
-            {
+        } else if (mk.startLine >= p.line && p.line >= mk.endLine) {
+            if (mk.startCharacter <= p.character && p.character <= mk.endCharacter) {
                 return true;
-            }else if(mk.startCharacter >= p.character &&  p.character >= mk.endCharacter)
-            {
+            } else if (mk.startCharacter >= p.character && p.character >= mk.endCharacter) {
                 return true;
             }
         }
@@ -313,50 +292,44 @@ export class MarkManager {
         return false;
     }
 
-    public getHoverProvider(db: database.DataBase)
-    {
+    public getHoverProvider(db: database.DataBase) {
         return vscode.languages.registerHoverProvider('*', {
             provideHover(document, position, token) {
-                
-                const fileName    = document.fileName;
-                const workDir     = path.dirname(fileName);
-                const word        = document.getText(document.getWordRangeAtPosition(position));
+
+                const fileName = document.fileName;
+                const workDir = path.dirname(fileName);
+                const word = document.getText(document.getWordRangeAtPosition(position));
 
                 //![123](../images/icon.png)   \r\n
                 //let noteHead        = '#### CodeNotes   \r\n';
                 let note = "";
-                
-                
-                db?.mkmap.forEach((value, key, map)=>
-                {
-                  if(value.filePath ===  fileName)
-                  {
-                      if(MarkManager.checkPoint(value,position) === true)
-                      {
-                        note += "* " + value.name +"   \r\n";
-                      }
-                          
-                  }
+
+
+                db?.mkmap.forEach((value, key, map) => {
+                    if (value.filePath === fileName) {
+                        if (MarkManager.checkPoint(value, position) === true) {
+                            note += "* " + value.name + "   \r\n";
+                        }
+
+                    }
                 });
-  
+
                 // console.log(1, noteHead)
                 // console.log(2, position)
                 // console.log(3, token)
                 // console.log(4, '这个就是悬停的文字', word);
-                
-                if("" === note)
-                {
+
+                if ("" === note) {
                     return undefined;
-                }else{
+                } else {
                     return new vscode.Hover(note);
                 }
             }
-           }
-          );
+        }
+        );
     }
 
-    public onChnageDoc(mk: mark.Mark,cc: vscode.TextDocumentContentChangeEvent,doc:vscode.TextDocumentChangeEvent)
-    {
+    public onChnageDoc(mk: mark.Mark, cc: vscode.TextDocumentContentChangeEvent, doc: vscode.TextDocumentChangeEvent) {
 
         // console.log("***************");
         // console.log(mk.startLine + " " +mk.endLine);
@@ -365,53 +338,59 @@ export class MarkManager {
 
         //console.log("old ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
 
-        if(cc.rangeOffset < mk.startOffsetMark)
-        {
+        if (cc.rangeOffset < mk.startOffsetMark) {
 
-            if(mk.startOffsetMark > cc.rangeOffset && 
-                (cc.rangeOffset + cc.rangeLength) > mk.startOffsetMark)
-            {
+            if (mk.startOffsetMark > cc.rangeOffset &&
+                (cc.rangeOffset + cc.rangeLength) > mk.startOffsetMark) {
                 //console.log("start code 0");
 
 
-                if((mk.startOffsetMark-cc.rangeOffset) >= cc.text.length)
-                {
-                    mk.startOffsetMark -= (cc.rangeLength - cc.text.length - ((cc.rangeOffset + cc.rangeLength)-mk.startOffsetMark));
+                if ((mk.startOffsetMark - cc.rangeOffset) >= cc.text.length) {
+                    mk.startOffsetMark -= (cc.rangeLength - cc.text.length - ((cc.rangeOffset + cc.rangeLength) - mk.startOffsetMark));
                 }
-                
 
-            }else if((mk.startOffsetMark - cc.rangeOffset) < cc.rangeLength)
-            {
+
+            } else if ((mk.startOffsetMark - cc.rangeOffset) < cc.rangeLength) {
                 //console.log("start code 1");
                 mk.startOffsetMark -= (mk.startOffsetMark - cc.rangeOffset);
-            }else{
+            } else {
                 //console.log("start code 2");
                 mk.startOffsetMark += (cc.text.length - cc.rangeLength);
             }
-            
+
         }
 
-        if(cc.rangeOffset <= mk.endOffsetMark)
-        {
-            if(mk.endOffsetMark > cc.rangeOffset && 
-                cc.rangeLength < cc.text.length && 
-                (cc.rangeOffset+cc.text.length) > mk.endOffsetMark && 
-                (cc.rangeOffset+cc.rangeLength) > mk.endOffsetMark && 
-                cc.rangeOffset >= mk.startOffsetMark && 
-                cc.rangeLength !== 0)
-            {
+        //console.log("==>>" + (mk.endOffsetMark >= cc.rangeOffset));
+        // console.log("==>>" + (cc.rangeLength <= cc.text.length));
+        //console.log("==>>" + ((cc.rangeOffset + cc.text.length) >= mk.endOffsetMark));
+        //console.log("==>>" + ((cc.rangeOffset + cc.rangeLength) > mk.endOffsetMark));
+        //console.log("==>>" + (cc.rangeOffset >= mk.startOffsetMark));
+
+        if (cc.rangeOffset <= mk.endOffsetMark) {
+            if (mk.endOffsetMark >= cc.rangeOffset &&
+                // cc.rangeLength <= cc.text.length &&
+                //(cc.rangeOffset + cc.text.length) >= mk.endOffsetMark &&
+                (cc.rangeOffset + cc.rangeLength) > mk.endOffsetMark &&
+                cc.rangeOffset >= mk.startOffsetMark &&
+                cc.rangeLength !== 0) {
+
+                if((cc.rangeOffset + cc.text.length) < mk.endOffsetMark)
+                {
+                    //console.log("end code 0.1");
+                    mk.endOffsetMark -= (mk.endOffsetMark - cc.rangeOffset - cc.text.length);
+                }
+
                 //console.log("end code 0");
-            }else if((mk.endOffsetMark - cc.rangeOffset) < cc.rangeLength)
-            {
+            } else if ((mk.endOffsetMark - cc.rangeOffset) < cc.rangeLength) {
                 //console.log("end code 1");
                 mk.endOffsetMark -= (mk.endOffsetMark - cc.rangeOffset);
-            }else{
+            } else {
                 //console.log("end code 2");
                 mk.endOffsetMark += (cc.text.length - cc.rangeLength);
             }
         }
 
-        
+
         //console.log("new ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
 
     }
