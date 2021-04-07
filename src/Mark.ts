@@ -24,11 +24,6 @@ export class Mark {
 
     public textEditor: vscode.TextEditor | undefined;
 
-    private startLineDB: number = 0;
-    private startCharacterDB: number = 0;
-    private endLineDB: number = 0;
-    private endCharacterDB: number = 0;
-
     public startOffsetMark: number = 0;
     public endOffsetMark: number = 0;
 
@@ -48,19 +43,15 @@ export class Mark {
 
         if (startLine) {
             this.startLine = startLine;
-            this.startLineDB = startLine;
         }
         if (startCharacter) {
             this.startCharacter = startCharacter;
-            this.startCharacterDB = startCharacter;
         }
         if (endLine) {
             this.endLine = endLine;
-            this.endLineDB = endLine;
         }
         if (endCharacter) {
             this.endCharacter = endCharacter;
-            this.endCharacterDB = endCharacter;
         }
 
     }
@@ -73,23 +64,16 @@ export class Mark {
         this.textEditor = textEditor;
     }
 
-    public resetRange() {
-        console.log("######### resetRange");
-        this.startLine = this.startLineDB;
-        this.startCharacter = this.startCharacterDB;
-        this.endLine = this.endLineDB;
-        this.endCharacter = this.endCharacterDB;
+    public writeRange(doc: vscode.TextDocument)
+    {
+        const startP = doc.positionAt(this.startOffsetMark);
+        const endP = doc.positionAt(this.endOffsetMark);
+
+        this.startLine = startP.line;
+        this.startCharacter = startP.character;
+        this.endLine = endP.line;
+        this.endCharacter = endP.character;
     }
-
-    public writeRange() {
-        console.log("######### writeRange");
-
-        this.startLineDB = this.startLine;
-        this.startCharacterDB = this.startCharacter;
-        this.endLineDB = this.endLine;
-        this.endCharacterDB = this.endCharacter;
-    }
-
 }
 
 export class Mdata {

@@ -111,7 +111,11 @@ export class MarkManager {
             const mk = this.db?.mkmap.get(id);
             if(mk)
             {
-                mk.setName(res);
+                if(mk.filePath)
+                    {mk.setName("["+path.basename(mk.filePath) + "] " + res);}
+                else
+                    {mk.setName("[-] " + res);}
+
                 this.db?.updateName(id,res);
                 this.sidebar?.elNow.reloadItemName(mk);
                 this.sidebar?.elAll.reloadItemName(mk);
@@ -220,9 +224,6 @@ export class MarkManager {
             // let fontSize = editorConfig.get<number>('fontSize');
             
             const decorationType = vscode.window.createTextEditorDecorationType({
-                //outlineColor: '#fff'
-                //backgroundColor: '#fff'
-                //border: '1px solid red;'
                 gutterIconSize: "14px",
                 gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
                 backgroundColor: "#FF000050",
@@ -352,8 +353,6 @@ export class MarkManager {
             }
            }
           );
-
-          
     }
 
     public onChnageDoc(mk: mark.Mark,cc: vscode.TextDocumentContentChangeEvent,doc:vscode.TextDocumentChangeEvent)
@@ -363,47 +362,30 @@ export class MarkManager {
         // console.log(mk.startLine + " " +mk.endLine);
         // console.log(mk.startCharacter + " " +mk.endCharacter);
         // console.log(cc.text.search('\r') );
-        
-        
 
-        let startOffsetChange = doc.document.offsetAt(cc.range.start);
-        let endOffsetChange = doc.document.offsetAt(cc.range.end);
-
-        // let startOffsetMark = doc.document.offsetAt(new Position(mk.startLine,mk.startCharacter));
-        // let endOffsetMark = doc.document.offsetAt(new Position(mk.endLine,mk.endCharacter));
-
-        console.log("old ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
-
-        // if(startOffsetChange === endOffsetChange)
-        // {
-        //     if(startOffsetChange <= mk.endOffsetMark)
-        //     {
-        //         mk.endOffsetMark += (cc.text.length - cc.rangeLength);
-        //     }
-
-        //     if(startOffsetChange <= mk.startOffsetMark)
-        //     {
-        //         mk.startOffsetMark += (cc.text.length - cc.rangeLength);
-        //     }
-        // }else if(startOffsetChange === endOffsetChange){
-
-        // }
+        //console.log("old ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
 
         if(cc.rangeOffset < mk.startOffsetMark)
         {
 
-
-
-            // if(mk.startOffsetMark > cc.rangeOffset && cc.rangeLength < cc.text.length && (cc.rangeOffset+cc.text.length) > mk.startOffsetMark)
-            // {
-            //     console.log("start code 0");
-            // }else 
-            if((mk.startOffsetMark - cc.rangeOffset) < cc.rangeLength)
+            if(mk.startOffsetMark > cc.rangeOffset && 
+                (cc.rangeOffset + cc.rangeLength) > mk.startOffsetMark)
             {
-                console.log("start code 1");
+                //console.log("start code 0");
+
+
+                if((mk.startOffsetMark-cc.rangeOffset) >= cc.text.length)
+                {
+                    mk.startOffsetMark -= (cc.rangeLength - cc.text.length - ((cc.rangeOffset + cc.rangeLength)-mk.startOffsetMark));
+                }
+                
+
+            }else if((mk.startOffsetMark - cc.rangeOffset) < cc.rangeLength)
+            {
+                //console.log("start code 1");
                 mk.startOffsetMark -= (mk.startOffsetMark - cc.rangeOffset);
             }else{
-                console.log("start code 2");
+                //console.log("start code 2");
                 mk.startOffsetMark += (cc.text.length - cc.rangeLength);
             }
             
@@ -414,48 +396,24 @@ export class MarkManager {
             if(mk.endOffsetMark > cc.rangeOffset && 
                 cc.rangeLength < cc.text.length && 
                 (cc.rangeOffset+cc.text.length) > mk.endOffsetMark && 
+                (cc.rangeOffset+cc.rangeLength) > mk.endOffsetMark && 
                 cc.rangeOffset >= mk.startOffsetMark && 
                 cc.rangeLength !== 0)
             {
-                console.log("end code 0");
+                //console.log("end code 0");
             }else if((mk.endOffsetMark - cc.rangeOffset) < cc.rangeLength)
             {
-                console.log("end code 1");
+                //console.log("end code 1");
                 mk.endOffsetMark -= (mk.endOffsetMark - cc.rangeOffset);
             }else{
-                console.log("end code 2");
+                //console.log("end code 2");
                 mk.endOffsetMark += (cc.text.length - cc.rangeLength);
             }
         }
 
+        
+        //console.log("new ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
 
-        console.log("new ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
-        // mk.startLine = doc.document.positionAt(startOffsetMark).line;
-        // mk.startCharacter = doc.document.positionAt(startOffsetMark).character;
-        // mk.endLine = doc.document.positionAt(endOffsetMark).line;
-        // mk.endCharacter = doc.document.positionAt(endOffsetMark).character;
-
-        // mk.startOffsetMark = startOffsetMark;
-        // mk.endOffsetMark = endOffsetMark;
-
-        // console.log(startOffsetMark+ " " +endOffsetMark);
-
-        // if(cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character && cc.text.length === 1)
-        // {
-
-        //     if(cc.range.start.line === mk.endLine && cc.range.start.character <= mk.endCharacter)
-        //     {
-        //         mk.endCharacter++;
-        //     }
-        // }else if(cc.text.search('\r') >= 0 && cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character )
-        // {
-
-        //     if(cc.range.start.line < mk.startLine)
-        //     {
-        //         mk.startLine++;
-        //         mk.endLine++;
-        //     }
-        // }
     }
 }
 

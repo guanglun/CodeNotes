@@ -161,7 +161,6 @@ export class DataBase {
             console.log("Update Data Success!");
         });
 
-        mk.writeRange();
     }
 
     insertDB(mk: mark.Mark) {

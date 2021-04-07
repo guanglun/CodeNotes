@@ -102,16 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	mm.load();
 
-	//context.subscriptions.push(mm.getHoverProvider(db));
-
-	context.subscriptions.push(vscode.languages.registerHoverProvider('*', {
-		provideHover(document, position, token) {
-
-			return new vscode.Hover(document.offsetAt(position).toString());
-
-
-			return undefined;
-		}}));
+	context.subscriptions.push(mm.getHoverProvider(db));
 
 	vscode.window.onDidChangeActiveTextEditor(editor => {  
 		if(editor) { 
@@ -134,42 +125,27 @@ export function activate(context: vscode.ExtensionContext) {
 		{
 			if(mk.filePath === editor.fileName)
 			{
+				mk.writeRange(editor);
 				db.updateRange(mk);
 			}
 		});
 	}));
 	
-	// context.subscriptions.push(
-	// vscode.workspace.((doc => {  
-
-
-
-
-
-	// 	// db?.mkmap.forEach((mk, key, map)=>
-	// 	// {
-	// 	// 	if(mk.filePath === editor.fileName)
-	// 	// 	{
-	// 	// 		mk.resetRange();
-	// 	// 	}
-	// 	// });
-	// })));
-
 	vscode.workspace.onDidChangeTextDocument(doc => {  
 	
-		console.log("* onDidChangeTextDocument ");
+		// console.log("* onDidChangeTextDocument ");
 		
-		doc.contentChanges.forEach((value, key, map)=>
-		{
+		// doc.contentChanges.forEach((value, key, map)=>
+		// {
 			
-			//console.log(key+":"+value.range.start.line +" " + value.range.end.line);
-			//console.log(key+":"+value.range.start.character +" " + value.range.end.character);
+		// 	//console.log(key+":"+value.range.start.line +" " + value.range.end.line);
+		// 	//console.log(key+":"+value.range.start.character +" " + value.range.end.character);
 
-			console.log(key+" : "+doc.document.offsetAt(value.range.start) +" " + doc.document.offsetAt(value.range.end));
-			console.log(key+" : "+value.text.length + " "+ value.text);
-			console.log(value);
-		}
-		);
+		// 	console.log(key+" : "+doc.document.offsetAt(value.range.start) +" " + doc.document.offsetAt(value.range.end));
+		// 	console.log(key+" : "+value.text.length + " "+ value.text);
+		// 	console.log(value);
+		// }
+		// );
 
 		doc.contentChanges.forEach((cc, key, map)=>
 		{
