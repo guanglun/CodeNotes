@@ -6,27 +6,51 @@
 </head>
 
 <body>
+  <!-- <input id="textMarkName" type="text" name="firstname" value="CodeNotes"style="margin-top:6px;width:100%;color: white; background-color: #2E2E2E;"></br> -->
 
-  <h3 style="width:100%;">CodeNotes</h3>
+  <h3 id="textMarkName" contenteditable="true" oninput="nameChange()">CodeNotes</h3>
+
+  <input type="color" id="colorSelect" onchange="colorChange()" />
+
+  <div style="margin-top:6px;">notes(support markdown):</div>
+
+  <textarea name="reworkmes" cols="80" rows="4"
+    style="margin-top:6px;resize: none;width:100%;color: white; background-color: #2E2E2E;"></textarea>
+
+  <div id="textId" style="margin-top:6px;">Id:</div>
+  <div id="textFilePath" style="margin-top:6px;">Path:</div>
+
+
+
 
   <script type="text/javascript">
     const tsvscode = acquireVsCodeApi();
 
-    var textInitCodeNotes = document.getElementById("textInitCodeNotes");
+    var textMarkName = document.getElementById("textMarkName");
+    var textFilePath = document.getElementById("textFilePath");
+    var colorSelect = document.getElementById("colorSelect");
+    var textId = document.getElementById("textId");
+    var markId;
 
     window.addEventListener('message', event => {
-			const message = event.data;
-      switch(message.command)
-      {
-          case 'ShowInit':
 
-            break;        
-          default:
-            break;
+      const message = event.data;
+      if (message.mark) {
+        textMarkName.innerText = message.mark.name;
+        textFilePath.innerText = "Path: " + message.mark.filePath;
+        textId.innerText = "Id: " + message.mark.id;
+        markId = message.mark.id;
+        colorSelect.value = message.mark.color;
       }
-  });
+    });
 
-
+    function colorChange() {
+      tsvscode.postMessage({ type: "setColor",id:markId, color:colorSelect.value});
+    }
+    function nameChange() {
+      textFilePath.innerText = textMarkName.innerText;
+      tsvscode.postMessage({ type: "setName",id:markId, name:textMarkName.innerText});
+    }
   </script>
 </body>
 

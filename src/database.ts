@@ -23,7 +23,8 @@ export class DataBase {
         start_line INTEGER,\
         start_character INTEGER,\
         end_line INTEGER,\
-        end_character INTEGER \
+        end_character INTEGER, \
+        color VARCHAR \
         );";
 
 
@@ -74,7 +75,7 @@ export class DataBase {
         this.mm = mm;
     }
 
-    loadDB() {
+    public loadDB() {
         const promise = this.loadDBIntoMemPromise();
         promise.then((res: any) => {
             console.log(res);
@@ -95,7 +96,7 @@ export class DataBase {
                         res[i].start_character,
                         res[i].end_line,
                         res[i].end_character,
-
+                        res[i].color,
                     );
                     this.mkmap.set(mk.id, mk);
                     this.sidebar?.elAll?.insert(mk);
@@ -115,7 +116,7 @@ export class DataBase {
 
     }
 
-    createTable() {
+    public createTable() {
 
         new Promise((resolve, reject) => {
             this.db?.run(DataBase.creatTable, function (err) {
@@ -130,7 +131,7 @@ export class DataBase {
         });
     }
 
-    showDB() {
+    public showDB() {
         if (this.db) {
             this.db.all("select * from " + DataBase.tableName, function (err, rows) {
                 if (err) { throw err; }
@@ -141,7 +142,7 @@ export class DataBase {
 
     }
 
-    updateName(id: number, name: string) {
+    public updateName(id: number, name: string) {
 
         this.db?.run("update " + DataBase.tableName + " set name = '" + name + "' WHERE id = " + id, function (err) {
             if (err) { console.log(err); throw err; }
@@ -149,7 +150,15 @@ export class DataBase {
         });
     }
 
-    async updateRange(mk:mark.Mark) {
+    public updateColor(id: number, color: string) {
+
+        this.db?.run("update " + DataBase.tableName + " set color = '" + color + "' WHERE id = " + id, function (err) {
+            if (err) { console.log(err); throw err; }
+            console.log("Update Data Success!");
+        });
+    }
+
+    public async updateRange(mk:mark.Mark) {
 
         await this.db?.run("update " + DataBase.tableName + 
         " set start_line = " + mk.startLine + 
@@ -179,11 +188,12 @@ export class DataBase {
                 mk.startLine + " , " +
                 mk.startCharacter + " , " +
                 mk.endLine + " , " +
-                mk.endCharacter +
+                mk.endCharacter + " , " +
+                mk.color +
                 ")";
             console.log(dbexc);
             this.db.run(dbexc, function (err) {
-                if (err) { throw err; }
+                if (err) { console.log(err); throw err; }
                 console.log("Insert Data Success!");
             });
 

@@ -28,9 +28,11 @@ export class Mark {
     public startOffsetMark: number = 0;
     public endOffsetMark: number = 0;
 
+    public color: string = "#FF0000";
+
     constructor(id?: number, name?: string, flag?: number, filePath?: string,
         anchorLine?: number, anchorCharacter?: number, activeLine?: number, activeCharacter?: number,
-        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number) {
+        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number,color?:string) {
 
         if (id) { this.id = id; }
         if (name) { this.name = name; }
@@ -54,7 +56,9 @@ export class Mark {
         if (endCharacter) {
             this.endCharacter = endCharacter;
         }
-
+        if (color) {
+            this.color = color;
+        }
     }
 
     public setName(name: string) {

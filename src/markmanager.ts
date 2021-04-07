@@ -66,7 +66,7 @@ export class MarkManager {
                 this.sidebar.elNow?.insert(mk);
                 this.sidebar.elNow?.refresh();
             }
-
+            this.sidebar.smark?.updateMarkEdit(mk);
         }
 
     }
@@ -104,19 +104,24 @@ export class MarkManager {
     public renameItem(id: number) {
         const promise = this.renameItemPromise();
         promise.then((res: any) => {
-            const mk = this.db?.mkmap.get(id);
-            if (mk) {
-                if (mk.filePath) { mk.setName("[" + path.basename(mk.filePath) + "] " + res); }
-                else { mk.setName("[-] " + res); }
-
-                this.db?.updateName(id, res);
-                this.sidebar?.elNow.reloadItemName(mk);
-                this.sidebar?.elAll.reloadItemName(mk);
-
-                this.sidebar?.elNow.refresh();
-                this.sidebar?.elAll.refresh();
-            }
+            this.setName(id,res);
         });
+    }
+
+    public setName(id:number,name:string)
+    {
+        const mk = this.db?.mkmap.get(id);
+        if (mk) {
+
+            mk.setName(name);
+
+            this.db?.updateName(id, name);
+            this.sidebar?.elNow.reloadItemName(mk);
+            this.sidebar?.elAll.reloadItemName(mk);
+
+            this.sidebar?.elNow.refresh();
+            this.sidebar?.elAll.refresh();
+        }
     }
 
     public editItem(id: number) {
@@ -196,7 +201,7 @@ export class MarkManager {
             mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine, mk.startCharacter));
             mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine, mk.endCharacter));
         }
-        
+
         if (en === ShowColorType.sctClick) {
             // textEditor.selection = new vscode.Selection(new Position(mk.startLine, mk.startCharacter),
             //     new Position(mk.endLine, mk.endCharacter));
@@ -222,11 +227,18 @@ export class MarkManager {
         if (en === ShowColorType.sctShow) {
             // let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
             // let fontSize = editorConfig.get<number>('fontSize');
+            let color;
+            if(mk.color)
+            {
+                color = mk.color;
+            }else{
+                color = "#FF0000";
+            }
 
             const decorationType = vscode.window.createTextEditorDecorationType({
                 gutterIconSize: "14px",
                 gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
-                backgroundColor: "#FF000050",
+                backgroundColor: color+"50",
                 opacity: "1",
                 borderRadius: "4px",
                 //border: "solid blue",
@@ -278,6 +290,9 @@ export class MarkManager {
         if (this.db && this.sidebar?.elAll) {
             const mk = this.db.mkmap.get(id);
             if (mk) {
+
+                this.sidebar.smark?.updateMarkEdit(mk);
+
                 if (mk.filePath) {
                     const uri = vscode.Uri.file(mk.filePath);
                     vscode.workspace.openTextDocument(uri).then(document => {
@@ -409,6 +424,25 @@ export class MarkManager {
 
         //console.log("new ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
 
+    }
+
+    public setColor(id:number,color:string)
+    {
+        const mk = this.db?.mkmap.get(id);
+        if(mk)
+        {
+            mk.color = color;
+            //console.log("set color " + color);
+            vscode.window.visibleTextEditors.forEach(editor => {
+                if (editor && mk) {
+                    if (mk.filePath === editor.document.fileName) {
+                        this.showColor(editor, mk, ShowColorType.sctShow);
+                    }
+                }
+            });
+
+            this.db?.updateColor(mk.id,color);
+        }
     }
 }
 
