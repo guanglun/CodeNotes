@@ -5,6 +5,7 @@ import * as database from './DataBase';
 import * as Sidebar from './sidebar/Sidebar';
 import * as markmanager from './MarkManager';
 import * as SidebarWeb from './sidebar/SidebarWeb';
+import * as SidebarMark from './sidebar/SidebarMark';
 import * as path from 'path';
 
 // this method is called when your extension is activated
@@ -23,14 +24,11 @@ export function activate(context: vscode.ExtensionContext) {
 	sd.elAll.init(db);
 
 	sd.setSWeb(new SidebarWeb.SidebarWeb(context,mm,db));
+	sd.setSMark(new SidebarMark.SidebarMark(context,mm,db));
 
-	if(sd.sweb)
-	{
-		
-		//context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider("sidebar_web", sd.sweb);//);
-	}
-	
+	if(sd.sweb){vscode.window.registerWebviewViewProvider("sidebar_web", sd.sweb);}
+	if(sd.smark){vscode.window.registerWebviewViewProvider("sidebar_mark", sd.smark);}
+
 	vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
@@ -63,7 +61,6 @@ export function activate(context: vscode.ExtensionContext) {
 		// console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
 		// console.log(textEditor.document. +" " +textEditor.selection.active.character);
 		//vscode.window.setStatusBarMessage('Insert',3000);
-
 
 		mm.insert(textEditor);
 	});
@@ -131,6 +128,16 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	}));
 	
+	vscode.workspace.onDidChangeConfiguration((cevent =>{
+		if (cevent.affectsConfiguration("CodeNotes.enableColor")) {
+			mm.reloadAllDocColor();
+            // if(vscode.workspace.getConfiguration().get('CodeNotes.enableColor') === true)
+            // {
+			// 	mm.reloadNowItem();
+			// }
+		}
+	}));
+
 	vscode.workspace.onDidChangeTextDocument(doc => {  
 	
 		// console.log("* onDidChangeTextDocument ");
