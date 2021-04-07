@@ -29,6 +29,9 @@ export class Mark {
     private endLineDB: number = 0;
     private endCharacterDB: number = 0;
 
+    public startOffsetMark: number = 0;
+    public endOffsetMark: number = 0;
+
     constructor(id?: number, name?: string, flag?: number, filePath?: string,
         anchorLine?: number, anchorCharacter?: number, activeLine?: number, activeCharacter?: number,
         startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number) {

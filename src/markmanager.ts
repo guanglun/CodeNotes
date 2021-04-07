@@ -190,15 +190,29 @@ export class MarkManager {
         }
     }
 
-    public showColor(textEditor: vscode.TextEditor, mk: mark.Mark, en: ShowColorType) {
+    public async showColor(textEditor: vscode.TextEditor, mk: mark.Mark, en: ShowColorType) {
 
         
         if (en === ShowColorType.sctClick) {
-            textEditor.selection = new vscode.Selection(new Position(mk.startLine, mk.startCharacter),
-                new Position(mk.endLine, mk.endCharacter));
+            // textEditor.selection = new vscode.Selection(new Position(mk.startLine, mk.startCharacter),
+            //     new Position(mk.endLine, mk.endCharacter));
 
-            textEditor.revealRange(new vscode.Range(new Position(mk.startLine, mk.startCharacter),
-                new Position(mk.endLine, mk.endCharacter)), vscode.TextEditorRevealType.InCenter);
+            //if(await textEditor.document.save() === true)
+            {
+
+                // mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine,mk.startCharacter));
+                // mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine,mk.endCharacter));
+
+                textEditor.selection = new vscode.Selection(textEditor.document.positionAt(mk.startOffsetMark),
+                textEditor.document.positionAt(mk.endOffsetMark));
+            }
+
+
+            textEditor.revealRange(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+            textEditor.document.positionAt(mk.endOffsetMark)));
+
+            // textEditor.revealRange(new vscode.Range(new Position(mk.startLine, mk.startCharacter),
+            //     new Position(mk.endLine, mk.endCharacter)), vscode.TextEditorRevealType.InCenter);
         }
 
         if (en === ShowColorType.sctShow) {
@@ -235,6 +249,9 @@ export class MarkManager {
                 new Position(mk.endLine, mk.endCharacter));
 
             textEditor.setDecorations(decorationType, [range]);
+
+            mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine,mk.startCharacter));
+            mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine,mk.endCharacter));
         }
 
         if (en === ShowColorType.sctClear) {
@@ -260,7 +277,7 @@ export class MarkManager {
                     const uri = vscode.Uri.file(mk.filePath);
                     vscode.workspace.openTextDocument(uri).then(document => {
                         vscode.window.showTextDocument(document).then(textEditor => {
-
+                            
                             this.showColor(textEditor, mk, ShowColorType.sctClick);
 
                         });
@@ -339,30 +356,106 @@ export class MarkManager {
           
     }
 
-    public onChnageDoc(mk: mark.Mark,cc: vscode.TextDocumentContentChangeEvent)
+    public onChnageDoc(mk: mark.Mark,cc: vscode.TextDocumentContentChangeEvent,doc:vscode.TextDocumentChangeEvent)
     {
 
-        console.log("***************");
-        console.log(mk.startLine + " " +mk.endLine);
-        console.log(mk.startCharacter + " " +mk.endCharacter);
-        console.log(cc.text.search('\r') );
+        // console.log("***************");
+        // console.log(mk.startLine + " " +mk.endLine);
+        // console.log(mk.startCharacter + " " +mk.endCharacter);
+        // console.log(cc.text.search('\r') );
         
-        if(cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character && cc.text.length === 1)
+        
+
+        let startOffsetChange = doc.document.offsetAt(cc.range.start);
+        let endOffsetChange = doc.document.offsetAt(cc.range.end);
+
+        // let startOffsetMark = doc.document.offsetAt(new Position(mk.startLine,mk.startCharacter));
+        // let endOffsetMark = doc.document.offsetAt(new Position(mk.endLine,mk.endCharacter));
+
+        console.log("old ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
+
+        // if(startOffsetChange === endOffsetChange)
+        // {
+        //     if(startOffsetChange <= mk.endOffsetMark)
+        //     {
+        //         mk.endOffsetMark += (cc.text.length - cc.rangeLength);
+        //     }
+
+        //     if(startOffsetChange <= mk.startOffsetMark)
+        //     {
+        //         mk.startOffsetMark += (cc.text.length - cc.rangeLength);
+        //     }
+        // }else if(startOffsetChange === endOffsetChange){
+
+        // }
+
+        if(cc.rangeOffset < mk.startOffsetMark)
         {
 
-            if(cc.range.start.line === mk.endLine && cc.range.start.character <= mk.endCharacter)
+
+
+            // if(mk.startOffsetMark > cc.rangeOffset && cc.rangeLength < cc.text.length && (cc.rangeOffset+cc.text.length) > mk.startOffsetMark)
+            // {
+            //     console.log("start code 0");
+            // }else 
+            if((mk.startOffsetMark - cc.rangeOffset) < cc.rangeLength)
             {
-                mk.endCharacter++;
+                console.log("start code 1");
+                mk.startOffsetMark -= (mk.startOffsetMark - cc.rangeOffset);
+            }else{
+                console.log("start code 2");
+                mk.startOffsetMark += (cc.text.length - cc.rangeLength);
             }
-        }else if(cc.text.search('\r') >= 0 && cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character )
-        {
+            
+        }
 
-            if(cc.range.start.line < mk.startLine)
+        if(cc.rangeOffset <= mk.endOffsetMark)
+        {
+            if(mk.endOffsetMark > cc.rangeOffset && 
+                cc.rangeLength < cc.text.length && 
+                (cc.rangeOffset+cc.text.length) > mk.endOffsetMark && 
+                cc.rangeOffset >= mk.startOffsetMark && 
+                cc.rangeLength !== 0)
             {
-                mk.startLine++;
-                mk.endLine++;
+                console.log("end code 0");
+            }else if((mk.endOffsetMark - cc.rangeOffset) < cc.rangeLength)
+            {
+                console.log("end code 1");
+                mk.endOffsetMark -= (mk.endOffsetMark - cc.rangeOffset);
+            }else{
+                console.log("end code 2");
+                mk.endOffsetMark += (cc.text.length - cc.rangeLength);
             }
         }
+
+
+        console.log("new ==>>" + mk.startOffsetMark+ " " +mk.endOffsetMark);
+        // mk.startLine = doc.document.positionAt(startOffsetMark).line;
+        // mk.startCharacter = doc.document.positionAt(startOffsetMark).character;
+        // mk.endLine = doc.document.positionAt(endOffsetMark).line;
+        // mk.endCharacter = doc.document.positionAt(endOffsetMark).character;
+
+        // mk.startOffsetMark = startOffsetMark;
+        // mk.endOffsetMark = endOffsetMark;
+
+        // console.log(startOffsetMark+ " " +endOffsetMark);
+
+        // if(cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character && cc.text.length === 1)
+        // {
+
+        //     if(cc.range.start.line === mk.endLine && cc.range.start.character <= mk.endCharacter)
+        //     {
+        //         mk.endCharacter++;
+        //     }
+        // }else if(cc.text.search('\r') >= 0 && cc.range.start.line === cc.range.end.line && cc.range.start.character === cc.range.end.character )
+        // {
+
+        //     if(cc.range.start.line < mk.startLine)
+        //     {
+        //         mk.startLine++;
+        //         mk.endLine++;
+        //     }
+        // }
     }
 }
 
