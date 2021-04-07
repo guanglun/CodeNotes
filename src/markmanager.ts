@@ -139,13 +139,20 @@ export class MarkManager {
             });
             this.sidebar?.elNow.refresh();
         }
-
     }
 
     public load() {
         if (this.db) {
             this.db.checkLoadDB();
         }
+    }
+
+    public reloadAllDocColor()
+    {
+        this.db?.mkmap.forEach((mk, key, map) => {
+            this.teColorManager(TEColorManagerType.tecmtShow,mk);
+        });
+
     }
 
     public teColorManager(type: TEColorManagerType, mk?: mark.Mark) {
@@ -183,7 +190,13 @@ export class MarkManager {
 
     public async showColor(textEditor: vscode.TextEditor, mk: mark.Mark, en: ShowColorType) {
 
-
+        if(mk.isOffsetInit === false)
+        {
+            mk.isOffsetInit = true;
+            mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine, mk.startCharacter));
+            mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine, mk.endCharacter));
+        }
+        
         if (en === ShowColorType.sctClick) {
             // textEditor.selection = new vscode.Selection(new Position(mk.startLine, mk.startCharacter),
             //     new Position(mk.endLine, mk.endCharacter));
@@ -231,15 +244,22 @@ export class MarkManager {
                 // }
             });
 
+            const range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+            textEditor.document.positionAt(mk.endOffsetMark));
+
+            if(mk.mdata?.decorationType)
+            {
+                mk.mdata.decorationType.dispose();
+            }
+
             mk.mdata?.setDecorationType(decorationType);
+            if(vscode.workspace.getConfiguration().get('CodeNotes.enableColor') === true)
+            {
+                textEditor.setDecorations(decorationType, [range]);
+            }
+            
 
-            const range = new vscode.Range(new Position(mk.startLine, mk.startCharacter),
-                new Position(mk.endLine, mk.endCharacter));
 
-            textEditor.setDecorations(decorationType, [range]);
-
-            mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine, mk.startCharacter));
-            mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine, mk.endCharacter));
         }
 
         if (en === ShowColorType.sctClear) {
@@ -247,8 +267,8 @@ export class MarkManager {
             if (mk.mdata?.decorationType) {
                 mk.mdata.decorationType.dispose();
 
-                textEditor.setDecorations(mk.mdata.decorationType, [new vscode.Range(new Position(mk.startLine, mk.startCharacter),
-                    new Position(mk.endLine, mk.endCharacter))]);
+                textEditor.setDecorations(mk.mdata.decorationType, [new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+                    textEditor.document.positionAt(mk.endOffsetMark))]);
             }
         }
     }
@@ -258,15 +278,11 @@ export class MarkManager {
         if (this.db && this.sidebar?.elAll) {
             const mk = this.db.mkmap.get(id);
             if (mk) {
-
                 if (mk.filePath) {
-
                     const uri = vscode.Uri.file(mk.filePath);
                     vscode.workspace.openTextDocument(uri).then(document => {
                         vscode.window.showTextDocument(document).then(textEditor => {
-
                             this.showColor(textEditor, mk, ShowColorType.sctClick);
-
                         });
                     });
                 }

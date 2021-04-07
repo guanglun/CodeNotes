@@ -83,7 +83,12 @@
 					"type": "webview",
 					"id": "sidebar_web",
 					"name": "CodeNotes Menu",
-					"contextualTitle": "CodeNotesMenu"
+					"contextualTitle": "CodeNotes Menu"
+				},{
+					"type": "webview",
+					"id": "sidebar_mark",
+					"name": "CodeNotes Mark Edit",
+					"contextualTitle": "CodeNotes Mark Edit"
 				},
 				{
 					"id": "sidebar_marks_now",
@@ -95,6 +100,22 @@
 				}
 				
 			]
+		},
+		"configuration": {
+			"type": "object",
+			"title": "CodeNotes",
+			"properties": {
+				"CodeNotes.enableColor": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable Color CodeNotes"
+				},
+				"CodeNotes.showHello": {
+					"type": "string",
+					"default": "Hello",
+					"description": "show hello test"
+				}
+			}
 		}
 	},
 	"scripts": {

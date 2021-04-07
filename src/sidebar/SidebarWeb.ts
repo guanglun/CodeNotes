@@ -34,6 +34,25 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
         }else{
           this.webShowInit();
         }
+
+        if(vscode.workspace.getConfiguration().get('CodeNotes.enableColor') === true)
+        {
+          this._view?.webview.postMessage({ command: "CodeNotes.enableColor",value:"true" });
+        }else{
+          this._view?.webview.postMessage({ command: "CodeNotes.enableColor",value:"false" });
+        }
+
+
+
+      }else  if (data.type === "EnableColor") {
+
+        if(data.value === 'true')
+        {
+          vscode.workspace.getConfiguration().update('CodeNotes.enableColor',true);
+        }else{
+          vscode.workspace.getConfiguration().update('CodeNotes.enableColor',false);
+        }
+        //this.mm.reloadAllDocColor();
       }
     });
   }

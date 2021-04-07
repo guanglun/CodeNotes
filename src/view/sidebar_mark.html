@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+</head>
+
+<body>
+
+  <h3 style="width:100%;">CodeNotes</h3>
+
+  <script type="text/javascript">
+    const tsvscode = acquireVsCodeApi();
+
+    var textInitCodeNotes = document.getElementById("textInitCodeNotes");
+
+    window.addEventListener('message', event => {
+			const message = event.data;
+      switch(message.command)
+      {
+          case 'ShowInit':
+
+            break;        
+          default:
+            break;
+      }
+  });
+
+
+  </script>
+</body>
+
+</html>

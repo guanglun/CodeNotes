@@ -24,6 +24,7 @@ export class Mark {
 
     public textEditor: vscode.TextEditor | undefined;
 
+    public isOffsetInit = false;
     public startOffsetMark: number = 0;
     public endOffsetMark: number = 0;
 
