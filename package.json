@@ -4,14 +4,14 @@
 	"description": "Code notes,Quick jump,Quick notes",
 	"keywords": ["vscode", "code", "mark", "notes"],
 	"publisher": "guanglun",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
 	"categories": [
 		"Other"
 	],
-	"icon": "images/icon.jpg",
+	"icon": "images/icon.png",
 	"activationEvents": [
 		"onCommand:codenotes.insertmark",
 		"onView:sidebar_marks_now",

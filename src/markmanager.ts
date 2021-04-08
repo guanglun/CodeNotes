@@ -279,7 +279,7 @@ export class MarkManager {
 
             const decorationType = vscode.window.createTextEditorDecorationType({
                 gutterIconSize: "14px",
-                gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\icon.png",
+                gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\mark.png",
                 backgroundColor: color+"50",
                 opacity: "1",
                 borderRadius: "4px",
