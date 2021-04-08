@@ -1,6 +1,6 @@
 # Change Log
 
 ### 0.0.2
-* Debug
+* 修复发布过程中出现的若干问题
 ### 0.0.1
-* First Version,Debug
+* 第一个版本，用于测试发布
