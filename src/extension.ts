@@ -26,8 +26,8 @@ export function activate(context: vscode.ExtensionContext) {
 	sd.setSWeb(new SidebarWeb.SidebarWeb(context,mm,db));
 	sd.setSMark(new SidebarMark.SidebarMark(context,mm,db));
 
-	if(sd.sweb){vscode.window.registerWebviewViewProvider("sidebar_web", sd.sweb);}
-	if(sd.smark){vscode.window.registerWebviewViewProvider("sidebar_mark", sd.smark);}
+	if(sd.sweb){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_web", sd.sweb));}
+	if(sd.smark){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_mark", sd.smark));}
 
 	vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)

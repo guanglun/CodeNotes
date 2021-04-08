@@ -16,7 +16,8 @@
 		"onCommand:codenotes.insertmark",
 		"onView:sidebar_marks_now",
 		"onView:sidebar_marks_all",
-		"onView:sidebar_web"
+		"onView:codenotes.sidebar_web",
+		"onView:codenotes.sidebar_mark"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -84,12 +85,12 @@
 
 				{
 					"type": "webview",
-					"id": "sidebar_web",
+					"id": "codenotes.sidebar_web",
 					"name": "CodeNotes Menu",
 					"contextualTitle": "CodeNotes Menu"
 				},{
 					"type": "webview",
-					"id": "sidebar_mark",
+					"id": "codenotes.sidebar_mark",
 					"name": "CodeNotes Mark Edit",
 					"contextualTitle": "CodeNotes Mark Edit"
 				},
