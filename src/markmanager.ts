@@ -260,7 +260,7 @@ export class MarkManager {
 
 
             textEditor.revealRange(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                textEditor.document.positionAt(mk.endOffsetMark)));
+                textEditor.document.positionAt(mk.endOffsetMark)),vscode.TextEditorRevealType.InCenter);
 
             // textEditor.revealRange(new vscode.Range(new Position(mk.startLine, mk.startCharacter),
             //     new Position(mk.endLine, mk.endCharacter)), vscode.TextEditorRevealType.InCenter);
