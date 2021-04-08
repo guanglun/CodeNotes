@@ -5,6 +5,6 @@
 * bug for me s
 * Emil:272073020@qq.com
 
-![](images/show.jpg)  
+![](images/show.gif)  
 
 ![](images/show.png)
