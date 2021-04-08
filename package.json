@@ -1,7 +1,7 @@
 {
 	"name": "codenotes",
 	"displayName": "CodeNotes",
-	"description": "Yes",
+	"description": "Code notes,Quick jump,Quick notes",
 	"keywords": ["vscode", "code", "mark", "notes"],
 	"publisher": "guanglun",
 	"version": "0.0.2",
@@ -11,7 +11,7 @@
 	"categories": [
 		"Other"
 	],
-	"icon": "images/book-mark-line.png",
+	"icon": "images/icon.jpg",
 	"activationEvents": [
 		"onCommand:codenotes.insertmark",
 		"onView:sidebar_marks_now",
