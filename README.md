@@ -18,11 +18,12 @@
 * 右侧可编辑标记名称、颜色、描述。描述内容支持markdown，将在鼠标在选择的文字上放置时显示
 
 ## 注意事项
-* 目前为测试版本，不做后续兼容
+* 目前为测试版本，不做后续兼容   
 
 ![](https://github.com/guanglun/CodeNotes/raw/master/images/show.gif)    
 
 ![](https://github.com/guanglun/CodeNotes/raw/master/images/show.png)  
 
+## 尾声
 * 作者：gaunglun
 * BUG反馈或更好的建议邮箱：272073020@qq.com

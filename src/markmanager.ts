@@ -62,7 +62,7 @@ export class MarkManager {
     }
 
     public insert(te: vscode.TextEditor) {
-        if (this.db && this.sidebar) {
+        if (this.db && this.sidebar && this.db.isDBInit === true) {
 
             const name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" +
                 te.selection.anchor.character;
@@ -99,6 +99,8 @@ export class MarkManager {
                 this.sidebar.elNow?.refresh();
             }
             this.sidebar.smark?.updateMarkEdit(mk);
+        }else{
+            vscode.window.showInformationMessage("Please Initialize CodeNotes");
         }
     }
 
@@ -307,7 +309,7 @@ export class MarkManager {
             }
 
             mk.mdata?.setDecorationType(decorationType);
-            if(vscode.workspace.getConfiguration().get('CodeNotes.enableColor') === true)
+            if(vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false)
             {
                 textEditor.setDecorations(decorationType, [range]);
             }

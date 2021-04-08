@@ -35,22 +35,22 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
           this.webShowInit();
         }
 
-        if(vscode.workspace.getConfiguration().get('CodeNotes.enableColor') === true)
+        if(vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === true)
         {
-          this._view?.webview.postMessage({ command: "CodeNotes.enableColor",value:"true" });
+          this._view?.webview.postMessage({ command: "CodeNotes.disableColor",value:"true" });
         }else{
-          this._view?.webview.postMessage({ command: "CodeNotes.enableColor",value:"false" });
+          this._view?.webview.postMessage({ command: "CodeNotes.disableColor",value:"false" });
         }
 
 
 
-      }else  if (data.type === "EnableColor") {
+      }else  if (data.type === "DisableColor") {
 
         if(data.value === 'true')
         {
-          vscode.workspace.getConfiguration().update('CodeNotes.enableColor',true);
+          vscode.workspace.getConfiguration().update('CodeNotes.disableColor',true);
         }else{
-          vscode.workspace.getConfiguration().update('CodeNotes.enableColor',false);
+          vscode.workspace.getConfiguration().update('CodeNotes.disableColor',false);
         }
         //this.mm.reloadAllDocColor();
       }
@@ -86,14 +86,14 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
       <button onclick="HelloCodeNotes()" type="button" id="btHelloCodeNotes" style="cursor: pointer;width:100%;height:30px;" hidden="true">Hello CodeNotes</button>
       <h2 id="textInitCodeNotes" style="cursor: pointer;width:100%;color:red" hidden="true">Please Initialize CodeNotes</h2>
     
-      <input onclick="cbEnableColorOnClick()" type="checkbox" id="cbEnableColor" hidden="true" style="vertical-align:middle;margin: 10px;">Enable Color<br>
+      <input onclick="cbDisableColorOnClick()" type="checkbox" id="cbDisableColor" style="vertical-align:middle;margin: 10px;">Disable Color</input><br>
     
       <script type="text/javascript">
         const tsvscode = acquireVsCodeApi();
         var btInitCodeNotes = document.getElementById("btInitCodeNotes");
         var btHelloCodeNotes = document.getElementById("btHelloCodeNotes");
         var textInitCodeNotes = document.getElementById("textInitCodeNotes");
-        var cbEnableColor = document.getElementById("cbEnableColor");
+        var cbDisableColor = document.getElementById("cbDisableColor");
     
         tsvscode.postMessage({ type: "SWEBStart"});
     
@@ -107,12 +107,12 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
           tsvscode.postMessage({ type: "InitCodeNotes"});
         }
     
-        function cbEnableColorOnClick()
+        function cbDisableColorOnClick()
         {
-          if(cbEnableColor.checked){
-            tsvscode.postMessage({ type: "EnableColor",value:"true"});
+          if(cbDisableColor.checked){
+            tsvscode.postMessage({ type: "DisableColor",value:"true"});
           }else{
-            tsvscode.postMessage({ type: "EnableColor",value:"false"});
+            tsvscode.postMessage({ type: "DisableColor",value:"false"});
           }
         }
     
@@ -126,20 +126,18 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
               textInitCodeNotes.hidden = false;
               btInitCodeNotes.hidden = false;
               btHelloCodeNotes.hidden = true;
-              cbEnableColor.hidden = true;
               break;
               case 'ShowMenu':
               textInitCodeNotes.hidden = true;
               btInitCodeNotes.hidden = true;
               //btHelloCodeNotes.hidden = false;
-              cbEnableColor.hidden = false;
               break;  
-              case 'CodeNotes.enableColor':
+              case 'CodeNotes.disableColor':
                 if(message.value === "true")
                 {
-                  cbEnableColor.checked = true;
+                  cbDisableColor.checked = true;
                 }else{
-                  cbEnableColor.checked = false;
+                  cbDisableColor.checked = false;
                 }
     
                 break;        

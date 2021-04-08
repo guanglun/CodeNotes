@@ -4,7 +4,7 @@
 	"description": "Code notes,Quick jump,Quick notes",
 	"keywords": ["vscode", "code", "mark", "notes"],
 	"publisher": "guanglun",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -108,10 +108,10 @@
 			"type": "object",
 			"title": "CodeNotes",
 			"properties": {
-				"CodeNotes.enableColor": {
+				"CodeNotes.disableColor": {
 					"type": "boolean",
-					"default": true,
-					"description": "Enable Color CodeNotes"
+					"default": false,
+					"description": "Disable Color CodeNotes"
 				},
 				"CodeNotes.showHello": {
 					"type": "string",

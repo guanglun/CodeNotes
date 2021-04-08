@@ -129,9 +129,9 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	
 	vscode.workspace.onDidChangeConfiguration((cevent =>{
-		if (cevent.affectsConfiguration("CodeNotes.enableColor")) {
+		if (cevent.affectsConfiguration("CodeNotes.disableColor")) {
 			mm.reloadAllDocColor();
-            // if(vscode.workspace.getConfiguration().get('CodeNotes.enableColor') === true)
+            // if(vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === true)
             // {
 			// 	mm.reloadNowItem();
 			// }
