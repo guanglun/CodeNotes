@@ -5,6 +5,6 @@
 * bug for me s
 * Emil:272073020@qq.com
 
-![](images/show.gif)  
+![](https://github.com/guanglun/CodeNotes/raw/master/images/show.gif)  
 
-![](images/show.png)
+![](https://github.com/guanglun/CodeNotes/raw/master/images/show.png)
