@@ -70,9 +70,93 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    console.log('_getHtmlForWebview');
-
-    return getWebViewContent(this.context, 'src/view/sidebar.html');
+    //return getWebViewContent(this.context, 'src/view/sidebar.html');
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    
+    <body>
+    
+      <h3 style="width:100%;">CodeNotes</h3>
+      <button onclick="InitCodeNotes()" type="button" id="btInitCodeNotes" style="cursor: pointer;width:100%;height:30px;" hidden="true">Initialize CodeNotes</button>
+      <button onclick="HelloCodeNotes()" type="button" id="btHelloCodeNotes" style="cursor: pointer;width:100%;height:30px;" hidden="true">Hello CodeNotes</button>
+      <h2 id="textInitCodeNotes" style="cursor: pointer;width:100%;color:red" hidden="true">Please Initialize CodeNotes</h2>
+    
+      <input onclick="cbEnableColorOnClick()" type="checkbox" id="cbEnableColor" hidden="true" style="vertical-align:middle;margin: 10px;">Enable Color<br>
+    
+      <script type="text/javascript">
+        const tsvscode = acquireVsCodeApi();
+        var btInitCodeNotes = document.getElementById("btInitCodeNotes");
+        var btHelloCodeNotes = document.getElementById("btHelloCodeNotes");
+        var textInitCodeNotes = document.getElementById("textInitCodeNotes");
+        var cbEnableColor = document.getElementById("cbEnableColor");
+    
+        tsvscode.postMessage({ type: "SWEBStart"});
+    
+        function InitCodeNotes()
+        {
+          tsvscode.postMessage({ type: "InitCodeNotes"});
+        }
+    
+        function HelloCodeNotes()
+        {
+          tsvscode.postMessage({ type: "InitCodeNotes"});
+        }
+    
+        function cbEnableColorOnClick()
+        {
+          if(cbEnableColor.checked){
+            tsvscode.postMessage({ type: "EnableColor",value:"true"});
+          }else{
+            tsvscode.postMessage({ type: "EnableColor",value:"false"});
+          }
+        }
+    
+        window.addEventListener('message', event => {
+    
+    
+          const message = event.data;
+          switch(message.command)
+          {
+              case 'ShowInit':
+              textInitCodeNotes.hidden = false;
+              btInitCodeNotes.hidden = false;
+              btHelloCodeNotes.hidden = true;
+              cbEnableColor.hidden = true;
+              break;
+              case 'ShowMenu':
+              textInitCodeNotes.hidden = true;
+              btInitCodeNotes.hidden = true;
+              //btHelloCodeNotes.hidden = false;
+              cbEnableColor.hidden = false;
+              break;  
+              case 'CodeNotes.enableColor':
+                if(message.value === "true")
+                {
+                  cbEnableColor.checked = true;
+                }else{
+                  cbEnableColor.checked = false;
+                }
+    
+                break;        
+              default:
+                break;
+          }
+      });
+    
+    
+      </script>
+    </body>
+    
+    </html>    
+    
+    
+    
+    `;
   }
 }
 

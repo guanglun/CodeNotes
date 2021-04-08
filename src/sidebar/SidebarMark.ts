@@ -32,6 +32,9 @@ export class SidebarMark implements vscode.WebviewViewProvider {
       }else if (data.type === "setName") {
         //console.log(data.id+ " "+data.name);
         this.mm.setName(data.id,data.name);
+      }else if (data.type === "setDescription") {
+        console.log(data.id+ " "+data.description);
+        this.mm.setDescription(data.id,data.description);
       }
     });
   }
@@ -42,12 +45,88 @@ export class SidebarMark implements vscode.WebviewViewProvider {
   }
 
   public updateMarkEdit(mk:Mark.Mark) {
-    this._view?.webview.postMessage({ mark: {id:mk.id,name:mk.name,filePath:mk.filePath,color:mk.color} });
+    this._view?.webview.postMessage({ mark: {id:mk.id,name:mk.name,filePath:mk.filePath,color:mk.color,description:mk.description} });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    console.log('_getHtmlForWebview');
+    //return SidebarWeb.getWebViewContent(this.context,'src/view/sidebar_mark.html');
 
-    return SidebarWeb.getWebViewContent(this.context, 'src/view/sidebar_mark.html');
+    return `
+    
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    
+    <body>
+      <!-- <input id="textMarkName" type="text" name="firstname" value="CodeNotes"style="margin-top:6px;width:100%;color: white; background-color: #2E2E2E;"></br> -->
+    
+      <!-- <h3 id="textMarkName" contenteditable="true" oninput="nameChange()" onkeydown="nameOnkeydown()">CodeNotes</h3> -->
+    
+      <div> <input id="textMarkName" type="text" onchange="nameOnChange()"
+          style="margin-top:10px;margin-bottom:10px;font-size:30px;color: white;background-color:transparent;border:0;" name="t2" value=CodeNotes /> </div>
+    
+    
+      <input type="color" id="colorSelect" onchange="colorChange()" />
+    
+      <div style="margin-top:6px;">notes(support markdown):</div>
+    
+      <textarea id="taDescription" onchange="taOnChange()" cols="80" rows="10"
+        style="margin-top:6px;resize: none;width:100%;color: white; background-color: #2E2E2E;"></textarea>
+    
+      <div id="textId" style="margin-top:6px;">Id:</div>
+      <div id="textFilePath" style="margin-top:6px;">Path:</div>
+    
+    
+    
+    
+      <script type="text/javascript">
+        const tsvscode = acquireVsCodeApi();
+    
+        var textMarkName = document.getElementById("textMarkName");
+        var textFilePath = document.getElementById("textFilePath");
+        var colorSelect = document.getElementById("colorSelect");
+        var taDescription = document.getElementById("taDescription");
+        var textId = document.getElementById("textId");
+        var markId;
+    
+        window.addEventListener('message', event => {
+    
+          const message = event.data;
+          if (message.mark) {
+            textMarkName.value = message.mark.name;
+            textFilePath.innerText = "Path: " + message.mark.filePath;
+            textId.innerText = "Id: " + message.mark.id;
+            markId = message.mark.id;
+            colorSelect.value = message.mark.color;
+            taDescription.value = message.mark.description;
+          }
+        });
+    
+        function colorChange() {
+          tsvscode.postMessage({ type: "setColor", id: markId, color: colorSelect.value });
+        }
+        function nameOnChange() {
+          tsvscode.postMessage({ type: "setName", id: markId, name: textMarkName.value });
+        }
+        function taOnChange() {
+          tsvscode.postMessage({ type: "setDescription", id: markId, description: taDescription.value });
+        }
+      </script>
+    </body>
+    
+    </html>    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    `;
   }
 }

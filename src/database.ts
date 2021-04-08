@@ -15,7 +15,7 @@ export class DataBase {
                      UNIQUE,\
         name VARCHAR,\
         flag INTEGER,\
-        file_name VARCHAR,\
+        relativePath VARCHAR,\
         anchor_line INTEGER,\
         anchor_character INTEGER,\
         active_line INTEGER,\
@@ -24,7 +24,8 @@ export class DataBase {
         start_character INTEGER,\
         end_line INTEGER,\
         end_character INTEGER, \
-        color VARCHAR \
+        color VARCHAR, \
+        description VARCHAR\
         );";
 
 
@@ -86,7 +87,7 @@ export class DataBase {
                         res[i].id,
                         res[i].name,
                         res[i].flag,
-                        res[i].file_name,
+                        res[i].relativePath,
                         res[i].anchor_line,
                         res[i].anchor_character,
                         res[i].active_line,
@@ -97,6 +98,7 @@ export class DataBase {
                         res[i].end_line,
                         res[i].end_character,
                         res[i].color,
+                        res[i].description,
                     );
                     this.mkmap.set(mk.id, mk);
                     this.sidebar?.elAll?.insert(mk);
@@ -146,7 +148,7 @@ export class DataBase {
 
         this.db?.run("update " + DataBase.tableName + " set name = '" + name + "' WHERE id = " + id, function (err) {
             if (err) { console.log(err); throw err; }
-            console.log("Update Data Success!");
+            //console.log("Update Data Success!");
         });
     }
 
@@ -154,7 +156,15 @@ export class DataBase {
 
         this.db?.run("update " + DataBase.tableName + " set color = '" + color + "' WHERE id = " + id, function (err) {
             if (err) { console.log(err); throw err; }
-            console.log("Update Data Success!");
+            //console.log("Update Data Success!");
+        });
+    }
+
+    public updateDescription(id: number, description: string) {
+
+        this.db?.run("update " + DataBase.tableName + " set description = '" + description + "' WHERE id = " + id, function (err) {
+            if (err) { console.log(err); throw err; }
+            //console.log("Update Data Success!");
         });
     }
 
@@ -167,7 +177,7 @@ export class DataBase {
         ", end_character = " + mk.endCharacter +
         " WHERE id = " + mk.id, function (err) {
             if (err) { console.log(err); throw err; }
-            console.log("Update Data Success!");
+            //console.log("Update Data Success!");
         });
 
     }
@@ -178,7 +188,7 @@ export class DataBase {
                 mk.id + " , " +
                 "\"" + mk.name + "\" , " +
                 mk.flag + " , " +
-                "\"" + mk.filePath + "\" , " +
+                "\"" + mk.relativePath + "\" , " +
 
                 mk.anchorLine + " , " +
                 mk.anchorCharacter + " , " +
@@ -189,12 +199,13 @@ export class DataBase {
                 mk.startCharacter + " , " +
                 mk.endLine + " , " +
                 mk.endCharacter + " , " +
-                mk.color +
+                "\"" + mk.color + "\" , " +
+                "\"" + mk.description + "\"" +
                 ")";
-            console.log(dbexc);
+            //console.log(dbexc);
             this.db.run(dbexc, function (err) {
                 if (err) { console.log(err); throw err; }
-                console.log("Insert Data Success!");
+                //console.log("Insert Data Success!");
             });
 
             this.mkmap.set(mk.id, mk);

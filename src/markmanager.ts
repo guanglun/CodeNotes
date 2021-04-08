@@ -4,6 +4,7 @@ import * as database from './DataBase';
 import * as mark from './mark';
 import * as path from 'path';
 import { Position } from 'vscode';
+import { mkdir } from 'node:fs';
 
 
 export enum ShowColorType {
@@ -34,16 +35,47 @@ export class MarkManager {
         this.db = db;
     }
 
+    public static pathRelativeToAbsolute(rPath:string)
+    {
+        if(vscode.workspace.workspaceFolders)
+        {
+            const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            console.log(workspacePath);
+            return path.join(workspacePath,rPath);
+        }
+        return undefined;
+    }
+
+    public static pathAbsoluteToRelative(aPath:string)
+    {
+        if(vscode.workspace.workspaceFolders)
+        {
+            const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            console.log(workspacePath);
+            const sp = aPath.split(workspacePath);
+            if(sp[1])
+            {
+                return sp[1];
+            }
+        }
+        return undefined;
+    }
+
     public insert(te: vscode.TextEditor) {
         if (this.db && this.sidebar) {
 
             const name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" +
                 te.selection.anchor.character;
 
+            //console.log("Path: "+ te.document.fileName);
+            //console.log("Work: "+ vscode.workspace.name);
+            const rPath = MarkManager.pathAbsoluteToRelative(te.document.fileName);
+            //console.log(rPath);
+
             const mk = new mark.Mark(++this.db.lastId,
                 name,
                 0,
-                te.document.fileName,
+                rPath,
                 te.selection.anchor.line,
                 te.selection.anchor.character,
                 te.selection.active.line,
@@ -68,7 +100,6 @@ export class MarkManager {
             }
             this.sidebar.smark?.updateMarkEdit(mk);
         }
-
     }
 
     public delete(id: number) {
@@ -121,6 +152,17 @@ export class MarkManager {
 
             this.sidebar?.elNow.refresh();
             this.sidebar?.elAll.refresh();
+        }
+    }
+
+    public setDescription(id:number,description:string)
+    {
+        const mk = this.db?.mkmap.get(id);
+        if (mk) {
+
+            mk.description = description;
+
+            this.db?.updateDescription(id, description);
         }
     }
 
@@ -305,21 +347,12 @@ export class MarkManager {
         }
     }
 
-    public static checkPoint(mk: mark.Mark, p: Position): boolean {
-        if (mk.startLine <= p.line && p.line <= mk.endLine) {
-            if (mk.startCharacter <= p.character && p.character <= mk.endCharacter) {
-                return true;
-            } else if (mk.startCharacter >= p.character && p.character >= mk.endCharacter) {
-                return true;
-            }
-        } else if (mk.startLine >= p.line && p.line >= mk.endLine) {
-            if (mk.startCharacter <= p.character && p.character <= mk.endCharacter) {
-                return true;
-            } else if (mk.startCharacter >= p.character && p.character >= mk.endCharacter) {
-                return true;
-            }
+    public static checkPoint(doc:vscode.TextDocument,mk: mark.Mark, p: Position): boolean {
+        const docOffset = doc.offsetAt(p);
+        if(mk.startOffsetMark <= docOffset && docOffset <= mk.endOffsetMark)
+        {
+            return true;
         }
-
         return false;
     }
 
@@ -338,8 +371,15 @@ export class MarkManager {
 
                 db?.mkmap.forEach((value, key, map) => {
                     if (value.filePath === fileName) {
-                        if (MarkManager.checkPoint(value, position) === true) {
-                            note += "* " + value.name + "   \r\n";
+                        if (MarkManager.checkPoint(document,value, position) === true) {
+                            note += "### " + value.name + "    \r\n";
+                            // if(value.description.length > 0)
+                            // {
+                                note += value.description + "    \r\n\r\n---    \r\n";
+                            // }else{
+                            //     note += "    \r\n---    \r\n";
+                            // }
+                            
                         }
 
                     }

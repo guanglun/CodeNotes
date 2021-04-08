@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { MarkManager } from './MarkManager';
 import * as sidebar from './sidebar/Sidebar';
 
 export class Mark {
@@ -29,15 +30,21 @@ export class Mark {
     public endOffsetMark: number = 0;
 
     public color: string = "#FF0000";
+    public relativePath: string | undefined;
+    public description: string = "";
+    
 
-    constructor(id?: number, name?: string, flag?: number, filePath?: string,
+    constructor(id?: number, name?: string, flag?: number, relativePath?: string,
         anchorLine?: number, anchorCharacter?: number, activeLine?: number, activeCharacter?: number,
-        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number,color?:string) {
+        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number,color?:string,description?:string) {
 
         if (id) { this.id = id; }
         if (name) { this.name = name; }
         if (flag) { this.flag = flag; }
-        if (filePath) { this.filePath = filePath; }
+        if (relativePath) { 
+            this.relativePath = relativePath; 
+            this.filePath = MarkManager.pathRelativeToAbsolute(relativePath);
+        }
         if (anchorLine) { this.anchorLine = anchorLine; }
         if (anchorCharacter) { this.anchorCharacter = anchorCharacter; }
         if (activeLine) { this.activeLine = activeLine; }
@@ -58,6 +65,9 @@ export class Mark {
         }
         if (color) {
             this.color = color;
+        }
+        if (description) {
+            this.description = description;
         }
     }
 

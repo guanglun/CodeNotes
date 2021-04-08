@@ -1,16 +1,17 @@
 {
 	"name": "codenotes",
-	"displayName": "codenotes",
+	"displayName": "CodeNotes",
 	"description": "Yes",
 	"keywords": ["vscode", "code", "mark", "notes"],
-	"publisher": "gaunglun",
-	"version": "0.0.1",
+	"publisher": "guanglun",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
 	"categories": [
 		"Other"
 	],
+	"icon": "images/book-mark-line.png",
 	"activationEvents": [
 		"onCommand:codenotes.insertmark",
 		"onView:sidebar_marks_now",
@@ -73,7 +74,7 @@
 			"activitybar": [
 				{
 					"id": "sidebar_codenotes",
-					"title": "codenotes",
+					"title": "CodeNotes",
 					"icon": "images/book-mark-line.svg"
 				}
 			]
