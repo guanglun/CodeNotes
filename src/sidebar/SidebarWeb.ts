@@ -82,7 +82,8 @@ export class SidebarWeb implements vscode.WebviewViewProvider {
     <body>
     
       <h3 style="width:100%;">CodeNotes</h3>
-      <button onclick="InitCodeNotes()" type="button" id="btInitCodeNotes" style="cursor: pointer;width:100%;height:30px;" hidden="true">Initialize CodeNotes</button>
+      <button onclick="InitCodeNotes()" type="button" id="btInitCodeNotes" style="color:red;font-size: 20px;cursor: pointer;width:100%;height:30px;" hidden="true"><span>Initialize CodeNotes</span></button>
+
       <button onclick="HelloCodeNotes()" type="button" id="btHelloCodeNotes" style="cursor: pointer;width:100%;height:30px;" hidden="true">Hello CodeNotes</button>
       <h2 id="textInitCodeNotes" style="cursor: pointer;width:100%;color:red" hidden="true">Please Initialize CodeNotes</h2>
     
