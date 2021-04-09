@@ -286,23 +286,10 @@ export class MarkManager {
 
             const decorationType = vscode.window.createTextEditorDecorationType({
                 gutterIconSize: "14px",
-                gutterIconPath: "C:\\Users\\27207\\hello-code\\images\\mark.png",
+                gutterIconPath: path.join(this.context.extensionPath ,"images/mark.png"),
                 backgroundColor: color+"50",
                 opacity: "1",
                 borderRadius: "4px",
-                //border: "solid blue",
-                //     before: { 
-                //         // contentIconPath: "C:\\Users\\27207\\hello-code\\images\\draft-fill.svg",
-                //         // width:"1em",
-                //         // height:"1em",
-                //         contentText:"✎",
-                //         color:"#FF00FF",
-                //         backgroundColor:"red transparent",
-                //         //fontStyle:"italic",
-                //         //border: "solid red",
-
-                //         //margin: '0px 10px 0px 10px'
-                // }
             });
 
             const range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
@@ -318,9 +305,6 @@ export class MarkManager {
             {
                 textEditor.setDecorations(decorationType, [range]);
             }
-            
-
-
         }
 
         if (en === ShowColorType.sctClear) {

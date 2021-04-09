@@ -215,7 +215,10 @@ export class DataBase {
     public checkLoadDB() {
         if (vscode.workspace.workspaceFolders) {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
-            var pathDB = rootUri.fsPath + "\\" + DataBase.databasePath + "\\notes.db";
+            var pathDB = rootUri.fsPath + "/" + DataBase.databasePath + "/notes.db";
+
+            console.log("database path: " + pathDB);
+
             const promise = this.existPromise(pathDB);
             promise.then((res: any) => {
 
@@ -242,13 +245,13 @@ export class DataBase {
     public creatCodeNotes() {
         if (vscode.workspace.workspaceFolders && this.isDBInit === false) {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
-            var folderUri = vscode.Uri.file(rootUri.fsPath + "\\" + DataBase.databasePath);
+            var folderUri = vscode.Uri.file(rootUri.fsPath + "/" + DataBase.databasePath);
 
             const promise = this.creatPromise(folderUri.fsPath);
             promise.then((res: any) => {
 
                 new Promise((resolve, reject) => {
-                    this.db = new sqlite3.Database(folderUri.fsPath + "\\notes.db", function (err) {
+                    this.db = new sqlite3.Database(folderUri.fsPath + "/notes.db", function (err) {
                         if (err) {
                             console.log("load database error,", err.message);
                         } else {

@@ -61,12 +61,9 @@ export class SidebarMark implements vscode.WebviewViewProvider {
     </head>
     
     <body>
-      <!-- <input id="textMarkName" type="text" name="firstname" value="CodeNotes"style="margin-top:6px;width:100%;color: white; background-color: #2E2E2E;"></br> -->
-    
-      <!-- <h3 id="textMarkName" contenteditable="true" oninput="nameChange()" onkeydown="nameOnkeydown()">CodeNotes</h3> -->
-    
+
       <div> <input id="textMarkName" type="text" onchange="nameOnChange()"
-          style="margin-top:10px;margin-bottom:10px;font-size:30px;color: white;background-color:transparent;border:0;" name="t2" value=CodeNotes /> </div>
+          style="margin-top:10px;margin-bottom:10px;font-size:24px;color: white;background-color:transparent;border:0;" name="t2" value=CodeNotes /> </div>
     
     
       <input type="color" id="colorSelect" onchange="colorChange()" />
