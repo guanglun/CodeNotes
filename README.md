@@ -19,8 +19,13 @@
 
 ## 注意事项
 * 目前为测试版本，不做后续兼容   
+* 项目在windows下开发，会在linux上做一般测试，mac木有所以没法测试，有BUG的话请在[Issues](https://github.com/guanglun/CodeNotes/issues)上提  
+
+## 演示  
+<br>  
 
 ![](https://github.com/guanglun/CodeNotes/raw/master/images/show.gif)    
+<br>  
 
 ![](https://github.com/guanglun/CodeNotes/raw/master/images/show.png)  
 
