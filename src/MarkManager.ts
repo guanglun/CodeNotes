@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as Sidebar from './sidebar/Sidebar';
 import * as database from './DataBase';
-import * as mark from './mark';
+import * as mark from './Mark';
 import * as path from 'path';
 import { Position } from 'vscode';
 import { mkdir } from 'node:fs';

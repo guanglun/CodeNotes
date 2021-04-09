@@ -3,7 +3,7 @@ import * as SidebarAll from './SidebarAll';
 import * as SidebarNow from './SidebarNow';
 import * as SidebarCtrl from './SidebarCtrl';
 import * as SidebarWeb from './SidebarWeb';
-import * as SidebarMark from './Sidebarmark';
+import * as SidebarMark from './SidebarMark';
 export class Sidebar {
 
     public elAll: SidebarAll.EntryList = new SidebarAll.EntryList();

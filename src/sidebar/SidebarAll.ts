@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as mark  from '../mark';
+import * as mark  from '../Mark';
 import * as database from '../DataBase';
 import * as sidebar from './Sidebar';
 

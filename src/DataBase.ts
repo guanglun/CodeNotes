@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as sqlite3 from 'sqlite3';
 import * as fs from 'fs';
-import * as mark from './mark';
+import * as mark from './Mark';
 import * as Sidebar from './sidebar/Sidebar';
 import * as markmanager from './MarkManager';
 
