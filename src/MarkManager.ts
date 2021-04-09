@@ -64,8 +64,13 @@ export class MarkManager {
     public insert(te: vscode.TextEditor) {
         if (this.db && this.sidebar && this.db.isDBInit === true) {
 
-            const name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" +
-                te.selection.anchor.character;
+            //const name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" + te.selection.anchor.character;
+
+            let name = te.document.getText(te.selection);
+            if(name.length === 0)
+            {
+                name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" + te.selection.anchor.character;
+            }
 
             //console.log("Path: "+ te.document.fileName);
             //console.log("Work: "+ vscode.workspace.name);
