@@ -24,10 +24,10 @@
 ## 演示  
 <br>  
 
-![](https://github.com/guanglun/CodeNotes/raw/master/images/show.gif)    
+![](https://gitee.com/guanglunking/code-notes/raw/master/images/show.gif)    
 <br>  
 
-![](https://github.com/guanglun/CodeNotes/raw/master/images/show.png)  
+![](https://gitee.com/guanglunking/code-notes/raw/master/images/show.png)  
 
 ## 尾声
 * 作者：gaunglun
