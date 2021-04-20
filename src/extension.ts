@@ -130,20 +130,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push (vscode.workspace.onDidChangeTextDocument(doc => {  
 	
-		// console.log("* onDidChangeTextDocument ");
-		
-		// doc.contentChanges.forEach((value, key, map)=>
-		// {
-			
-		// 	//console.log(key+":"+value.range.start.line +" " + value.range.end.line);
-		// 	//console.log(key+":"+value.range.start.character +" " + value.range.end.character);
-
-		// 	console.log(key+" : "+doc.document.offsetAt(value.range.start) +" " + doc.document.offsetAt(value.range.end));
-		// 	console.log(key+" : "+value.text.length + " "+ value.text);
-		// 	console.log(value);
-		// }
-		// );
-
 		doc.contentChanges.forEach((cc, key, map)=>
 		{
 			db?.mkmap.forEach((mk, key, map)=>
@@ -151,20 +137,13 @@ export function activate(context: vscode.ExtensionContext) {
 				if(mk.filePath === doc.document.fileName)
 				{
 				
-					mm.onChnageDoc(mk,cc,doc);
+					mm.onChangeDoc(mk,cc,doc);
 				}
 			});
 
 		});
 
-		
-		// console.log(editor.contentChanges[1].range.start.line +" " + editor.contentChanges[1].range.start.character);
-		// console.log(editor.contentChanges[1].range.end.line +" " + editor.contentChanges[1].range.end.character);
-
-		//console.log(editor.contentChanges.length);
 	}));
-
-
 
 }
 

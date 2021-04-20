@@ -380,6 +380,7 @@ export class MarkManager {
         return false;
     }
 
+    //https://code.visualstudio.com/api/extension-guides/command
     /**
      * 获取HoverProvider
      * @param db 
@@ -387,49 +388,40 @@ export class MarkManager {
      */
     public getHoverProvider(db: database.DataBase) {
         return vscode.languages.registerHoverProvider('*', {
-            provideHover(document, position, token) {
-
+            provideHover(document, position, token): vscode.ProviderResult<vscode.Hover> {
                 const fileName = document.fileName;
-                const workDir = path.dirname(fileName);
-                const word = document.getText(document.getWordRangeAtPosition(position));
+                //const workDir = path.dirname(fileName);
+                //const word = document.getText(document.getWordRangeAtPosition(position));
 
-                //![123](../images/icon.png)   \r\n
-                //let noteHead        = '#### CodeNotes   \r\n';
                 let note = "";
-
 
                 db?.mkmap.forEach((value, key, map) => {
                     if (value.filePath === fileName) {
                         if (MarkManager.checkPoint(document,value, position) === true) {
                             note += "### " + value.name + "    \r\n";
-                            // if(value.description.length > 0)
-                            // {
-                                note += value.description + "    \r\n\r\n---    \r\n";
-                            // }else{
-                            //     note += "    \r\n---    \r\n";
-                            // }
-                            
+                            note += value.description + "    \r\n";
                         }
-
                     }
                 });
 
-                // console.log(1, noteHead)
-                // console.log(2, position)
-                // console.log(3, token)
-                // console.log(4, '这个就是悬停的文字', word);
+                //使用细节查看https://code.visualstudio.com/api/extension-guides/command
+                //搜索 commentCommandUri 快速定位
+                const contents = new vscode.MarkdownString(note);
+                const args = [3];
+                const commentCommandUri = vscode.Uri.parse(`command:sidebar_marks_all.openChild?${encodeURIComponent(JSON.stringify(args))}`);
+                contents.appendMarkdown(`* [Add comment](${commentCommandUri})`);
 
-                if ("" === note) {
-                    return undefined;
-                } else {
-                    return new vscode.Hover(note);
-                }
+
+                contents.isTrusted = true;
+
+                return new vscode.Hover(contents);
+
             }
         }
         );
     }
 
-    public onChnageDoc(mk: mark.Mark, cc: vscode.TextDocumentContentChangeEvent, doc: vscode.TextDocumentChangeEvent) {
+    public onChangeDoc(mk: mark.Mark, cc: vscode.TextDocumentContentChangeEvent, doc: vscode.TextDocumentChangeEvent) {
 
         // console.log("***************");
         // console.log(mk.startLine + " " +mk.endLine);
