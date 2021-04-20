@@ -274,30 +274,15 @@ export class MarkManager {
         }
 
         if (en === ShowColorType.sctClick) {
-            // textEditor.selection = new vscode.Selection(new Position(mk.startLine, mk.startCharacter),
-            //     new Position(mk.endLine, mk.endCharacter));
-
-            //if(await textEditor.document.save() === true)
-            {
-
-                // mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine,mk.startCharacter));
-                // mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine,mk.endCharacter));
-
-                textEditor.selection = new vscode.Selection(textEditor.document.positionAt(mk.startOffsetMark),
-                    textEditor.document.positionAt(mk.endOffsetMark));
-            }
-
+            textEditor.selection = new vscode.Selection(textEditor.document.positionAt(mk.startOffsetMark),
+                textEditor.document.positionAt(mk.endOffsetMark));
 
             textEditor.revealRange(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
                 textEditor.document.positionAt(mk.endOffsetMark)),vscode.TextEditorRevealType.InCenter);
-
-            // textEditor.revealRange(new vscode.Range(new Position(mk.startLine, mk.startCharacter),
-            //     new Position(mk.endLine, mk.endCharacter)), vscode.TextEditorRevealType.InCenter);
         }
 
         if (en === ShowColorType.sctShow) {
-            // let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('editor');
-            // let fontSize = editorConfig.get<number>('fontSize');
+
             let color;
             if(mk.color)
             {
