@@ -28,7 +28,6 @@ export class DataBase {
         description VARCHAR\
         );";
 
-
     public mkmap: Map<number, mark.Mark> = new Map<number, mark.Mark>();
     public context: vscode.ExtensionContext;
     private sidebar: Sidebar.Sidebar | undefined;
@@ -37,35 +36,6 @@ export class DataBase {
     private db: sqlite3.Database | undefined;
     private mm: markmanager.MarkManager | undefined;
     public lastId = 0;
-
-    /**
-   * 读取路径信息
-   * @param {string} filepath 路径
-   */
-    private creatPromise(path: string) {
-        return new Promise((resolve, reject) => {
-            fs.stat(path, function (err, result) {
-                if (err) {
-                    fs.mkdir(path, function (err) {
-                        if (err) { resolve(false); }
-                        else { resolve(true); }
-                    });
-                } else {
-                    resolve(true);
-                }
-            });
-        });
-    }
-
-    private existPromise(path: string) {
-
-        return new Promise((resolve, reject) => {
-            fs.stat(path, function (err, result) {
-                if (err) { resolve(false); }
-                else { resolve(true); }
-            });
-        });
-    }
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -76,6 +46,38 @@ export class DataBase {
         this.mm = mm;
     }
 
+        /**
+   * 读取路径信息
+   * @param {string} filepath 路径
+   */
+         private creatPromise(path: string) {
+            return new Promise((resolve, reject) => {
+                fs.stat(path, function (err, result) {
+                    if (err) {
+                        fs.mkdir(path, function (err) {
+                            if (err) { resolve(false); }
+                            else { resolve(true); }
+                        });
+                    } else {
+                        resolve(true);
+                    }
+                });
+            });
+        }
+    
+        private existPromise(path: string) {
+    
+            return new Promise((resolve, reject) => {
+                fs.stat(path, function (err, result) {
+                    if (err) { resolve(false); }
+                    else { resolve(true); }
+                });
+            });
+        }
+
+    /**
+     * 加载数据库内容
+     */
     public loadDB() {
         const promise = this.loadDBIntoMemPromise();
         promise.then((res: any) => {
@@ -110,19 +112,20 @@ export class DataBase {
                 this.mm?.reloadNowItem();
                 this.mm?.teColorManager(markmanager.TEColorManagerType.tecmtInit);
             }
-            //console.log(this.mkmap);
-        }, err => {
-            console.error(err);
         });
-
-
     }
 
+    
+    /**
+     * 创建数据库
+     */
     public createTable() {
 
         new Promise((resolve, reject) => {
             this.db?.run(DataBase.creatTable, function (err) {
-                if (err) { throw err; }
+                if (err) { 
+                    vscode.window.showErrorMessage(err.toString());
+                    console.error(err); }
                 else {
                     resolve(true);
                 }
@@ -133,85 +136,88 @@ export class DataBase {
         });
     }
 
+    /**
+     * debug 显示数据库内容
+     */
     public showDB() {
         if (this.db) {
             this.db.all("select * from " + DataBase.tableName, function (err, rows) {
-                if (err) { throw err; }
+                if (err) { 
+                    vscode.window.showErrorMessage(err.toString());
+                    console.error(err); }
+                else{
                 console.log(rows);
-                rows[0].id;
+                rows[0].id;}
             });
         }
 
     }
 
+    /**
+     * 更新Name
+     * @param id 
+     * @param name 
+     */
     public updateName(id: number, name: string) {
 
         this.db?.run("update " + DataBase.tableName + " set name = '" + name + "' WHERE id = " + id, function (err) {
-            if (err) { console.log(err); throw err; }
-            //console.log("Update Data Success!");
+            if (err) { 
+                vscode.window.showErrorMessage(err.toString());
+                console.error(err); }
         });
     }
 
+    /**
+     * 更新颜色
+     * @param id 
+     * @param color 
+     */
     public updateColor(id: number, color: string) {
 
         this.db?.run("update " + DataBase.tableName + " set color = '" + color + "' WHERE id = " + id, function (err) {
-            if (err) { console.log(err); throw err; }
-            //console.log("Update Data Success!");
+            if (err) { 
+                vscode.window.showErrorMessage(err.toString());
+                console.error(err); }
         });
     }
 
+    /**
+     * 更新描述
+     * @param id 
+     * @param description 
+     */
     public updateDescription(id: number, description: string) {
 
         this.db?.run("update " + DataBase.tableName + " set description = '" + description + "' WHERE id = " + id, function (err) {
-            if (err) { console.log(err); throw err; }
-            //console.log("Update Data Success!");
+            if (err) { 
+                vscode.window.showErrorMessage(err.toString());
+                console.error(err); }
         });
     }
 
-    public async updateRange(mk:mark.Mark) {
+    /**
+     * 更新mark数据的range至数据库
+     * @param mk 
+     */
+    public async updateRange(mk: mark.Mark) {
 
-        await this.db?.run("update " + DataBase.tableName + 
-        " set start_line = " + mk.startLine + 
-        ", start_character = " + mk.startCharacter + 
-        ", end_line = " + mk.endLine + 
-        ", end_character = " + mk.endCharacter +
-        " WHERE id = " + mk.id, function (err) {
-            if (err) { console.log(err); throw err; }
-            //console.log("Update Data Success!");
-        });
-
-    }
-
-    insertDB(mk: mark.Mark) {
-        if (this.db) {
-            const dbexc = "insert into " + DataBase.tableName + " values ( " +
-                mk.id + " , " +
-                "\"" + mk.name + "\" , " +
-                mk.flag + " , " +
-                "\"" + mk.relativePath + "\" , " +
-
-                mk.anchorLine + " , " +
-                mk.anchorCharacter + " , " +
-                mk.activeLine + " , " +
-                mk.activeCharacter + " , " +
-
-                mk.startLine + " , " +
-                mk.startCharacter + " , " +
-                mk.endLine + " , " +
-                mk.endCharacter + " , " +
-                "\"" + mk.color + "\" , " +
-                "\"" + mk.description + "\"" +
-                ")";
-            //console.log(dbexc);
-            this.db.run(dbexc, function (err) {
-                if (err) { console.log(err); throw err; }
-                //console.log("Insert Data Success!");
+        await this.db?.run("update " + DataBase.tableName +
+            " set start_line = " + mk.startLine +
+            ", start_character = " + mk.startCharacter +
+            ", end_line = " + mk.endLine +
+            ", end_character = " + mk.endCharacter +
+            " WHERE id = " + mk.id, function (err) {
+                if (err) { 
+                    vscode.window.showErrorMessage(err.toString());
+                    console.error(err); }
             });
-
-            this.mkmap.set(mk.id, mk);
-        }
     }
 
+
+
+    /**
+     * 检查数据库状态
+     */
     public checkLoadDB() {
         if (vscode.workspace.workspaceFolders) {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
@@ -221,27 +227,27 @@ export class DataBase {
 
             const promise = this.existPromise(pathDB);
             promise.then((res: any) => {
-
                 if (res === true) {
                     new Promise((resolve, reject) => {
                         this.db = new sqlite3.Database(pathDB, function (err) {
-                            if (err) {
-                                console.log("load database error,", err.message);
-                            } else {
-                                resolve(true);
-                            }
+                            if (err) { 
+                                vscode.window.showErrorMessage(err.toString());
+                                console.error(err); }
+                            else {resolve(true);}
                         });
                     }).then((res: any) => {
                         this.loadDB();
                         this.isDBInit = true;
                         this.sidebar?.sweb?.webShowMenu();
                     });
-
                 }
             });
         }
     }
 
+    /**
+     * 创建初始化数据库
+     */
     public creatCodeNotes() {
         if (vscode.workspace.workspaceFolders && this.isDBInit === false) {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
@@ -252,11 +258,10 @@ export class DataBase {
 
                 new Promise((resolve, reject) => {
                     this.db = new sqlite3.Database(folderUri.fsPath + "/notes.db", function (err) {
-                        if (err) {
-                            console.log("load database error,", err.message);
-                        } else {
-                            resolve(true);
-                        }
+                        if (err) { 
+                            vscode.window.showErrorMessage(err.toString());
+                            console.error(err); }
+                        else {resolve(true);}
                     });
                 }).then((res: any) => {
                     this.createTable();
@@ -266,23 +271,74 @@ export class DataBase {
         }
     }
 
-    deleteDB(id: number) {
-        if (this.db) {
-            this.db.run("delete from " + DataBase.tableName + " WHERE id = " + id, function (err) {
-                if (err) { throw err; }
-                console.log("Delete Data Success!");
-            });
-        }
+    /**
+     * 插入一行Promise
+     * @param mk 
+     * @returns 
+     */
+    public loadInsertDBPromise(mk: mark.Mark) {
+        return new Promise((resolve, reject) => {
+            if (this.db) {
+                const dbexc = "insert into " + DataBase.tableName + " values ( " +
+                    mk.id + " , " +
+                    "\"" + mk.name + "\" , " +
+                    mk.flag + " , " +
+                    "\"" + mk.relativePath + "\" , " +
+    
+                    mk.anchorLine + " , " +
+                    mk.anchorCharacter + " , " +
+                    mk.activeLine + " , " +
+                    mk.activeCharacter + " , " +
+    
+                    mk.startLine + " , " +
+                    mk.startCharacter + " , " +
+                    mk.endLine + " , " +
+                    mk.endCharacter + " , " +
+                    "\"" + mk.color + "\" , " +
+                    "\"" + mk.description + "\"" +
+                    ")";
+                //console.log(dbexc);
+                this.db.run(dbexc, function (err) {
+                    if (err) { 
+                        vscode.window.showErrorMessage(err.toString());
+                        console.error(err); }
+                    else { resolve(undefined); }
+                });
+            }
+        });
     }
 
+    /**
+     * 删除一组数据
+     * @param id 
+     * @returns 
+     */
+    public loadDeleteDBPromise(id: number) {
+        return new Promise((resolve, reject) => {
+            if (this.db) {
+                this.db.run("delete from " + DataBase.tableName + " WHERE id = " + id, function (err) {
+                    if (err) { 
+                        vscode.window.showErrorMessage(err.toString());
+                        console.error(err); }
+                    else { resolve(undefined); }
+                });
+            }
+        });
+    }
+
+    /**
+     * 加载数据库内容
+     * @returns 
+     */
     loadDBIntoMemPromise() {
         return new Promise((resolve, reject) => {
             if (this.db) {
                 this.db.all("select * from " + DataBase.tableName, function (err, rows) {
-                    if (err) { reject(new Error("array length invalid")); }
+                    if (err) { 
+                        vscode.window.showErrorMessage(err.toString());
+                        console.error(err); }
                     else { resolve(rows); }
-                }
-                );
+                });
             }
         });
     }

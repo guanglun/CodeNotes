@@ -29,53 +29,43 @@ export function activate(context: vscode.ExtensionContext) {
 	if(sd.sweb){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_web", sd.sweb));}
 	if(sd.smark){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_mark", sd.smark));}
 
-	vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
+	context.subscriptions.push (vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			//vscode.window.setStatusBarMessage('Delete ' + res.command.arguments[0],3000);
 			mm.delete(res.command.arguments[0]);
 		}
-	});
+	}));
 
-	vscode.commands.registerCommand('codenotes.renameItem', (res: Sidebar.EntryItem) => {
+	context.subscriptions.push (vscode.commands.registerCommand('codenotes.renameItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			mm.renameItem(res.command.arguments[0]);
 		}
-	});
+	}));
 
-	vscode.commands.registerCommand('codenotes.editItem', (res: Sidebar.EntryItem) => {
+	context.subscriptions.push (vscode.commands.registerCommand('codenotes.editItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			mm.editItem(res.command.arguments[0]);
 		}
-	});
+	}));
 
-	let command = vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
-		// const text = textEditor.document.getText(textEditor.selection);
-		// console.log(textEditor.document.fileName);
-		// console.log(textEditor.selection.start.line + " : " + textEditor.selection.start.character);
-		// console.log(textEditor.selection.end.line + " : " + textEditor.selection.end.character);
-		// console.log('选中的文本是:', text);
-		// console.log(textEditor.selection.anchor.line +" " +textEditor.selection.anchor.character);
-		// console.log(textEditor.selection.active.line +" " +textEditor.selection.active.character);
-		// console.log(textEditor.document. +" " +textEditor.selection.active.character);
-		//vscode.window.setStatusBarMessage('Insert',3000);
-
+	context.subscriptions.push (vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
 		mm.insert(textEditor);
-	});
+	}));
 
 
 
-	vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll);
-	vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
+	context.subscriptions.push (vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll));
+	context.subscriptions.push (vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
 		mm.click(args);
-	});
+	}));
 
-	vscode.window.registerTreeDataProvider("sidebar_marks_now", sd.elNow);
-	vscode.commands.registerCommand("sidebar_marks_now.openChild", (args: number) => {
+	context.subscriptions.push (vscode.window.registerTreeDataProvider("sidebar_marks_now", sd.elNow));
+	context.subscriptions.push (vscode.commands.registerCommand("sidebar_marks_now.openChild", (args: number) => {
 		mm.click(args);
-	});
+	}));
 
 	// vscode.window.registerTreeDataProvider("sidebar_marks_ctrl", sd.elCtrl);
 	// vscode.commands.registerCommand("sidebar_marks_ctrl.openChild", (args: number) => {
@@ -98,10 +88,9 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	mm.load();
-
 	context.subscriptions.push(mm.getHoverProvider(db));
 
-	vscode.window.onDidChangeActiveTextEditor(editor => {  
+	context.subscriptions.push (vscode.window.onDidChangeActiveTextEditor(editor => {  
 		if(editor) { 
 			db.mkmap.forEach((value, key, map)=>
             {
@@ -113,9 +102,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 			mm.reloadNowItem();
 		}  
-	});
+	}));
 	
-	vscode.workspace.onDidSaveTextDocument((editor => {  
+	context.subscriptions.push (vscode.workspace.onDidSaveTextDocument((editor => {  
 		//console.log(editor.fileName);
 
 		db?.mkmap.forEach((mk, key, map)=>
@@ -126,9 +115,9 @@ export function activate(context: vscode.ExtensionContext) {
 				db.updateRange(mk);
 			}
 		});
-	}));
+	})));
 	
-	vscode.workspace.onDidChangeConfiguration((cevent =>{
+	context.subscriptions.push (vscode.workspace.onDidChangeConfiguration((cevent =>{
 		if (cevent.affectsConfiguration("CodeNotes.disableColor")) {
 			console.log("affectsConfiguration");
 			mm.reloadAllDocColor();
@@ -137,9 +126,9 @@ export function activate(context: vscode.ExtensionContext) {
 			// 	mm.reloadNowItem();
 			// }
 		}
-	}));
+	})));
 
-	vscode.workspace.onDidChangeTextDocument(doc => {  
+	context.subscriptions.push (vscode.workspace.onDidChangeTextDocument(doc => {  
 	
 		// console.log("* onDidChangeTextDocument ");
 		
@@ -173,7 +162,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// console.log(editor.contentChanges[1].range.end.line +" " + editor.contentChanges[1].range.end.character);
 
 		//console.log(editor.contentChanges.length);
-	});
+	}));
 
 
 

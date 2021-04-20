@@ -91,19 +91,26 @@ export class MarkManager {
                 te.selection.end.character,
             );
 
-            this.db.insertDB(mk);
-            this.sidebar.elAll?.insert(mk);
-            this.sidebar.elAll?.refresh();
+            const promise = this.db.loadInsertDBPromise(mk);
+            promise.then((res: any) => {
 
-            if (vscode.window.activeTextEditor?.document.fileName === mk.filePath) {
-                this.teColorManager(TEColorManagerType.tecmtShow, mk);
-            }
+                this.db?.mkmap.set(mk.id, mk);
+                this.sidebar?.elAll?.insert(mk);
+                this.sidebar?.elAll?.refresh();
+    
+                if (vscode.window.activeTextEditor?.document.fileName === mk.filePath) {
+                    this.teColorManager(TEColorManagerType.tecmtShow, mk);
+                }
+    
+                if (vscode.window.activeTextEditor?.document.fileName === mk.filePath) {
+                    this.sidebar?.elNow?.insert(mk);
+                    this.sidebar?.elNow?.refresh();
+                }
+                this.sidebar?.smark?.updateMarkEdit(mk);
 
-            if (vscode.window.activeTextEditor?.document.fileName === mk.filePath) {
-                this.sidebar.elNow?.insert(mk);
-                this.sidebar.elNow?.refresh();
-            }
-            this.sidebar.smark?.updateMarkEdit(mk);
+            });
+
+
         }else{
             vscode.window.showInformationMessage("Please Initialize CodeNotes");
         }
@@ -113,10 +120,14 @@ export class MarkManager {
         if (this.db && this.sidebar) {
             const mk = this.db.mkmap.get(id);
             this.teColorManager(TEColorManagerType.tecmtClear, mk);
-            this.db.deleteDB(id);
-            this.db.mkmap.delete(id);
-            this.sidebar.elNow.refresh();
-            this.sidebar.elAll.refresh();
+
+            const promise = this.db.loadDeleteDBPromise(id);
+            promise.then((res: any) => {
+                this.db?.mkmap.delete(id);
+                this.sidebar?.elNow.refresh();
+                this.sidebar?.elAll.refresh();
+            });
+
         }
     }
 
@@ -209,6 +220,11 @@ export class MarkManager {
 
     }
 
+    /**
+     * 颜色管理
+     * @param type 
+     * @param mk 
+     */
     public teColorManager(type: TEColorManagerType, mk?: mark.Mark) {
         if (type === TEColorManagerType.tecmtInit) {
             vscode.window.visibleTextEditors.forEach(editor => {
@@ -242,6 +258,12 @@ export class MarkManager {
         }
     }
 
+    /**
+     * 段落颜色显示
+     * @param textEditor 
+     * @param mk 
+     * @param en 
+     */
     public async showColor(textEditor: vscode.TextEditor, mk: mark.Mark, en: ShowColorType) {
 
         if(mk.isOffsetInit === false)
@@ -318,6 +340,10 @@ export class MarkManager {
         }
     }
 
+    /**
+     * 点击item执行
+     * @param id 
+     */
     //文件插入内容请看:http://www.voidcn.com/article/p-kyntjbrl-bvo.html
     public click(id: number) {
         if (this.db && this.sidebar?.elAll) {
@@ -338,6 +364,13 @@ export class MarkManager {
         }
     }
 
+    /**
+     * 检查point在文件中的位置是否符合段内
+     * @param doc 
+     * @param mk 
+     * @param p 
+     * @returns 
+     */
     public static checkPoint(doc:vscode.TextDocument,mk: mark.Mark, p: Position): boolean {
         const docOffset = doc.offsetAt(p);
         if(mk.startOffsetMark <= docOffset && docOffset <= mk.endOffsetMark)
@@ -347,6 +380,11 @@ export class MarkManager {
         return false;
     }
 
+    /**
+     * 获取HoverProvider
+     * @param db 
+     * @returns 
+     */
     public getHoverProvider(db: database.DataBase) {
         return vscode.languages.registerHoverProvider('*', {
             provideHover(document, position, token) {
@@ -457,6 +495,11 @@ export class MarkManager {
 
     }
 
+    /**
+     * 设置颜色
+     * @param id 
+     * @param color 
+     */
     public setColor(id:number,color:string)
     {
         const mk = this.db?.mkmap.get(id);
