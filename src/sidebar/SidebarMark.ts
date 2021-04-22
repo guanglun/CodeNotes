@@ -25,6 +25,7 @@ export class SidebarMark implements vscode.WebviewViewProvider {
       localResourceRoots: [this.context.extensionUri],
     };
 
+
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
     webviewView.webview.onDidReceiveMessage(async (data): Promise<void> => {
       if (data.type === "setColor") {
