@@ -29,41 +29,47 @@ export function activate(context: vscode.ExtensionContext) {
 	if(sd.sweb){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_web", sd.sweb,{webviewOptions: {retainContextWhenHidden: true}}));}
 	if(sd.smark){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_mark", sd.smark,{webviewOptions: {retainContextWhenHidden: true}}));}
 
-	context.subscriptions.push (vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
-			//vscode.window.setStatusBarMessage('Delete ' + res.command.arguments[0],3000);
 			mm.delete(res.command.arguments[0]);
 		}
 	}));
 
-	context.subscriptions.push (vscode.commands.registerCommand('codenotes.renameItem', (res: Sidebar.EntryItem) => {
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.addJumpButton', (res: Sidebar.EntryItem) => {
+		if(res.command && res.command.arguments)
+		{
+			mm.addJump(res.command.arguments[0]);
+		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.renameItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			mm.renameItem(res.command.arguments[0]);
 		}
 	}));
 
-	context.subscriptions.push (vscode.commands.registerCommand('codenotes.editItem', (res: Sidebar.EntryItem) => {
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.editItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
 			mm.editItem(res.command.arguments[0]);
 		}
 	}));
 
-	context.subscriptions.push (vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
 		mm.insert(textEditor);
 	}));
 
 
 
-	context.subscriptions.push (vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll));
-	context.subscriptions.push (vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
+	context.subscriptions.push(vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll));
+	context.subscriptions.push(vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
 		mm.click(args);
 	}));
 
-	context.subscriptions.push (vscode.window.registerTreeDataProvider("sidebar_marks_now", sd.elNow));
-	context.subscriptions.push (vscode.commands.registerCommand("sidebar_marks_now.openChild", (args: number) => {
+	context.subscriptions.push(vscode.window.registerTreeDataProvider("sidebar_marks_now", sd.elNow));
+	context.subscriptions.push(vscode.commands.registerCommand("sidebar_marks_now.openChild", (args: number) => {
 		mm.click(args);
 	}));
 
@@ -104,7 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}  
 	}));
 	
-	context.subscriptions.push (vscode.workspace.onDidSaveTextDocument((editor => {  
+	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((editor => {  
 		//console.log(editor.fileName);
 
 		db?.mkmap.forEach((mk, key, map)=>
@@ -117,7 +123,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	})));
 	
-	context.subscriptions.push (vscode.workspace.onDidChangeConfiguration((cevent =>{
+	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((cevent =>{
 		if (cevent.affectsConfiguration("CodeNotes.disableColor")) {
 			console.log("affectsConfiguration");
 			mm.reloadAllDocColor();
@@ -128,7 +134,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	})));
 
-	context.subscriptions.push (vscode.workspace.onDidChangeTextDocument(doc => {  
+	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(doc => {  
 	
 		doc.contentChanges.forEach((cc, key, map)=>
 		{

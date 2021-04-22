@@ -46,6 +46,10 @@
 			{
 				"command": "codenotes.editItem",
 				"title": "Edit"
+			},
+			{
+				"command": "codenotes.addJumpButton",
+				"title": "Add Jump Button"
 			}
 		],
 		"menus": {
@@ -72,6 +76,10 @@
 				},
 				{
 					"command": "codenotes.editItem",
+					"group": "navigation"
+				},
+				{
+					"command": "codenotes.addJumpButton",
 					"group": "navigation"
 				}
 			]

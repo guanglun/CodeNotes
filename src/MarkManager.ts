@@ -118,7 +118,9 @@ export class MarkManager {
 
     public delete(id: number) {
         if (this.db && this.sidebar) {
+            
             const mk = this.db.mkmap.get(id);
+            const name = mk?.name;
             this.teColorManager(TEColorManagerType.tecmtClear, mk);
 
             const promise = this.db.loadDeleteDBPromise(id);
@@ -126,8 +128,20 @@ export class MarkManager {
                 this.db?.mkmap.delete(id);
                 this.sidebar?.elNow.refresh();
                 this.sidebar?.elAll.refresh();
+                vscode.window.showInformationMessage('Delete ' + name);
             });
+        }
+    }
 
+    public addJump(id: number) {
+        if (this.db && this.sidebar) {
+            
+            const mk = this.db.mkmap.get(id);
+            const name = mk?.name;
+            const promise = this.addJumpButtonPromise();
+            promise.then((res: any) => {
+                
+            });
         }
     }
 
@@ -139,6 +153,25 @@ export class MarkManager {
                     ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
                     placeHolder: 'Rename Item', 	// 在输入框内的提示信息
                     prompt: 'Rename Item', 		// 在输入框下方的提示信息
+                    //validateInput:function(text){return text;} // 对输入内容进行验证并返回
+                }).then(function (msg) {
+                    if (msg) {
+                        resolve(msg);
+                    } else {
+                        reject(new Error("array length invalid"));
+                    }
+                });
+        });
+    }
+
+    private addJumpButtonPromise() {
+        return new Promise((resolve, reject) => {
+            vscode.window.showInputBox(
+                {                               // 这个对象中所有参数都是可选参数
+                    password: false, 			// 输入内容是否是密码
+                    ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
+                    placeHolder: 'Jumper Name', // 在输入框内的提示信息
+                    prompt: 'Please Input Jumper Name', 		// 在输入框下方的提示信息
                     //validateInput:function(text){return text;} // 对输入内容进行验证并返回
                 }).then(function (msg) {
                     if (msg) {
