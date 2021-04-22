@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.8",
+	"version": "0.0.9",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -50,6 +50,10 @@
 			{
 				"command": "codenotes.addJumpButton",
 				"title": "Add Jump Button"
+			},
+			{
+				"command": "codenotes.deleteJumpButton",
+				"title": "Delete Jump Button"
 			}
 		],
 		"menus": {
@@ -67,20 +71,24 @@
 			],
 			"view/item/context": [
 				{
-					"command": "codenotes.deleteItem",
-					"group": "navigation"
-				},
-				{
 					"command": "codenotes.renameItem",
-					"group": "navigation"
+					"group": "navigation@1"
 				},
 				{
 					"command": "codenotes.editItem",
-					"group": "navigation"
+					"group": "navigation@2"
 				},
 				{
+					"command": "codenotes.deleteItem",
+					"group": "navigation@3"
+				},				
+				{
 					"command": "codenotes.addJumpButton",
-					"group": "navigation"
+					"group": "navigation@4"
+				},
+				{
+					"command": "codenotes.deleteJumpButton",
+					"group": "navigation@5"
 				}
 			]
 		},

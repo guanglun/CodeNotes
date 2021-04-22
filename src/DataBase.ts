@@ -25,6 +25,7 @@ export class DataBase {
         end_line INTEGER,\
         end_character INTEGER, \
         color VARCHAR, \
+        jumpButton VARCHAR, \
         description VARCHAR\
         );";
 
@@ -100,6 +101,7 @@ export class DataBase {
                         res[i].end_line,
                         res[i].end_character,
                         res[i].color,
+                        res[i].jumpButton,
                         res[i].description,
                     );
                     this.mkmap.set(mk.id, mk);
@@ -161,6 +163,15 @@ export class DataBase {
     public updateName(id: number, name: string) {
 
         this.db?.run("update " + DataBase.tableName + " set name = '" + name + "' WHERE id = " + id, function (err) {
+            if (err) { 
+                vscode.window.showErrorMessage(err.toString());
+                console.error(err); }
+        });
+    }
+
+    public updateJumpButton(id: number, jb: string) {
+
+        this.db?.run("update " + DataBase.tableName + " set jumpButton = '" + jb + "' WHERE id = " + id, function (err) {
             if (err) { 
                 vscode.window.showErrorMessage(err.toString());
                 console.error(err); }
@@ -295,6 +306,7 @@ export class DataBase {
                     mk.endLine + " , " +
                     mk.endCharacter + " , " +
                     "\"" + mk.color + "\" , " +
+                    "\"" + mk.jumpButton + "\" , " +
                     "\"" + mk.description + "\"" +
                     ")";
                 //console.log(dbexc);

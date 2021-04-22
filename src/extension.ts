@@ -36,13 +36,6 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand('codenotes.addJumpButton', (res: Sidebar.EntryItem) => {
-		if(res.command && res.command.arguments)
-		{
-			mm.addJump(res.command.arguments[0]);
-		}
-	}));
-
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.renameItem', (res: Sidebar.EntryItem) => {
 		if(res.command && res.command.arguments)
 		{
@@ -54,6 +47,20 @@ export function activate(context: vscode.ExtensionContext) {
 		if(res.command && res.command.arguments)
 		{
 			mm.editItem(res.command.arguments[0]);
+		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.addJumpButton', (res: Sidebar.EntryItem) => {
+		if(res.command && res.command.arguments)
+		{
+			mm.addJump(res.command.arguments[0]);
+		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.deleteJumpButton', (res: Sidebar.EntryItem) => {
+		if(res.command && res.command.arguments)
+		{
+			mm.deleteJump(res.command.arguments[0]);
 		}
 	}));
 

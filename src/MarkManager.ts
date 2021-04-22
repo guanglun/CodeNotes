@@ -35,26 +35,21 @@ export class MarkManager {
         this.db = db;
     }
 
-    public static pathRelativeToAbsolute(rPath:string)
-    {
-        if(vscode.workspace.workspaceFolders)
-        {
+    public static pathRelativeToAbsolute(rPath: string) {
+        if (vscode.workspace.workspaceFolders) {
             const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
             console.log(workspacePath);
-            return path.join(workspacePath,rPath);
+            return path.join(workspacePath, rPath);
         }
         return undefined;
     }
 
-    public static pathAbsoluteToRelative(aPath:string)
-    {
-        if(vscode.workspace.workspaceFolders)
-        {
+    public static pathAbsoluteToRelative(aPath: string) {
+        if (vscode.workspace.workspaceFolders) {
             const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
             console.log(workspacePath);
             const sp = aPath.split(workspacePath);
-            if(sp[1])
-            {
+            if (sp[1]) {
                 return sp[1];
             }
         }
@@ -67,8 +62,7 @@ export class MarkManager {
             //const name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" + te.selection.anchor.character;
 
             let name = te.document.getText(te.selection);
-            if(name.length === 0)
-            {
+            if (name.length === 0) {
                 name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" + te.selection.anchor.character;
             }
 
@@ -97,11 +91,11 @@ export class MarkManager {
                 this.db?.mkmap.set(mk.id, mk);
                 this.sidebar?.elAll?.insert(mk);
                 this.sidebar?.elAll?.refresh();
-    
+
                 if (vscode.window.activeTextEditor?.document.fileName === mk.filePath) {
                     this.teColorManager(TEColorManagerType.tecmtShow, mk);
                 }
-    
+
                 if (vscode.window.activeTextEditor?.document.fileName === mk.filePath) {
                     this.sidebar?.elNow?.insert(mk);
                     this.sidebar?.elNow?.refresh();
@@ -111,14 +105,14 @@ export class MarkManager {
             });
 
 
-        }else{
+        } else {
             vscode.window.showInformationMessage("Please Initialize CodeNotes");
         }
     }
 
     public delete(id: number) {
         if (this.db && this.sidebar) {
-            
+
             const mk = this.db.mkmap.get(id);
             const name = mk?.name;
             this.teColorManager(TEColorManagerType.tecmtClear, mk);
@@ -133,15 +127,92 @@ export class MarkManager {
         }
     }
 
-    public addJump(id: number) {
+    public async deleteJump(id: number) {
         if (this.db && this.sidebar) {
-            
+            const mk = this.db.mkmap.get(id);
+
+            if(mk?.mdata.jb[0] == null && mk?.mdata.jb.length == 1)
+            {
+                vscode.window.showInformationMessage('No one JumpButton');
+            }else{
+                const name = mk?.name;
+
+                let items: vscode.QuickPickItem[] = [];
+    
+                mk?.mdata.jb.forEach((value, key, map) => {
+                    items.push({
+                        label: value.name?value.name:"null",
+                        description: 'id:' + value.id,
+                        detail: "click delete"
+                    })
+    
+                });
+    
+                let value = await vscode.window.showQuickPick(items);
+    
+                if(value && mk)
+                {
+                    const deleteId = Number(value?.description?.split('id:')[1]);
+                 
+                    function findJb(res:any) {
+                        if(res.name === value?.label && res.id == deleteId )
+                            return true;
+                        else
+                            return false;
+                    }
+    
+                    delete mk?.mdata.jb[mk?.mdata.jb.findIndex(findJb)];
+                    let json = JSON.stringify(mk.mdata.jb);
+                    mk.jumpButton = json;                
+                    this.db.updateJumpButton(id,mk.jumpButton);
+                }
+            }
+
+
+        }
+
+    }
+
+    public async addJump(id: number) {
+        if (this.db && this.sidebar) {
             const mk = this.db.mkmap.get(id);
             const name = mk?.name;
-            const promise = this.addJumpButtonPromise();
-            promise.then((res: any) => {
-                
-            });
+
+            let btName = await vscode.window.showInputBox({
+                    password: false, 			// 输入内容是否是密码
+                    ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
+                    placeHolder: 'Jumper Name', // 在输入框内的提示信息
+                    prompt: 'Please Input Jumper Name', 		// 在输入框下方的提示信息
+                    //validateInput:function(text){return text;} // 对输入内容进行验证并返回
+                    validateInput: (text) => {
+                        return text.length > 0 ? null : 'null is error';
+                    },}
+                    );
+
+            if(btName)
+            {
+                let items: vscode.QuickPickItem[] = [];
+
+                this.db?.mkmap.forEach((value, key, map) => {
+                    items.push({
+                        label: value.name?value.name:"null",
+                        description: 'id:' + value.id,
+                        detail: value.description?value.description:"null"
+                    })
+
+                });
+
+                let value = await vscode.window.showQuickPick(items);
+
+                if(value && mk)
+                {
+                    const jumpId = Number(value?.description?.split('id:')[1]);
+                    mk.mdata.jb.push(new mark.JumpButton(btName,jumpId));
+                    let json = JSON.stringify(mk.mdata.jb);
+                    mk.jumpButton = json;
+                    this.db.updateJumpButton(id,mk.jumpButton);
+                }
+            }
         }
     }
 
@@ -164,34 +235,15 @@ export class MarkManager {
         });
     }
 
-    private addJumpButtonPromise() {
-        return new Promise((resolve, reject) => {
-            vscode.window.showInputBox(
-                {                               // 这个对象中所有参数都是可选参数
-                    password: false, 			// 输入内容是否是密码
-                    ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
-                    placeHolder: 'Jumper Name', // 在输入框内的提示信息
-                    prompt: 'Please Input Jumper Name', 		// 在输入框下方的提示信息
-                    //validateInput:function(text){return text;} // 对输入内容进行验证并返回
-                }).then(function (msg) {
-                    if (msg) {
-                        resolve(msg);
-                    } else {
-                        reject(new Error("array length invalid"));
-                    }
-                });
-        });
-    }
-
     public renameItem(id: number) {
         const promise = this.renameItemPromise();
         promise.then((res: any) => {
-            this.setName(id,res);
+            this.setName(id, res);
+
         });
     }
 
-    public setName(id:number,name:string)
-    {
+    public setName(id: number, name: string) {
         const mk = this.db?.mkmap.get(id);
         if (mk) {
 
@@ -206,8 +258,7 @@ export class MarkManager {
         }
     }
 
-    public setDescription(id:number,description:string)
-    {
+    public setDescription(id: number, description: string) {
         const mk = this.db?.mkmap.get(id);
         if (mk) {
 
@@ -245,10 +296,9 @@ export class MarkManager {
         }
     }
 
-    public reloadAllDocColor()
-    {
+    public reloadAllDocColor() {
         this.db?.mkmap.forEach((mk, key, map) => {
-            this.teColorManager(TEColorManagerType.tecmtShow,mk);
+            this.teColorManager(TEColorManagerType.tecmtShow, mk);
         });
 
     }
@@ -299,8 +349,7 @@ export class MarkManager {
      */
     public async showColor(textEditor: vscode.TextEditor, mk: mark.Mark, en: ShowColorType) {
 
-        if(mk.isOffsetInit === false)
-        {
+        if (mk.isOffsetInit === false) {
             mk.isOffsetInit = true;
             mk.startOffsetMark = textEditor.document.offsetAt(new Position(mk.startLine, mk.startCharacter));
             mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine, mk.endCharacter));
@@ -311,38 +360,35 @@ export class MarkManager {
                 textEditor.document.positionAt(mk.endOffsetMark));
 
             textEditor.revealRange(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                textEditor.document.positionAt(mk.endOffsetMark)),vscode.TextEditorRevealType.InCenter);
+                textEditor.document.positionAt(mk.endOffsetMark)), vscode.TextEditorRevealType.InCenter);
         }
 
         if (en === ShowColorType.sctShow) {
 
             let color;
-            if(mk.color)
-            {
+            if (mk.color) {
                 color = mk.color;
-            }else{
+            } else {
                 color = "#FF0000";
             }
 
             const decorationType = vscode.window.createTextEditorDecorationType({
                 gutterIconSize: "14px",
-                gutterIconPath: path.join(this.context.extensionPath ,"images/mark.png"),
-                backgroundColor: color+"50",
+                gutterIconPath: path.join(this.context.extensionPath, "images/mark.png"),
+                backgroundColor: color + "50",
                 opacity: "1",
                 borderRadius: "4px",
             });
 
             const range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-            textEditor.document.positionAt(mk.endOffsetMark));
+                textEditor.document.positionAt(mk.endOffsetMark));
 
-            if(mk.mdata?.decorationType)
-            {
+            if (mk.mdata?.decorationType) {
                 mk.mdata.decorationType.dispose();
             }
 
             mk.mdata?.setDecorationType(decorationType);
-            if(vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false)
-            {
+            if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
                 textEditor.setDecorations(decorationType, [range]);
             }
         }
@@ -389,10 +435,9 @@ export class MarkManager {
      * @param p 
      * @returns 
      */
-    public static checkPoint(doc:vscode.TextDocument,mk: mark.Mark, p: Position): boolean {
+    public static checkPoint(doc: vscode.TextDocument, mk: mark.Mark, p: Position): boolean {
         const docOffset = doc.offsetAt(p);
-        if(mk.startOffsetMark <= docOffset && docOffset <= mk.endOffsetMark)
-        {
+        if (mk.startOffsetMark <= docOffset && docOffset <= mk.endOffsetMark) {
             return true;
         }
         return false;
@@ -410,29 +455,37 @@ export class MarkManager {
                 const fileName = document.fileName;
                 //const workDir = path.dirname(fileName);
                 //const word = document.getText(document.getWordRangeAtPosition(position));
-
-                let note = "";
-
+                let isShow = false;
+                const contents = new vscode.MarkdownString();
                 db?.mkmap.forEach((value, key, map) => {
                     if (value.filePath === fileName) {
-                        if (MarkManager.checkPoint(document,value, position) === true) {
-                            note += "### " + value.name + "    \r\n";
+                        if (MarkManager.checkPoint(document, value, position) === true) {
+                            isShow = true;
+
+                            let note = "### " + value.name + "    \r\n";
                             note += value.description + "    \r\n";
+
+                            contents.appendMarkdown(note);
+
+                            value.mdata.jb.forEach((res) => {
+                                const args = [res.id];
+                                console.log(args)
+                                const commentCommandUri = vscode.Uri.parse(`command:sidebar_marks_all.openChild?${encodeURIComponent(JSON.stringify(args))}`);
+                                contents.appendMarkdown(`* [`+ res.name +`](${commentCommandUri})  \r\n`);
+                            });
+
                         }
                     }
                 });
 
                 //使用细节查看https://code.visualstudio.com/api/extension-guides/command
                 //搜索 commentCommandUri 快速定位
-                const contents = new vscode.MarkdownString(note);
-                const args = [3];
-                const commentCommandUri = vscode.Uri.parse(`command:sidebar_marks_all.openChild?${encodeURIComponent(JSON.stringify(args))}`);
-                contents.appendMarkdown(`* [Add comment](${commentCommandUri})`);
-
-
+                
                 contents.isTrusted = true;
-
-                return new vscode.Hover(contents);
+                if(isShow == false)
+                    return undefined;
+                else
+                    return new vscode.Hover(contents);
 
             }
         }
@@ -484,8 +537,7 @@ export class MarkManager {
                 cc.rangeOffset >= mk.startOffsetMark &&
                 cc.rangeLength !== 0) {
 
-                if((cc.rangeOffset + cc.text.length) < mk.endOffsetMark)
-                {
+                if ((cc.rangeOffset + cc.text.length) < mk.endOffsetMark) {
                     //console.log("end code 0.1");
                     mk.endOffsetMark -= (mk.endOffsetMark - cc.rangeOffset - cc.text.length);
                 }
@@ -510,11 +562,9 @@ export class MarkManager {
      * @param id 
      * @param color 
      */
-    public setColor(id:number,color:string)
-    {
+    public setColor(id: number, color: string) {
         const mk = this.db?.mkmap.get(id);
-        if(mk)
-        {
+        if (mk) {
             mk.color = color;
             //console.log("set color " + color);
             vscode.window.visibleTextEditors.forEach(editor => {
@@ -525,7 +575,7 @@ export class MarkManager {
                 }
             });
 
-            this.db?.updateColor(mk.id,color);
+            this.db?.updateColor(mk.id, color);
         }
     }
 }

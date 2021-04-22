@@ -31,12 +31,12 @@ export class Mark {
 
     public color: string = "#FF0000";
     public relativePath: string | undefined;
+    public jumpButton: string = "";
     public description: string = "";
-    
 
     constructor(id?: number, name?: string, flag?: number, relativePath?: string,
         anchorLine?: number, anchorCharacter?: number, activeLine?: number, activeCharacter?: number,
-        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number,color?:string,description?:string) {
+        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number,color?:string,jumpButton?:string,description?:string) {
 
         if (id) { this.id = id; }
         if (name) { this.name = name; }
@@ -66,6 +66,14 @@ export class Mark {
         if (color) {
             this.color = color;
         }
+        if (jumpButton) {
+
+            this.jumpButton = jumpButton;
+            var obj;
+            try{
+                this.mdata.jb = JSON.parse(jumpButton);
+            }catch{}
+        }        
         if (description) {
             this.description = description;
         }
@@ -98,6 +106,8 @@ export class Mdata {
     public eitemAll: sidebar.EntryItem | undefined;
     public eitemNow: sidebar.EntryItem | undefined;
 
+    public jb:JumpButton[] = [];
+
     public setEntryItemAll(el: sidebar.EntryItem) {
         this.eitemAll = el;
     }
@@ -109,5 +119,18 @@ export class Mdata {
     public setDecorationType(dt: vscode.TextEditorDecorationType) {
         this.decorationType = dt;
     }
+}
 
+export class JumpButton {
+    public name: string = "";
+    public id: number = 0;
+
+    constructor(name?: string, id?: number)
+    {
+        if(name)
+            this.name = name;
+
+        if(id)
+            this.id = id;
+    }
 }
