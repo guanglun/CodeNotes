@@ -1,3 +1,6 @@
+### Version 0.0.10
+- 完成右击快捷操作，Edit、Rename、Delete、Jump等
+
 ### Version 0.0.9
 - 初步完成跳转按钮功能
 

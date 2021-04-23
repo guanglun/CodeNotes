@@ -30,6 +30,8 @@ export function activate(context: vscode.ExtensionContext) {
 	if(sd.smark){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_mark", sd.smark,{webviewOptions: {retainContextWhenHidden: true}}));}
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
+		if(!mm.checkDBInit())
+			return;
 		if(res.command && res.command.arguments)
 		{
 			mm.delete(res.command.arguments[0]);
@@ -37,6 +39,8 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.renameItem', (res: Sidebar.EntryItem) => {
+		if(!mm.checkDBInit())
+			return;		
 		if(res.command && res.command.arguments)
 		{
 			mm.renameItem(res.command.arguments[0]);
@@ -44,20 +48,61 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.editItem', (res: Sidebar.EntryItem) => {
+		if(!mm.checkDBInit())
+			return;		
 		if(res.command && res.command.arguments)
 		{
 			mm.editItem(res.command.arguments[0]);
 		}
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand('codenotes.addJumpButton', (res: Sidebar.EntryItem) => {
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.editMark', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		await mm.editItem( await mm.selectWhitch(textEditor,'Edit'));
+
+	}));
+
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteMark', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		await mm.delete( await mm.selectWhitch(textEditor,'Delete'));
+
+	}));
+
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.renameMark', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		await mm.renameItem( await mm.selectWhitch(textEditor,'Rename'));
+
+	}));
+
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.addJumpLinkMark', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;
+		await mm.addJump( await mm.selectWhitch(textEditor,'Add Jump Link'));
+
+	}));
+
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteJumpLinkMark', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		await mm.deleteJump( await mm.selectWhitch(textEditor,'Delete Jump Link'));
+
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.addJumpLink', (res: Sidebar.EntryItem) => {
+		if(!mm.checkDBInit())
+			return;		
 		if(res.command && res.command.arguments)
 		{
 			mm.addJump(res.command.arguments[0]);
 		}
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand('codenotes.deleteJumpButton', (res: Sidebar.EntryItem) => {
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.deleteJumpLink', (res: Sidebar.EntryItem) => {
+		if(!mm.checkDBInit())
+			return;		
 		if(res.command && res.command.arguments)
 		{
 			mm.deleteJump(res.command.arguments[0]);
@@ -65,18 +110,22 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
 		mm.insert(textEditor);
 	}));
 
-
-
 	context.subscriptions.push(vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll));
 	context.subscriptions.push(vscode.commands.registerCommand("sidebar_marks_all.openChild", (args: number) => {
+		if(!mm.checkDBInit())
+			return;		
 		mm.click(args);
 	}));
 
 	context.subscriptions.push(vscode.window.registerTreeDataProvider("sidebar_marks_now", sd.elNow));
 	context.subscriptions.push(vscode.commands.registerCommand("sidebar_marks_now.openChild", (args: number) => {
+		if(!mm.checkDBInit())
+			return;		
 		mm.click(args);
 	}));
 
@@ -87,7 +136,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// });
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {
-		// 建立webview
+		if(!mm.checkDBInit())
+			return;
 		const panel = vscode.window.createWebviewPanel(
 			'testWebview', // viewType
 			"WebView演示", // 视图标题
@@ -153,7 +203,6 @@ export function activate(context: vscode.ExtensionContext) {
 					mm.onChangeDoc(mk,cc,doc);
 				}
 			});
-
 		});
 
 	}));

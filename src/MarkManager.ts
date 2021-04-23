@@ -5,6 +5,7 @@ import * as mark from './Mark';
 import * as path from 'path';
 import { Position } from 'vscode';
 import { mkdir } from 'node:fs';
+import { isDate } from 'node:util';
 
 
 export enum ShowColorType {
@@ -57,7 +58,7 @@ export class MarkManager {
     }
 
     public insert(te: vscode.TextEditor) {
-        if (this.db && this.sidebar && this.db.isDBInit === true) {
+        if (this.db && this.sidebar) {
 
             //const name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" + te.selection.anchor.character;
 
@@ -105,9 +106,14 @@ export class MarkManager {
             });
 
 
-        } else {
-            vscode.window.showInformationMessage("Please Initialize CodeNotes");
         }
+    }
+
+    public checkDBInit()
+    {
+        if(this.db?.isDBInit == false)
+            vscode.window.showErrorMessage("Please Initialize CodeNotes");
+        return this.db?.isDBInit;            
     }
 
     public delete(id: number) {
@@ -122,7 +128,7 @@ export class MarkManager {
                 this.db?.mkmap.delete(id);
                 this.sidebar?.elNow.refresh();
                 this.sidebar?.elAll.refresh();
-                vscode.window.showInformationMessage('Delete ' + name);
+                vscode.window.setStatusBarMessage('Delete ' + name,2000);
             });
         }
     }
@@ -133,7 +139,7 @@ export class MarkManager {
 
             if(mk?.mdata.jb[0] === null && mk?.mdata.jb.length === 1)
             {
-                vscode.window.showInformationMessage('No one JumpButton');
+                vscode.window.setStatusBarMessage('No one Jump Link',2000);
             }else{
                 const name = mk?.name;
 
@@ -145,32 +151,37 @@ export class MarkManager {
                         description: 'id:' + value.id,
                         detail: "click delete"
                     });
-    
                 });
     
-                let value = await vscode.window.showQuickPick(items);
-    
-                if(value && mk)
+                if(items.length > 0)
                 {
-                    const deleteId = Number(value?.description?.split('id:')[1]);
-                 
-                    function findJb(res:any) {
-                        if(res.name === value?.label && res.id === deleteId )
-                        {
-                            return true;
-                        }  
-                        else
-                        {
-                            return false;
-                        }
-                            
-                    }
+                    let value = await vscode.window.showQuickPick(items,{placeHolder:'Sletct Delete Jump'});
     
-                    delete mk?.mdata.jb[mk?.mdata.jb.findIndex(findJb)];
-                    let json = JSON.stringify(mk.mdata.jb);
-                    mk.jumpButton = json;                
-                    this.db.updateJumpButton(id,mk.jumpButton);
+                    if(value && mk)
+                    {
+                        const deleteId = Number(value?.description?.split('id:')[1]);
+                     
+                        function findJb(res:any) {
+                            if(res.name === value?.label && res.id === deleteId )
+                            {
+                                return true;
+                            }  
+                            else
+                            {
+                                return false;
+                            }
+                                
+                        }
+        
+                        delete mk?.mdata.jb[mk?.mdata.jb.findIndex(findJb)];
+                        let json = JSON.stringify(mk.mdata.jb);
+                        mk.jumpLink = json;                
+                        this.db.updateJumpLink(id,mk.jumpLink);
+                    }
+                }else{
+                    vscode.window.setStatusBarMessage('Not Found Jump',2000);
                 }
+
             }
 
 
@@ -178,7 +189,19 @@ export class MarkManager {
 
     }
 
+    public getQuickPickItem(mk: mark.Mark)
+    {
+        return {
+            label: mk.name?mk.name:"null",
+            description: 'id:' + mk.id,
+            detail: 'jump num:'+mk.mdata.jb.length
+        }
+    }
+
     public async addJump(id: number) {
+        if(id == 0)
+            return;
+
         if (this.db && this.sidebar) {
             const mk = this.db.mkmap.get(id);
             const name = mk?.name;
@@ -187,7 +210,7 @@ export class MarkManager {
                     password: false, 			// 输入内容是否是密码
                     ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
                     placeHolder: 'Jumper Name', // 在输入框内的提示信息
-                    prompt: 'Please Input Jumper Name', 		// 在输入框下方的提示信息
+                    prompt: 'Input Jumper Name', 		// 在输入框下方的提示信息
                     //validateInput:function(text){return text;} // 对输入内容进行验证并返回
                     validateInput: (text) => {
                         return text.length > 0 ? null : 'null is error';
@@ -199,23 +222,18 @@ export class MarkManager {
                 let items: vscode.QuickPickItem[] = [];
 
                 this.db?.mkmap.forEach((value, key, map) => {
-                    items.push({
-                        label: value.name?value.name:"null",
-                        description: 'id:' + value.id,
-                        detail: value.description?value.description:"null"
-                    });
-
+                    items.push(this.getQuickPickItem(value));
                 });
 
-                let value = await vscode.window.showQuickPick(items);
+                let value = await vscode.window.showQuickPick(items,{placeHolder:'Sletct Jump To Mark'});
 
                 if(value && mk)
                 {
                     const jumpId = Number(value?.description?.split('id:')[1]);
-                    mk.mdata.jb.push(new mark.JumpButton(btName,jumpId));
+                    mk.mdata.jb.push(new mark.JumpLink(btName,jumpId));
                     let json = JSON.stringify(mk.mdata.jb);
-                    mk.jumpButton = json;
-                    this.db.updateJumpButton(id,mk.jumpButton);
+                    mk.jumpLink = json;
+                    this.db.updateJumpLink(id,mk.jumpLink);
                 }
             }
         }
@@ -227,8 +245,8 @@ export class MarkManager {
                 { // 这个对象中所有参数都是可选参数
                     password: false, 			// 输入内容是否是密码
                     ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
-                    placeHolder: 'Rename Item', 	// 在输入框内的提示信息
-                    prompt: 'Rename Item', 		// 在输入框下方的提示信息
+                    placeHolder: 'Rename Mark', 	// 在输入框内的提示信息
+                    prompt: 'Input New Name', 		// 在输入框下方的提示信息
                     //validateInput:function(text){return text;} // 对输入内容进行验证并返回
                 }).then(function (msg) {
                     if (msg) {
@@ -241,11 +259,14 @@ export class MarkManager {
     }
 
     public renameItem(id: number) {
-        const promise = this.renameItemPromise();
-        promise.then((res: any) => {
-            this.setName(id, res);
+        if(id != 0)
+        {
+            const promise = this.renameItemPromise();
+            promise.then((res: any) => {
+                this.setName(id, res);
+            });
+        }
 
-        });
     }
 
     public setName(id: number, name: string) {
@@ -449,6 +470,37 @@ export class MarkManager {
         return false;
     }
 
+    public async selectWhitch(te:vscode.TextEditor,work:string)
+    {
+        //console.log(te);
+        let items: vscode.QuickPickItem[] = [];
+        this.db?.mkmap.forEach((value, key, map) => {
+            if (value.filePath === te.document.fileName) {
+                if (MarkManager.checkPoint(te.document, value, te.selection.anchor) === true) {
+                        //console.log(value);
+                        items.push(this.getQuickPickItem(value));
+                }
+            }
+        });
+        if(items.length > 1)
+        {
+            let value = await vscode.window.showQuickPick(items,{placeHolder:'Sletct ' + work + ' Mark'});
+
+            if(value)
+            {
+                const jumpId = Number(value?.description?.split('id:')[1]);
+                return jumpId;
+            }
+        }else if(items.length == 1 && items[0] != null)
+        {
+            return Number(items[0]?.description?.split('id:')[1]);
+        }else{
+            vscode.window.setStatusBarMessage('Not Found Marks',2000);
+            return 0;
+        }
+        return 0;
+    }
+
     //https://code.visualstudio.com/api/extension-guides/command
     /**
      * 获取HoverProvider
@@ -458,28 +510,38 @@ export class MarkManager {
     public getHoverProvider(db: database.DataBase) {
         return vscode.languages.registerHoverProvider('*', {
             provideHover(document, position, token): vscode.ProviderResult<vscode.Hover> {
-                const fileName = document.fileName;
-                //const workDir = path.dirname(fileName);
-                //const word = document.getText(document.getWordRangeAtPosition(position));
+
                 let isShow = false;
                 const contents = new vscode.MarkdownString();
                 db?.mkmap.forEach((value, key, map) => {
-                    if (value.filePath === fileName) {
+                    if (value.filePath === document.fileName) {
                         if (MarkManager.checkPoint(document, value, position) === true) {
                             isShow = true;
+                 
+                            contents.appendMarkdown("### " + value.name + "\r\n");
 
-                            let note = "### " + value.name + "    \r\n";
-                            note += value.description + "    \r\n";
+                            // const entryItem = new Sidebar.EntryItem("",vscode.TreeItemCollapsibleState.None);
+        
+                            // entryItem.command = {
+                            // command:"", 
+                            // title:"",
+                            // arguments:[value.id] 
+                            // };
+                            
+                            // const args = [entryItem];
+                            // const editUri = vscode.Uri.parse(`command:codenotes.editItem?${encodeURIComponent(JSON.stringify(args))}`);
+                            // const deleteUri = vscode.Uri.parse(`command:codenotes.deleteItem?${encodeURIComponent(JSON.stringify(args))}`);
+                            // contents.appendMarkdown(`[Edit](${editUri}) &ensp; [Delete](${deleteUri})  \r\n`);
 
-                            contents.appendMarkdown(note);
+                            contents.appendMarkdown(value.description + "  \r\n  \r\n");
 
                             value.mdata.jb.forEach((res) => {
                                 const args = [res.id];
-                                //console.log(args)
                                 const commentCommandUri = vscode.Uri.parse(`command:sidebar_marks_all.openChild?${encodeURIComponent(JSON.stringify(args))}`);
                                 contents.appendMarkdown(`* [`+ res.name +`](${commentCommandUri})  \r\n`);
                             });
-                            contents.appendMarkdown('---   \r\n');
+                            
+                            contents.appendMarkdown("  \r\n---   \r\n");
                             
                         }
                     }

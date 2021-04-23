@@ -31,12 +31,12 @@ export class Mark {
 
     public color: string = "#FF0000";
     public relativePath: string | undefined;
-    public jumpButton: string = "";
+    public jumpLink: string = "";
     public description: string = "";
 
     constructor(id?: number, name?: string, flag?: number, relativePath?: string,
         anchorLine?: number, anchorCharacter?: number, activeLine?: number, activeCharacter?: number,
-        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number,color?:string,jumpButton?:string,description?:string) {
+        startLine?: number, startCharacter?: number, endLine?: number, endCharacter?: number,color?:string,jumpLink?:string,description?:string) {
 
         if (id) { this.id = id; }
         if (name) { this.name = name; }
@@ -66,12 +66,12 @@ export class Mark {
         if (color) {
             this.color = color;
         }
-        if (jumpButton) {
+        if (jumpLink) {
 
-            this.jumpButton = jumpButton;
+            this.jumpLink = jumpLink;
             var obj;
             try{
-                this.mdata.jb = JSON.parse(jumpButton);
+                this.mdata.jb = JSON.parse(jumpLink);
             }catch{}
         }        
         if (description) {
@@ -106,7 +106,7 @@ export class Mdata {
     public eitemAll: sidebar.EntryItem | undefined;
     public eitemNow: sidebar.EntryItem | undefined;
 
-    public jb:JumpButton[] = [];
+    public jb:JumpLink[] = [];
 
     public setEntryItemAll(el: sidebar.EntryItem) {
         this.eitemAll = el;
@@ -121,7 +121,7 @@ export class Mdata {
     }
 }
 
-export class JumpButton {
+export class JumpLink {
     public name: string = "";
     public id: number = 0;
 

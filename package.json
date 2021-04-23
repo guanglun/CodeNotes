@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -29,14 +29,18 @@
 		"commands": [
 			{
 				"command": "codenotes.insertmark",
-				"title": "CodeNotes Insert Mark"
+				"title": "CodeNotes Insert"
 			},
 			{
 				"command": "codenotes.openWebview",
-				"title": "CodeNotes Open Web View"
+				"title": "CodeNotes OpenView"
 			},
 			{
 				"command": "codenotes.deleteItem",
+				"title": "Delete"
+			},
+			{
+				"command": "codenotes.deleteMark",
 				"title": "Delete"
 			},
 			{
@@ -44,51 +48,110 @@
 				"title": "Rename"
 			},
 			{
+				"command": "codenotes.renameMark",
+				"title": "Rename"
+			},
+			{
 				"command": "codenotes.editItem",
 				"title": "Edit"
 			},
 			{
-				"command": "codenotes.addJumpButton",
-				"title": "Add Jump Button"
+				"command": "codenotes.editMark",
+				"title": "Edit"
 			},
 			{
-				"command": "codenotes.deleteJumpButton",
-				"title": "Delete Jump Button"
+				"command": "codenotes.addJumpLink",
+				"title": "Add Jump Link"
+			},
+			{
+				"command": "codenotes.deleteJumpLink",
+				"title": "Delete Jump Link"
+			},
+			{
+				"command": "codenotes.addJumpLinkMark",
+				"title": "Add Jump Link"
+			},
+			{
+				"command": "codenotes.deleteJumpLinkMark",
+				"title": "Delete Jump Link"
 			}
 		],
+		"submenus": [
+			{
+			  "id": "codenotes.mark",
+			  "label": "CodeNotes Mark"
+			}
+		  ],
 		"menus": {
+
 			"editor/context": [
 				{
 					"when": "editorFocus",
 					"command": "codenotes.insertmark",
-					"group": "navigation"
+					"group": "0_codenotes@1"
 				},
 				{
 					"when": "editorFocus",
 					"command": "codenotes.openWebview",
-					"group": "navigation"
+					"group": "0_codenotes@2"
+				},
+				{
+				  "submenu": "codenotes.mark",
+				  "group": "0_codenotes@3"
+				}
+			],
+			"codenotes.mark": [
+				{
+					"when": "editorFocus",
+					"command": "codenotes.editMark",
+					"group": "0_codenotes@1"
+				},
+				{
+					"when": "editorFocus",
+					"command": "codenotes.renameMark",
+					"group": "0_codenotes@2"
+				},
+				{
+					"when": "editorFocus",
+					"command": "codenotes.deleteMark",
+					"group": "0_codenotes@3"
+				},
+				{
+					"when": "editorFocus",
+					"command": "codenotes.addJumpLinkMark",
+					"group": "0_codenotes@4"
+				},
+				{
+					"when": "editorFocus",
+					"command": "codenotes.deleteJumpLinkMark",
+					"group": "0_codenotes@5"
 				}
 			],
 			"view/item/context": [
 				{
-					"command": "codenotes.renameItem",
-					"group": "navigation@1"
+					"command": "codenotes.editItem",
+					"group": "navigation@1",
+					"when": "view == sidebar_marks_all || view == sidebar_marks_now"
 				},
 				{
-					"command": "codenotes.editItem",
-					"group": "navigation@2"
+					"command": "codenotes.renameItem",
+					"group": "navigation@2",
+					"when": "view == sidebar_marks_all || view == sidebar_marks_now"
 				},
 				{
 					"command": "codenotes.deleteItem",
-					"group": "navigation@3"
+					"group": "navigation@3",
+					"when": "view == sidebar_marks_all || view == sidebar_marks_now"
 				},				
 				{
-					"command": "codenotes.addJumpButton",
-					"group": "navigation@4"
+					"command": "codenotes.addJumpLink",
+					"group": "navigation@4",
+					"when": "view == sidebar_marks_all || view == sidebar_marks_now"
 				},
 				{
-					"command": "codenotes.deleteJumpButton",
-					"group": "navigation@5"
+					"command": "codenotes.deleteJumpLink",
+					"group": "navigation@5",
+					"when": "view == sidebar_marks_all || view == sidebar_marks_now"
 				}
 			]
 		},
