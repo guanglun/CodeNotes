@@ -38,7 +38,7 @@ export class MarkManager {
     public static pathRelativeToAbsolute(rPath: string) {
         if (vscode.workspace.workspaceFolders) {
             const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            console.log(workspacePath);
+            //console.log(workspacePath);
             return path.join(workspacePath, rPath);
         }
         return undefined;
@@ -47,7 +47,7 @@ export class MarkManager {
     public static pathAbsoluteToRelative(aPath: string) {
         if (vscode.workspace.workspaceFolders) {
             const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            console.log(workspacePath);
+            //console.log(workspacePath);
             const sp = aPath.split(workspacePath);
             if (sp[1]) {
                 return sp[1];
@@ -131,7 +131,7 @@ export class MarkManager {
         if (this.db && this.sidebar) {
             const mk = this.db.mkmap.get(id);
 
-            if(mk?.mdata.jb[0] == null && mk?.mdata.jb.length == 1)
+            if(mk?.mdata.jb[0] === null && mk?.mdata.jb.length === 1)
             {
                 vscode.window.showInformationMessage('No one JumpButton');
             }else{
@@ -144,7 +144,7 @@ export class MarkManager {
                         label: value.name?value.name:"null",
                         description: 'id:' + value.id,
                         detail: "click delete"
-                    })
+                    });
     
                 });
     
@@ -155,10 +155,15 @@ export class MarkManager {
                     const deleteId = Number(value?.description?.split('id:')[1]);
                  
                     function findJb(res:any) {
-                        if(res.name === value?.label && res.id == deleteId )
+                        if(res.name === value?.label && res.id === deleteId )
+                        {
                             return true;
+                        }  
                         else
+                        {
                             return false;
+                        }
+                            
                     }
     
                     delete mk?.mdata.jb[mk?.mdata.jb.findIndex(findJb)];
@@ -198,7 +203,7 @@ export class MarkManager {
                         label: value.name?value.name:"null",
                         description: 'id:' + value.id,
                         detail: value.description?value.description:"null"
-                    })
+                    });
 
                 });
 
@@ -272,7 +277,8 @@ export class MarkManager {
 
         const mk = this.db?.mkmap.get(id);
         if (mk) {
-            console.log(mk.textEditor);
+            //console.log(mk.textEditor);
+            this.sidebar?.smark?.updateMarkEdit(mk);
         }
 
     }
@@ -469,11 +475,12 @@ export class MarkManager {
 
                             value.mdata.jb.forEach((res) => {
                                 const args = [res.id];
-                                console.log(args)
+                                //console.log(args)
                                 const commentCommandUri = vscode.Uri.parse(`command:sidebar_marks_all.openChild?${encodeURIComponent(JSON.stringify(args))}`);
                                 contents.appendMarkdown(`* [`+ res.name +`](${commentCommandUri})  \r\n`);
                             });
-
+                            contents.appendMarkdown('---   \r\n');
+                            
                         }
                     }
                 });

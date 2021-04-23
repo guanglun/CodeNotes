@@ -82,7 +82,7 @@ export class DataBase {
     public loadDB() {
         const promise = this.loadDBIntoMemPromise();
         promise.then((res: any) => {
-            console.log(res);
+            //console.log(res);
             if (res.length) {
                 this.mkmap.clear();
                 for (let i = 0; i < res.length; i++) {

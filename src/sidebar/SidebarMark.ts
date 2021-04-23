@@ -34,7 +34,7 @@ export class SidebarMark implements vscode.WebviewViewProvider {
         //console.log(data.id+ " "+data.name);
         this.mm.setName(data.id,data.name);
       }else if (data.type === "setDescription") {
-        console.log(data.id+ " "+data.description);
+        //console.log(data.id+ " "+data.description);
         this.mm.setDescription(data.id,data.description);
       }
     });
