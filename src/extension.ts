@@ -6,6 +6,7 @@ import * as Sidebar from './sidebar/Sidebar';
 import * as markmanager from './MarkManager';
 import * as SidebarWeb from './sidebar/SidebarWeb';
 import * as SidebarMark from './sidebar/SidebarMark';
+import * as ViewMarks from './webview/ViewMarks';
 import * as path from 'path';
 
 // this method is called when your extension is activated
@@ -138,16 +139,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {
 		if(!mm.checkDBInit())
 			return;
-		const panel = vscode.window.createWebviewPanel(
-			'testWebview', // viewType
-			"WebView演示", // 视图标题
-			vscode.ViewColumn.One, // 显示在编辑器的哪一个部位
-			{
-				enableScripts: true, // 启用JS，默认禁用
-				retainContextWhenHidden: true, // webview被隐藏时保持状态，避免被重置
-			}
-		);
-		panel.webview.html = SidebarWeb.getWebViewContent(context, 'src/view/index.html');
+
+		ViewMarks.ViewMarksPanel.createOrShow(context.extensionUri,mm,db);
 	}));
 
 	mm.load();
@@ -207,6 +200,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 	}));
 
+	// if (vscode.window.registerWebviewPanelSerializer) {
+	// 	// Make sure we register a serializer in activation event
+	// 	vscode.window.registerWebviewPanelSerializer(ViewMarks.ViewMarksPanel.viewType, {
+	// 		async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
+	// 			console.log(`Got state: ${state}`);
+	// 			// Reset the webview options so we use latest uri for `localResourceRoots`.
+	// 			webviewPanel.webview.options = ViewMarks.ViewMarksPanel.getWebviewOptions(context.extensionUri);
+	// 			ViewMarks.ViewMarksPanel.revive(webviewPanel, context.extensionUri);
+	// 		}
+	// 	});
+	// }
 }
 
 
