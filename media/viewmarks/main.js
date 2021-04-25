@@ -7,50 +7,73 @@
 
     vscodeLog('js start up');
 
-    function vscodeLog(message)
-    {
+    function vscodeLog(message) {
         vscode.postMessage({
             command: 'log',
             text: message
         });
     }
 
-    //container.innerHTML += '<div id= "item_left" class="item"></div>';
-    //container.innerHTML += '<div id="item_right" class="item" style="left:150px;"></div>';
-    //container.innerHTML += '<div id="item_right0" class="item" style="left:300px;"></div>';
+    var connectCommon = {
+        connector: ['Bezier'],
+        anchor: ['Left', 'Right', 'Top', 'Bottom'],
+        paintStyle: { stroke: "white" },
+        connectorStyle: { stroke: 'white', strokeWidth: 6 },
+        overlays: [     [ "Arrow", { width:12, length:12, location:0.85 }],
+                        [ "Label", { location:0.65 ,label:'', cssClass:"labelStyle"}]]
+    };
 
-    // var text = document.createTextNode("这是一段文字");
-    // var ele = document.createElement("h3");//创建一个html标签
-    // ele.appendChild(text);//在标签内添加文字
-    // container.appendChild(ele);//将标签添加到页面中
+    var endpointCommon = {
+        endpoint: ["Dot", { radius: 5, cssClass: "initial_endpoint", hoverClass: "hover_endpoint" }],
+        endpointStyle: { fill: 'white' },
 
-    // <div id="item_left" class="item"></div>
-    // <div id="item_right" class="item" style="left:150px;"></div>
-    // <div id="item_right0" class="item" style="left:300px;"></div>
-
+    };
 
     // Handle messages sent from the extension to the webview
     window.addEventListener('message', event => {
         const message = event.data; // The json data that the extension sent
         switch (message.command) {
             case 'marks':
-                //vscodeLog(message.marks)
+                vscodeLog(message.marks);
                 message.marks.forEach(function (mark) {
-                    var left = mark.id * 200
-                    container.innerHTML += `<div id="id-${mark.id}" class="mark_div" style="left:${left}px;">
-                                            <div class="mark_name_div">${mark.name}<div>
+                    var left = mark.id * 200;
+                    container.innerHTML += `<div id="${mark.id}" class="mark_div" style="left:${left}px;">
+                                            <p class="mark_name_p">${mark.name}<p>
                                             </div>`;
 
                 });
 
                 message.marks.forEach(function (mark) {
-                    
-                    jsPlumb.draggable(`id-${mark.id}`)
+
+                    mark.mdata.jb.forEach(function (jb) {
+                        jsPlumb.addEndpoint(`${mark.id}`, {
+                            anchors: ['Left', 'Right', 'Top', 'Bottom'],
+                            uuid: `${mark.id}-${jb.id}-from`
+                        },endpointCommon);
+
+                        jsPlumb.addEndpoint(`${jb.id}`, {
+                            anchors: ['Left', 'Right', 'Top', 'Bottom'],
+                            uuid: `${mark.id}-${jb.id}-to`
+                        },endpointCommon);
+
+                        // connectCommon.label = `${jb.name}`;
+                        // vscodeLog(connectCommon.overlays[1]);
+                        connectCommon.overlays[1][1].label = `${jb.name}`;
+                        jsPlumb.connect({ uuids: [`${mark.id}-${jb.id}-from`, `${mark.id}-${jb.id}-to`] },connectCommon);
+                    });
+
+
+                    jsPlumb.draggable(`${mark.id}`, {
+                        grid: [1, 1]
+                    });
                 });
+
 
                 break;
         }
     });
+
+
 
     /* global jsPlumb */
     jsPlumb.ready(function () {
@@ -73,8 +96,8 @@
         // jsPlumb.draggable('item_left')
         // jsPlumb.draggable('item_right')
         // jsPlumb.draggable('item_right0')
-        vscode.postMessage({command: 'state',state: 'startup'});
-    })
+        vscode.postMessage({ command: 'state', state: 'startup' });
+    });
 
-    
+
 }());

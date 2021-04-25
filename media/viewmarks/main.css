@@ -2,17 +2,31 @@
 	height: 100px; 
 	width: 160px;
 	background: #89cafc;
-	border-width: 4px;	
+	border-width: 2px;	
 	border-style: solid;
-	border-radius: 15px;	
+	border-radius: 8px;	
 	border-color: white white white white;
 	position: absolute;
-	text-align:center;
 	color:black;
-	vertical-align: middle;
-	display: table-cell;
+
+	width:fit-content;
+	width:-webkit-fit-content;
+	width:-moz-fit-content;
+
+	line-height: 100px;
 }
 
-.mark_name_div{
+.mark_name_p{
+	font-size:20px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
 
+.labelStyle{
+	border-width : 1px;
+	border-style : dotted;
+	border-color : #89cafc;;
+	font-size: 12px;
+	color:black;
+	 background-color: #89cafc;
 }
