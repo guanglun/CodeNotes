@@ -1,3 +1,6 @@
+### Version 0.0.11
+- 初步完成Line，Function的添加
+
 ### Version 0.0.10
 - 完成右击快捷操作，Edit、Rename、Delete、Jump等
 

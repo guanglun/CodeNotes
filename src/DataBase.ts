@@ -47,34 +47,34 @@ export class DataBase {
         this.mm = mm;
     }
 
-   /**
-   * 读取路径信息
-   * @param {string} filepath 路径
-   */
-         public static creatPromise(path: string) {
-            return new Promise((resolve, reject) => {
-                fs.stat(path, function (err, result) {
-                    if (err) {
-                        fs.mkdir(path, function (err) {
-                            if (err) { resolve(false); }
-                            else { resolve(true); }
-                        });
-                    } else {
-                        resolve(true);
-                    }
-                });
+    /**
+    * 读取路径信息
+    * @param {string} filepath 路径
+    */
+    public static creatPromise(path: string) {
+        return new Promise((resolve, reject) => {
+            fs.stat(path, function (err, result) {
+                if (err) {
+                    fs.mkdir(path, function (err) {
+                        if (err) { resolve(false); }
+                        else { resolve(true); }
+                    });
+                } else {
+                    resolve(true);
+                }
             });
-        }
-    
-        public static existPromise(path: string) {
-    
-            return new Promise((resolve, reject) => {
-                fs.stat(path, function (err, result) {
-                    if (err) { resolve(false); }
-                    else { resolve(true); }
-                });
+        });
+    }
+
+    public static existPromise(path: string) {
+
+        return new Promise((resolve, reject) => {
+            fs.stat(path, function (err, result) {
+                if (err) { resolve(false); }
+                else { resolve(true); }
             });
-        }
+        });
+    }
 
     /**
      * 加载数据库内容
@@ -117,7 +117,7 @@ export class DataBase {
         });
     }
 
-    
+
     /**
      * 创建数据库
      */
@@ -125,9 +125,10 @@ export class DataBase {
 
         new Promise((resolve, reject) => {
             this.db?.run(DataBase.creatTable, function (err) {
-                if (err) { 
+                if (err) {
                     vscode.window.showErrorMessage(err.toString());
-                    console.error(err); }
+                    console.error(err);
+                }
                 else {
                     resolve(true);
                 }
@@ -144,12 +145,14 @@ export class DataBase {
     public showDB() {
         if (this.db) {
             this.db.all("select * from " + DataBase.tableName, function (err, rows) {
-                if (err) { 
+                if (err) {
                     vscode.window.showErrorMessage(err.toString());
-                    console.error(err); }
-                else{
-                console.log(rows);
-                rows[0].id;}
+                    console.error(err);
+                }
+                else {
+                    console.log(rows);
+                    rows[0].id;
+                }
             });
         }
 
@@ -163,18 +166,20 @@ export class DataBase {
     public updateName(id: number, name: string) {
 
         this.db?.run("update " + DataBase.tableName + " set name = '" + name + "' WHERE id = " + id, function (err) {
-            if (err) { 
+            if (err) {
                 vscode.window.showErrorMessage(err.toString());
-                console.error(err); }
+                console.error(err);
+            }
         });
     }
 
     public updateJumpLink(id: number, jb: string) {
 
         this.db?.run("update " + DataBase.tableName + " set jumpLink = '" + jb + "' WHERE id = " + id, function (err) {
-            if (err) { 
+            if (err) {
                 vscode.window.showErrorMessage(err.toString());
-                console.error(err); }
+                console.error(err);
+            }
         });
     }
 
@@ -186,9 +191,10 @@ export class DataBase {
     public updateColor(id: number, color: string) {
 
         this.db?.run("update " + DataBase.tableName + " set color = '" + color + "' WHERE id = " + id, function (err) {
-            if (err) { 
+            if (err) {
                 vscode.window.showErrorMessage(err.toString());
-                console.error(err); }
+                console.error(err);
+            }
         });
     }
 
@@ -200,9 +206,10 @@ export class DataBase {
     public updateDescription(id: number, description: string) {
 
         this.db?.run("update " + DataBase.tableName + " set description = '" + description + "' WHERE id = " + id, function (err) {
-            if (err) { 
+            if (err) {
                 vscode.window.showErrorMessage(err.toString());
-                console.error(err); }
+                console.error(err);
+            }
         });
     }
 
@@ -218,9 +225,10 @@ export class DataBase {
             ", end_line = " + mk.endLine +
             ", end_character = " + mk.endCharacter +
             " WHERE id = " + mk.id, function (err) {
-                if (err) { 
+                if (err) {
                     vscode.window.showErrorMessage(err.toString());
-                    console.error(err); }
+                    console.error(err);
+                }
             });
     }
 
@@ -241,10 +249,11 @@ export class DataBase {
                 if (res === true) {
                     new Promise((resolve, reject) => {
                         this.db = new sqlite3.Database(pathDB, function (err) {
-                            if (err) { 
+                            if (err) {
                                 vscode.window.showErrorMessage(err.toString());
-                                console.error(err); }
-                            else {resolve(true);}
+                                console.error(err);
+                            }
+                            else { resolve(true); }
                         });
                     }).then((res: any) => {
                         this.loadDB();
@@ -269,10 +278,11 @@ export class DataBase {
 
                 new Promise((resolve, reject) => {
                     this.db = new sqlite3.Database(folderUri.fsPath + "/notes.db", function (err) {
-                        if (err) { 
+                        if (err) {
                             vscode.window.showErrorMessage(err.toString());
-                            console.error(err); }
-                        else {resolve(true);}
+                            console.error(err);
+                        }
+                        else { resolve(true); }
                     });
                 }).then((res: any) => {
                     this.createTable();
@@ -280,6 +290,42 @@ export class DataBase {
                 });
             });
         }
+    }
+
+    public async insertDB(mk: mark.Mark):Promise<boolean> {
+
+        if (this.db) {
+            const dbexc = "insert into " + DataBase.tableName + " values ( " +
+                mk.id + " , " +
+                "\"" + mk.name + "\" , " +
+                mk.flag + " , " +
+                "\"" + mk.relativePath + "\" , " +
+
+                mk.anchorLine + " , " +
+                mk.anchorCharacter + " , " +
+                mk.activeLine + " , " +
+                mk.activeCharacter + " , " +
+
+                mk.startLine + " , " +
+                mk.startCharacter + " , " +
+                mk.endLine + " , " +
+                mk.endCharacter + " , " +
+                "\"" + mk.color + "\" , " +
+                "\"" + mk.jumpLink + "\" , " +
+                "\"" + mk.description + "\"" +
+                ")";
+
+            await this.db.run(dbexc, function (err) {
+                if (err) {
+                    vscode.window.showErrorMessage(err.toString());
+                    console.error(err);
+                    return false;
+                }
+            });
+            return true;
+        }
+        return false;
+
     }
 
     /**
@@ -295,12 +341,12 @@ export class DataBase {
                     "\"" + mk.name + "\" , " +
                     mk.flag + " , " +
                     "\"" + mk.relativePath + "\" , " +
-    
+
                     mk.anchorLine + " , " +
                     mk.anchorCharacter + " , " +
                     mk.activeLine + " , " +
                     mk.activeCharacter + " , " +
-    
+
                     mk.startLine + " , " +
                     mk.startCharacter + " , " +
                     mk.endLine + " , " +
@@ -309,11 +355,12 @@ export class DataBase {
                     "\"" + mk.jumpLink + "\" , " +
                     "\"" + mk.description + "\"" +
                     ")";
-                //console.log(dbexc);
+
                 this.db.run(dbexc, function (err) {
-                    if (err) { 
+                    if (err) {
                         vscode.window.showErrorMessage(err.toString());
-                        console.error(err); }
+                        console.error(err);
+                    }
                     else { resolve(undefined); }
                 });
             }
@@ -329,9 +376,10 @@ export class DataBase {
         return new Promise((resolve, reject) => {
             if (this.db) {
                 this.db.run("delete from " + DataBase.tableName + " WHERE id = " + id, function (err) {
-                    if (err) { 
+                    if (err) {
                         vscode.window.showErrorMessage(err.toString());
-                        console.error(err); }
+                        console.error(err);
+                    }
                     else { resolve(undefined); }
                 });
             }
@@ -346,9 +394,10 @@ export class DataBase {
         return new Promise((resolve, reject) => {
             if (this.db) {
                 this.db.all("select * from " + DataBase.tableName, function (err, rows) {
-                    if (err) { 
+                    if (err) {
                         vscode.window.showErrorMessage(err.toString());
-                        console.error(err); }
+                        console.error(err);
+                    }
                     else { resolve(rows); }
                 });
             }

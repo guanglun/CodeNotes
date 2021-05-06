@@ -144,10 +144,18 @@ export function activate(context: vscode.ExtensionContext) {
 		mm.insert(textEditor,Mark.Mark.FLAG_DEFAULT);
 	}));
 
-	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertLine', function (textEditor, edit) {
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertLine', async function (textEditor, edit) {
 		if(!mm.checkDBInit())
 			return;		
 		mm.insert(textEditor,Mark.Mark.FLAG_LINE);
+		mm.showMarkDown(textEditor.document.fileName,textEditor.selection.active.line);
+	}));
+
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertFunction', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		mm.insert(textEditor,Mark.Mark.FLAG_FUNCTION);
+		mm.showMarkDown(textEditor.document.fileName,textEditor.selection.active.line);
 	}));
 
 	context.subscriptions.push(vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll));

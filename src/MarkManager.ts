@@ -108,6 +108,27 @@ export class MarkManager {
                 }
             }
 
+            if (type === mark.Mark.FLAG_FUNCTION) {
+                let line: number;
+
+                for (line = te.selection.start.line; line <= te.selection.end.line; line++) {
+                    this.db?.mkmap.forEach((value, key, map) => {
+                        if (value.flag === mark.Mark.FLAG_FUNCTION || (line === te.selection.start.line && value.flag === mark.Mark.FLAG_LINE)) {
+                            if (MarkManager.checkLine(line, value)) {
+                                vscode.window.setStatusBarMessage('Fun Set Used', 2000);
+                                checkline = true;
+                            }
+                        }
+                        if (checkline) {
+                            return;
+                        }
+                    });
+                    if (checkline) {
+                        break;
+                    }
+                }
+            }
+
             if (checkline) {
                 return false;
             }
@@ -133,8 +154,7 @@ export class MarkManager {
                 te.selection.end.character,
             );
 
-            const promise = this.db.loadInsertDBPromise(mk);
-            promise.then((res: any) => {
+            if(this.db.insertDB(mk))
 
                 this.db?.mkmap.set(mk.id, mk);
                 this.sidebar?.elAll?.insert(mk);
@@ -150,7 +170,6 @@ export class MarkManager {
                 }
                 this.sidebar?.smark?.updateMarkEdit(mk);
 
-            });
 
             return true;
         }
@@ -325,13 +344,18 @@ export class MarkManager {
 
     }
     public showMarkDown(fileName:string,line:number) {
+
+        
+
         if (this.showMarkDownType === MarkManager.MD_STYPE_DISABLE) {
             return;
         }
 
         this.db?.mkmap.forEach((value, key, map) => {
+
             if (value.filePath === fileName) {
-                if (value.flag === mark.Mark.FLAG_LINE && MarkManager.checkLine(line, value)) {
+                if ((value.flag === mark.Mark.FLAG_LINE || value.flag === mark.Mark.FLAG_FUNCTION) && MarkManager.checkLine(line, value)) {
+                    //console.log("editMarkDown " + value.id);
                     this.editMarkDown(value.id);
                 }
             }
@@ -339,14 +363,17 @@ export class MarkManager {
     }
 
     public async typeMarkDown() {
-        if (this.showMarkDownType !== MarkManager.MD_STYPE_DISABLE) {
-            await vscode.commands.executeCommand("workbench.action.closeEditorsInOtherGroups");
+        
+        await vscode.commands.executeCommand("workbench.action.closeEditorsInOtherGroups");
 
+        if (this.showMarkDownType !== MarkManager.MD_STYPE_DISABLE) {
             if (vscode.workspace.workspaceFolders) {
                 var rootUri = vscode.workspace.workspaceFolders[0].uri;
                 var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
+                const file =  await pfs.open(mDUri.fsPath,'w+');
+                file.close();
 
-                await vscode.commands.executeCommand("markdown.showPreviewToSide", mDUri);
+                await vscode.commands.executeCommand("markdown.showLockedPreviewToSide", mDUri);
 
                 if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
                     vscode.workspace.openTextDocument(mDUri).then(document => {
@@ -492,13 +519,27 @@ export class MarkManager {
             mk.endOffsetMark = textEditor.document.offsetAt(new Position(mk.endLine, mk.endCharacter));
         }
 
-        if (en === ShowColorType.sctClick) {
-            textEditor.selection = new vscode.Selection(textEditor.document.positionAt(mk.startOffsetMark),
-                textEditor.document.positionAt(mk.endOffsetMark));
+        if (en === ShowColorType.sctClick && mk.flag === mark.Mark.FLAG_DEFAULT) {
+            // textEditor.selection = new vscode.Selection(
+            //     textEditor.document.positionAt(mk.startOffsetMark),
+            //     textEditor.document.positionAt(mk.endOffsetMark));
 
-            textEditor.revealRange(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+            textEditor.revealRange(new vscode.Range(
+                textEditor.document.positionAt(mk.startOffsetMark),
                 textEditor.document.positionAt(mk.endOffsetMark)), vscode.TextEditorRevealType.InCenter);
         }
+
+        if (en === ShowColorType.sctClick && (mk.flag === mark.Mark.FLAG_LINE || mk.flag === mark.Mark.FLAG_FUNCTION)) {
+            // textEditor.selection = new vscode.Selection(
+            //     textEditor.document.positionAt(mk.startOffsetMark),
+            //     textEditor.document.positionAt(mk.endOffsetMark));
+
+            textEditor.revealRange(new vscode.Range(
+                textEditor.document.positionAt(mk.startOffsetMark),
+                textEditor.document.positionAt(mk.endOffsetMark)), vscode.TextEditorRevealType.InCenter);
+        }
+
+
 
         if (en === ShowColorType.sctShow) {
 
@@ -510,6 +551,8 @@ export class MarkManager {
             }
 
             let decorationType;
+            let range;
+
             if (mk.flag === mark.Mark.FLAG_DEFAULT) {
                 decorationType = vscode.window.createTextEditorDecorationType({
                     gutterIconSize: "14px",
@@ -517,25 +560,39 @@ export class MarkManager {
                     opacity: "1",
                     borderRadius: "4px",
                 });
-            } else {
+                range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+                textEditor.document.positionAt(mk.endOffsetMark));                   
+            }else if(mk.flag === mark.Mark.FLAG_LINE){
                 decorationType = vscode.window.createTextEditorDecorationType({
                     gutterIconSize: "14px",
-                    gutterIconPath: path.join(this.context.extensionPath, "images/mark.png"),
+                    gutterIconPath: path.join(this.context.extensionPath, "images/code-line.png"),
                 });
+                range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+                textEditor.document.positionAt(mk.endOffsetMark));
+            }else if(mk.flag === mark.Mark.FLAG_FUNCTION){
+                decorationType = vscode.window.createTextEditorDecorationType({
+                    gutterIconSize: "14px",
+                    gutterIconPath: path.join(this.context.extensionPath, "images/functions.png"),
+                });
+                range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+                textEditor.document.positionAt(mk.startOffsetMark));                
             }
 
 
-            const range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                textEditor.document.positionAt(mk.endOffsetMark));
+
 
             if (mk.mdata?.decorationType) {
                 mk.mdata.decorationType.dispose();
             }
 
-            mk.mdata?.setDecorationType(decorationType);
-            if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
-                textEditor.setDecorations(decorationType, [range]);
+            if(decorationType && range)
+            {
+                mk.mdata?.setDecorationType(decorationType);
+                if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
+                    textEditor.setDecorations(decorationType, [range]);
+                }
             }
+
         }
 
         if (en === ShowColorType.sctClear) {
@@ -599,7 +656,7 @@ export class MarkManager {
                     //console.log(value);
                     items.push(this.getQuickPickItem(value));
                 }
-            } else if (value.filePath === te.document.fileName && value.flag === mark.Mark.FLAG_LINE) {
+            } else if (value.filePath === te.document.fileName && (value.flag === mark.Mark.FLAG_LINE || value.flag === mark.Mark.FLAG_FUNCTION)) {
                 if (MarkManager.checkLine(te.selection.start.line, value) === true) {
                     //console.log(value);
                     items.push(this.getQuickPickItem(value));
