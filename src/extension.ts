@@ -69,9 +69,29 @@ export function activate(context: vscode.ExtensionContext) {
 		if(!mm.checkDBInit())
 			return;		
 		await mm.editMarkDown( await mm.selectWhitch(textEditor,'Edit'));
-		console.log("edit markdown");
 	}));
 
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.showMarkDown.disable', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		mm.showMarkDownType = markmanager.MarkManager.MD_STYPE_DISABLE;
+		mm.typeMarkDown();
+	}));
+
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.showMarkDown.onlyPreview', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		mm.showMarkDownType = markmanager.MarkManager.MD_STYPE_ONLYMD;
+		mm.typeMarkDown();
+	}));
+
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.showMarkDown.previewAndEdit', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		mm.showMarkDownType = markmanager.MarkManager.MD_STYPE_MD_EDIT;
+		mm.typeMarkDown();
+	}));
+	
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteMark', async function (textEditor, edit) {
 		if(!mm.checkDBInit())
 			return;		
@@ -216,7 +236,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event =>{
-		mm.showMarkDown(event);
+		mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
 
 	}));
 	// if (vscode.window.registerWebviewPanelSerializer) {

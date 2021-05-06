@@ -7,7 +7,7 @@ import { Position } from 'vscode';
 import { mkdir } from 'node:fs';
 import { isDate } from 'node:util';
 import { promises as pfs } from 'fs';
-import  * as fs  from 'fs';
+import * as fs from 'fs';
 export enum ShowColorType {
     sctClick,
     sctShow,
@@ -22,12 +22,18 @@ export enum TEColorManagerType {
 
 export class MarkManager {
 
+    public static MD_STYPE_DISABLE = 0;
+    public static MD_STYPE_ONLYMD = 1;
+    public static MD_STYPE_MD_EDIT = 2;
+
+    public showMarkDownType: number = 0;
+
     private context: vscode.ExtensionContext;
     private sidebar: Sidebar.Sidebar | undefined;
 
     private db: database.DataBase | undefined;
 
-    private lineId:number = 0;
+    private lineId: number = 0;
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
@@ -40,7 +46,6 @@ export class MarkManager {
     public static pathRelativeToAbsolute(rPath: string) {
         if (vscode.workspace.workspaceFolders) {
             const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            //console.log(workspacePath);
             return path.join(workspacePath, rPath);
         }
         return undefined;
@@ -49,7 +54,6 @@ export class MarkManager {
     public static pathAbsoluteToRelative(aPath: string) {
         if (vscode.workspace.workspaceFolders) {
             const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            //console.log(workspacePath);
             const sp = aPath.split(workspacePath);
             if (sp[1]) {
                 return sp[1];
@@ -58,65 +62,53 @@ export class MarkManager {
         return undefined;
     }
 
-    public static checkLine(line:number,mk:mark.Mark):boolean
-    {
-        let lineCheck:number;
-        for(lineCheck = mk.startLine;lineCheck <=  mk.endLine;lineCheck++)
-        {
-            if(lineCheck === line)
-            {
+    public static checkLine(line: number, mk: mark.Mark): boolean {
+        let lineCheck: number;
+        for (lineCheck = mk.startLine; lineCheck <= mk.endLine; lineCheck++) {
+            if (lineCheck === line) {
                 break;
             }
         }
-        if(lineCheck > mk.endLine)
-        {
+        if (lineCheck > mk.endLine) {
             return false;
-        }else{
+        } else {
             return true;
         }
     }
 
-    public insert(te: vscode.TextEditor,type: number): boolean {
+    public insert(te: vscode.TextEditor, type: number): boolean {
         if (this.db && this.sidebar) {
 
-            let checkline = true;
+            let checkline = false;
             let name = te.document.getText(te.selection);
 
-            if(name.length === 0 && type === mark.Mark.FLAG_DEFAULT)
-            {
+            if (name.length === 0 && type === mark.Mark.FLAG_DEFAULT) {
                 vscode.window.setStatusBarMessage('Not Found Select String', 2000);
                 return false;
             }
 
-            if(type === mark.Mark.FLAG_LINE)
-            {
+            if (type === mark.Mark.FLAG_LINE) {
                 let line: number;
-                let lineCheck: number;
 
-                for(line = te.selection.start.line;line <=  te.selection.end.line;line++)
-                {
+                for (line = te.selection.start.line; line <= te.selection.end.line; line++) {
                     this.db?.mkmap.forEach((value, key, map) => {
                         if (value.flag === mark.Mark.FLAG_LINE) {
-                            if(MarkManager.checkLine(line,value))
-                            {
+                            if (MarkManager.checkLine(line, value)) {
                                 vscode.window.setStatusBarMessage('Line Set Used', 2000);
-                                 checkline = true;
+                                checkline = true;
                             }
                         }
-                        if(checkline)
-                        {
+                        if (checkline) {
                             return;
                         }
                     });
-                    if(checkline)
-                    {
+                    if (checkline) {
                         break;
                     }
                 }
             }
 
-            if(checkline)
-            {
+            if (checkline) {
                 return false;
             }
 
@@ -243,7 +235,7 @@ export class MarkManager {
         return {
             label: mk.name ? mk.name : "null",
             description: 'id:' + mk.id,
-            detail: 'jump num:' + mk.mdata.jb.length + ' flag: '+ mark.Mark.flagStr[mk.flag]
+            detail: 'jump num:' + mk.mdata.jb.length + ' flag: ' + mark.Mark.flagStr[mk.flag]
         }
     }
 
@@ -316,40 +308,61 @@ export class MarkManager {
 
     }
 
-    public async saveMarkDown(editor:vscode.TextDocument)
-    {
-        if (editor && vscode.workspace.workspaceFolders) 
-        {
+    public async saveMarkDown(editor: vscode.TextDocument) {
+        if (editor && vscode.workspace.workspaceFolders) {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
             var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
-            console.log("in 1")
-            if(editor.fileName === mDUri.fsPath)
-            {
+
+            if (editor.fileName === mDUri.fsPath) {
                 const data = await pfs.readFile(mDUri.fsPath);
 
-                console.log("in 2")
-                if(data)
-                {
-                    console.log(data.toString())
-                    this.setDescription(this.lineId,data.toString());
+                if (data) {
+                    this.setDescription(this.lineId, data.toString());
                 }
 
             }
         }
 
     }
-    public showMarkDown(event:vscode.TextEditorSelectionChangeEvent) {
+    public showMarkDown(fileName:string,line:number) {
+        if (this.showMarkDownType === MarkManager.MD_STYPE_DISABLE) {
+            return;
+        }
+
         this.db?.mkmap.forEach((value, key, map) => {
-            if (value.filePath ===event.textEditor.document.fileName) {
-                if(value.flag === mark.Mark.FLAG_LINE && MarkManager.checkLine(event.selections[0].active.line,value))
-                {
+            if (value.filePath === fileName) {
+                if (value.flag === mark.Mark.FLAG_LINE && MarkManager.checkLine(line, value)) {
                     this.editMarkDown(value.id);
                 }
             }
         });
     }
 
-    public editMarkDown(id: number) {
+    public async typeMarkDown() {
+        if (this.showMarkDownType !== MarkManager.MD_STYPE_DISABLE) {
+            await vscode.commands.executeCommand("workbench.action.closeEditorsInOtherGroups");
+
+            if (vscode.workspace.workspaceFolders) {
+                var rootUri = vscode.workspace.workspaceFolders[0].uri;
+                var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
+
+                await vscode.commands.executeCommand("markdown.showPreviewToSide", mDUri);
+
+                if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
+                    vscode.workspace.openTextDocument(mDUri).then(document => {
+                            vscode.window.showTextDocument(document, vscode.ViewColumn.Beside, true);
+                    });
+                }
+                // if (vscode.window.visibleTextEditors)
+                //     vscode.window.showTextDocument(vscode.window.visibleTextEditors[0].document).then(textEditor => {
+                // });
+
+            }
+        }
+    }
+
+    public async editMarkDown(id: number) {
+
         if (id !== 0) {
             const mk = this.db?.mkmap.get(id);
             if (mk && vscode.workspace.workspaceFolders) {
@@ -358,32 +371,8 @@ export class MarkManager {
                 var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
 
                 this.lineId = mk.id;
-                fs.open(mDUri.fsPath, 'w+', function (err, fd) {
-                    if (err) {
-                        return console.error(err);
-                    }
 
-                    fs.writeFile(mDUri.fsPath, mk.description, async function (err) {
-                        if (err) {
-                            return console.error(err);
-                        }
-
-                        
-                        await vscode.commands.executeCommand("markdown.showPreviewToSide",mDUri);
-                        vscode.workspace.openTextDocument(mDUri).then(document => {
-                            vscode.window.showTextDocument(document,vscode.ViewColumn.Three,true).then(textEditor => {
-                                
-                            });
-                        });
-
-                        if(vscode.window.visibleTextEditors)
-                            vscode.window.showTextDocument(vscode.window.visibleTextEditors[0].document ,vscode.ViewColumn.One,false).then(textEditor => {
-                                
-                        });
-                    });
-
-                    
-                });
+                await pfs.writeFile(mDUri.fsPath, mk.description);
 
             }
         }
@@ -521,19 +510,18 @@ export class MarkManager {
             }
 
             let decorationType;
-            if(mk.flag === mark.Mark.FLAG_DEFAULT)
-            {
+            if (mk.flag === mark.Mark.FLAG_DEFAULT) {
                 decorationType = vscode.window.createTextEditorDecorationType({
                     gutterIconSize: "14px",
                     backgroundColor: color + "50",
                     opacity: "1",
                     borderRadius: "4px",
                 });
-            }else{
+            } else {
                 decorationType = vscode.window.createTextEditorDecorationType({
                     gutterIconSize: "14px",
                     gutterIconPath: path.join(this.context.extensionPath, "images/mark.png"),
-                });                
+                });
             }
 
 
@@ -605,13 +593,13 @@ export class MarkManager {
         let items: vscode.QuickPickItem[] = [];
         this.db?.mkmap.forEach((value, key, map) => {
 
-            
+
             if (value.filePath === te.document.fileName && value.flag === mark.Mark.FLAG_DEFAULT) {
                 if (MarkManager.checkPoint(te.document, value, te.selection.anchor) === true) {
                     //console.log(value);
                     items.push(this.getQuickPickItem(value));
                 }
-            }else if (value.filePath === te.document.fileName && value.flag === mark.Mark.FLAG_LINE) {
+            } else if (value.filePath === te.document.fileName && value.flag === mark.Mark.FLAG_LINE) {
                 if (MarkManager.checkLine(te.selection.start.line, value) === true) {
                     //console.log(value);
                     items.push(this.getQuickPickItem(value));

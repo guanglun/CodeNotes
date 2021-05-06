@@ -82,12 +82,28 @@
 			{
 				"command": "codenotes.deleteJumpLinkMark",
 				"title": "Delete Jump Link"
+			},
+			{
+				"command": "codenotes.showMarkDown.disable",
+				"title": "Disable"
+			},
+			{
+				"command": "codenotes.showMarkDown.onlyPreview",
+				"title": "Only Preview"
+			},
+			{
+				"command": "codenotes.showMarkDown.previewAndEdit",
+				"title": "Preview And Edit"
 			}
 		],
 		"submenus": [
 			{
 			  "id": "codenotes.mark",
 			  "label": "CodeNotes Mark"
+			},
+			{
+				"id": "codenotes.showMarkDown",
+				"label": "CodeNotes Show MarkDown"
 			}
 		  ],
 		"menus": {
@@ -111,7 +127,13 @@
 				{
 				  "submenu": "codenotes.mark",
 				  "group": "0_codenotes@4"
+				},
+				{
+				  "submenu": "codenotes.showMarkDown",
+				  "group": "0_codenotes@5"
 				}
+
+				
 			],
 			"codenotes.mark": [
 				{
@@ -143,6 +165,22 @@
 					"when": "editorFocus",
 					"command": "codenotes.deleteJumpLinkMark",
 					"group": "0_codenotes@6"
+				}
+			],"codenotes.showMarkDown": [
+				{
+					"when": "editorFocus",
+					"command": "codenotes.showMarkDown.disable",
+					"group": "0_codenotes@1"
+				},
+				{
+					"when": "editorFocus",
+					"command": "codenotes.showMarkDown.onlyPreview",
+					"group": "0_codenotes@2"
+				},
+				{
+					"when": "editorFocus",
+					"command": "codenotes.showMarkDown.previewAndEdit",
+					"group": "0_codenotes@3"
 				}
 			],
 			"view/item/context": [
