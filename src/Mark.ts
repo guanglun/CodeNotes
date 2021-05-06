@@ -4,6 +4,11 @@ import * as sidebar from './sidebar/Sidebar';
 
 export class Mark {
 
+    public static flagStr:string[] = ["DEFALUT","LINE","FUNCTION"];
+    public static FLAG_DEFAULT      = 0;
+    public static FLAG_LINE         = 1;
+    public static FLAG_FUNCTION     = 2;
+
     public id: number = 0;
     public name: string | undefined;
     public flag: number = 0;

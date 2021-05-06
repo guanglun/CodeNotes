@@ -18,7 +18,7 @@
 	],
 	"icon": "images/icon.png",
 	"activationEvents": [
-		"onCommand:codenotes.insertmark",
+		"onCommand:codenotes.insertMark",
 		"onView:sidebar_marks_now",
 		"onView:sidebar_marks_all",
 		"onView:codenotes.sidebar_web",
@@ -28,8 +28,12 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "codenotes.insertmark",
-				"title": "CodeNotes Insert"
+				"command": "codenotes.insertMark",
+				"title": "CodeNotes Insert Mark"
+			},
+			{
+				"command": "codenotes.insertLine",
+				"title": "CodeNotes Insert Line"
 			},
 			{
 				"command": "codenotes.openWebview",
@@ -60,6 +64,10 @@
 				"title": "Edit"
 			},
 			{
+				"command": "codenotes.editMarkDown",
+				"title": "Edit MarkDown"
+			},
+			{
 				"command": "codenotes.addJumpLink",
 				"title": "Add Jump Link"
 			},
@@ -87,17 +95,22 @@
 			"editor/context": [
 				{
 					"when": "editorFocus",
-					"command": "codenotes.insertmark",
+					"command": "codenotes.insertMark",
 					"group": "0_codenotes@1"
 				},
 				{
 					"when": "editorFocus",
-					"command": "codenotes.openWebview",
+					"command": "codenotes.insertLine",
 					"group": "0_codenotes@2"
 				},
 				{
+					"when": "editorFocus",
+					"command": "codenotes.openWebview",
+					"group": "0_codenotes@3"
+				},
+				{
 				  "submenu": "codenotes.mark",
-				  "group": "0_codenotes@3"
+				  "group": "0_codenotes@4"
 				}
 			],
 			"codenotes.mark": [
@@ -108,23 +121,28 @@
 				},
 				{
 					"when": "editorFocus",
-					"command": "codenotes.renameMark",
+					"command": "codenotes.editMarkDown",
 					"group": "0_codenotes@2"
 				},
 				{
 					"when": "editorFocus",
-					"command": "codenotes.deleteMark",
+					"command": "codenotes.renameMark",
 					"group": "0_codenotes@3"
 				},
 				{
 					"when": "editorFocus",
-					"command": "codenotes.addJumpLinkMark",
+					"command": "codenotes.deleteMark",
 					"group": "0_codenotes@4"
 				},
 				{
 					"when": "editorFocus",
-					"command": "codenotes.deleteJumpLinkMark",
+					"command": "codenotes.addJumpLinkMark",
 					"group": "0_codenotes@5"
+				},
+				{
+					"when": "editorFocus",
+					"command": "codenotes.deleteJumpLinkMark",
+					"group": "0_codenotes@6"
 				}
 			],
 			"view/item/context": [

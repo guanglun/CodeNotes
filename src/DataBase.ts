@@ -7,7 +7,7 @@ import * as markmanager from './MarkManager';
 
 export class DataBase {
 
-    private static databasePath = ".codenotes";
+    public static databasePath = ".codenotes";
     private static tableName = "marks";
     private static creatTable =
         "CREATE TABLE " + DataBase.tableName + " (\
@@ -51,7 +51,7 @@ export class DataBase {
    * 读取路径信息
    * @param {string} filepath 路径
    */
-         private creatPromise(path: string) {
+         public static creatPromise(path: string) {
             return new Promise((resolve, reject) => {
                 fs.stat(path, function (err, result) {
                     if (err) {
@@ -66,7 +66,7 @@ export class DataBase {
             });
         }
     
-        private existPromise(path: string) {
+        public static existPromise(path: string) {
     
             return new Promise((resolve, reject) => {
                 fs.stat(path, function (err, result) {
@@ -236,7 +236,7 @@ export class DataBase {
 
             console.log("database path: " + pathDB);
 
-            const promise = this.existPromise(pathDB);
+            const promise = DataBase.existPromise(pathDB);
             promise.then((res: any) => {
                 if (res === true) {
                     new Promise((resolve, reject) => {
@@ -264,7 +264,7 @@ export class DataBase {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
             var folderUri = vscode.Uri.file(rootUri.fsPath + "/" + DataBase.databasePath);
 
-            const promise = this.creatPromise(folderUri.fsPath);
+            const promise = DataBase.creatPromise(folderUri.fsPath);
             promise.then((res: any) => {
 
                 new Promise((resolve, reject) => {

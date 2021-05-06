@@ -7,6 +7,7 @@ import * as markmanager from './MarkManager';
 import * as SidebarWeb from './sidebar/SidebarWeb';
 import * as SidebarMark from './sidebar/SidebarMark';
 import * as ViewMarks from './webview/ViewMarks';
+import * as Mark from './Mark';
 import * as path from 'path';
 
 // this method is called when your extension is activated
@@ -64,6 +65,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 	}));
 
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.editMarkDown', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		await mm.editMarkDown( await mm.selectWhitch(textEditor,'Edit'));
+		console.log("edit markdown");
+	}));
+
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteMark', async function (textEditor, edit) {
 		if(!mm.checkDBInit())
 			return;		
@@ -110,10 +118,16 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 
-	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertmark', function (textEditor, edit) {
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertMark', function (textEditor, edit) {
 		if(!mm.checkDBInit())
 			return;		
-		mm.insert(textEditor);
+		mm.insert(textEditor,Mark.Mark.FLAG_DEFAULT);
+	}));
+
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertLine', function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;		
+		mm.insert(textEditor,Mark.Mark.FLAG_LINE);
 	}));
 
 	context.subscriptions.push(vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll));
@@ -163,6 +177,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((editor => {  
 		//console.log(editor.fileName);
 
+		mm.saveMarkDown(editor);
 		db?.mkmap.forEach((mk, key, map)=>
 		{
 			if(mk.filePath === editor.fileName)
@@ -200,6 +215,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	}));
 
+	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event =>{
+		mm.showMarkDown(event);
+
+	}));
 	// if (vscode.window.registerWebviewPanelSerializer) {
 	// 	// Make sure we register a serializer in activation event
 	// 	vscode.window.registerWebviewPanelSerializer(ViewMarks.ViewMarksPanel.viewType, {
