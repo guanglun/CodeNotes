@@ -8,6 +8,9 @@ import { mkdir } from 'node:fs';
 import { isDate } from 'node:util';
 import { promises as pfs } from 'fs';
 import * as fs from 'fs';
+const readline = require('readline');
+
+
 export enum ShowColorType {
     sctClick,
     sctShow,
@@ -137,6 +140,9 @@ export class MarkManager {
                 name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" + te.selection.anchor.character;
             }
 
+            if (name.length > 64) {
+                name = name.slice(0, 63);
+            }
             const rPath = MarkManager.pathAbsoluteToRelative(te.document.fileName);
 
 
@@ -154,9 +160,9 @@ export class MarkManager {
                 te.selection.end.character,
             );
 
-            if(this.db.insertDB(mk))
+            if (this.db.insertDB(mk)) {
+                this.db?.mkmapSet(mk);
 
-                this.db?.mkmap.set(mk.id, mk);
                 this.sidebar?.elAll?.insert(mk);
                 this.sidebar?.elAll?.refresh();
 
@@ -170,15 +176,17 @@ export class MarkManager {
                 }
                 this.sidebar?.smark?.updateMarkEdit(mk);
 
-
+            }
             return true;
         }
         return false;
     }
 
     public checkDBInit() {
-        if (this.db?.isDBInit == false)
+        if (this.db?.isDBInit === false) {
             vscode.window.showErrorMessage("Please Initialize CodeNotes");
+        }
+
         return this.db?.isDBInit;
     }
 
@@ -191,7 +199,7 @@ export class MarkManager {
 
             const promise = this.db.loadDeleteDBPromise(id);
             promise.then((res: any) => {
-                this.db?.mkmap.delete(id);
+                this.db?.mkmapDelete(id);
                 this.sidebar?.elNow.refresh();
                 this.sidebar?.elAll.refresh();
                 vscode.window.setStatusBarMessage('Delete ' + name, 2000);
@@ -259,7 +267,7 @@ export class MarkManager {
     }
 
     public async addJump(id: number) {
-        if (id == 0)
+        if (id === 0)
             return;
 
         if (this.db && this.sidebar) {
@@ -318,7 +326,7 @@ export class MarkManager {
     }
 
     public renameItem(id: number) {
-        if (id != 0) {
+        if (id !== 0) {
             const promise = this.renameItemPromise();
             promise.then((res: any) => {
                 this.setName(id, res);
@@ -343,9 +351,9 @@ export class MarkManager {
         }
 
     }
-    public showMarkDown(fileName:string,line:number) {
+    public showMarkDown(fileName: string, line: number) {
 
-        
+
 
         if (this.showMarkDownType === MarkManager.MD_STYPE_DISABLE) {
             return;
@@ -354,8 +362,9 @@ export class MarkManager {
         this.db?.mkmap.forEach((value, key, map) => {
 
             if (value.filePath === fileName) {
-                if ((value.flag === mark.Mark.FLAG_LINE || value.flag === mark.Mark.FLAG_FUNCTION) && MarkManager.checkLine(line, value)) {
-                    //console.log("editMarkDown " + value.id);
+                if ((value.flag === mark.Mark.FLAG_LINE && MarkManager.checkLine(line, value)) ||
+                (value.flag === mark.Mark.FLAG_FUNCTION && line === value.startLine)) {
+                    
                     this.editMarkDown(value.id);
                 }
             }
@@ -363,21 +372,21 @@ export class MarkManager {
     }
 
     public async typeMarkDown() {
-        
+
         await vscode.commands.executeCommand("workbench.action.closeEditorsInOtherGroups");
 
         if (this.showMarkDownType !== MarkManager.MD_STYPE_DISABLE) {
             if (vscode.workspace.workspaceFolders) {
                 var rootUri = vscode.workspace.workspaceFolders[0].uri;
                 var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
-                const file =  await pfs.open(mDUri.fsPath,'w+');
+                const file = await pfs.open(mDUri.fsPath, 'w+');
                 file.close();
 
                 await vscode.commands.executeCommand("markdown.showLockedPreviewToSide", mDUri);
 
                 if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
                     vscode.workspace.openTextDocument(mDUri).then(document => {
-                            vscode.window.showTextDocument(document, vscode.ViewColumn.Beside, true);
+                        vscode.window.showTextDocument(document, vscode.ViewColumn.Beside, true);
                     });
                 }
                 // if (vscode.window.visibleTextEditors)
@@ -398,7 +407,7 @@ export class MarkManager {
                 var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
 
                 this.lineId = mk.id;
-
+                console.log(mk.description);
                 await pfs.writeFile(mDUri.fsPath, mk.description);
 
             }
@@ -561,21 +570,21 @@ export class MarkManager {
                     borderRadius: "4px",
                 });
                 range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                textEditor.document.positionAt(mk.endOffsetMark));                   
-            }else if(mk.flag === mark.Mark.FLAG_LINE){
+                    textEditor.document.positionAt(mk.endOffsetMark));
+            } else if (mk.flag === mark.Mark.FLAG_LINE) {
                 decorationType = vscode.window.createTextEditorDecorationType({
                     gutterIconSize: "14px",
                     gutterIconPath: path.join(this.context.extensionPath, "images/code-line.png"),
                 });
                 range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                textEditor.document.positionAt(mk.endOffsetMark));
-            }else if(mk.flag === mark.Mark.FLAG_FUNCTION){
+                    textEditor.document.positionAt(mk.endOffsetMark));
+            } else if (mk.flag === mark.Mark.FLAG_FUNCTION) {
                 decorationType = vscode.window.createTextEditorDecorationType({
                     gutterIconSize: "14px",
                     gutterIconPath: path.join(this.context.extensionPath, "images/functions.png"),
                 });
                 range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                textEditor.document.positionAt(mk.startOffsetMark));                
+                    textEditor.document.positionAt(mk.startOffsetMark));
             }
 
 
@@ -585,8 +594,7 @@ export class MarkManager {
                 mk.mdata.decorationType.dispose();
             }
 
-            if(decorationType && range)
-            {
+            if (decorationType && range) {
                 mk.mdata?.setDecorationType(decorationType);
                 if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
                     textEditor.setDecorations(decorationType, [range]);
@@ -604,6 +612,111 @@ export class MarkManager {
                     textEditor.document.positionAt(mk.endOffsetMark))]);
             }
         }
+    }
+
+    public async readLine(file: string, line: number): Promise<string> {
+        let num: number = 0;
+        const fileStream = fs.createReadStream(file);
+
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
+
+        for await (const lineStr of rl) {
+            if (num === line) {
+                fileStream.close();
+                return lineStr;
+            }
+            num++;
+        }
+        fileStream.close();
+        return "";
+    }
+
+    public async generate() {
+        if (!vscode.workspace.workspaceFolders) {
+            return;
+        }
+        if (this.db) {
+            const rootUri = vscode.workspace.workspaceFolders[0].uri;
+            this.db?.mkmapFunction.forEach(async (mkf, key, map) => {
+                if (this.db) {
+                    const head =
+                        `---
+title: ${mkf.name}
+date: 2021-04-30 18:17:14
+categories: Linux
+tags: 
+    - Linux 
+    - Kernel
+---
+`;
+                    const mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/" + mkf.name + ".md");
+                    const file = await pfs.open(mDUri.fsPath, 'w+');
+
+                    file.appendFile(head);
+
+                    if(mkf.filePath)
+                    {
+                        file.appendFile("\r\n```c\r\n");
+                        const document = await vscode.workspace.openTextDocument(mkf.filePath);
+
+                        if (document) {
+                            const startOffsetMark = document.offsetAt(new Position(mkf.startLine, 0));
+                            const endOffsetMark = document.offsetAt(new Position(mkf.startLine, 999999));
+                            const range = new vscode.Range(document.positionAt(startOffsetMark), document.positionAt(endOffsetMark));
+                            const text = document.getText(range);
+    
+                            file.appendFile(text.trim());
+                        }
+                        file.appendFile("\r\n```\r\n");
+                    }
+
+                    file.appendFile(mkf.description + "\r\n");
+
+                    let line: number;
+                    for (line = mkf.startLine; line <= mkf.endLine; line++) {
+
+                        const arr = Array.from(this.db?.mkmapLine);
+
+                        for(let count = 0;count<arr.length;count++)
+                        {
+                            const mkl = arr[count][1];
+                        //}
+                        //this.db?.mkmapLine.forEach((mkl, key, map) => {
+
+                            if (mkl.startLine <= line && mkl.endLine >= line && mkl.filePath === mkf.filePath)//match
+                            {
+                                file.appendFile("\r\n```c\r\n");
+                                if (mkl.filePath) {
+                                    
+
+                                    const document = await vscode.workspace.openTextDocument(mkl.filePath);
+
+                                    if (document) {
+                                        const startOffsetMark = document.offsetAt(new Position(mkl.startLine, 0));
+                                        const endOffsetMark = document.offsetAt(new Position(mkl.endLine, 999999));
+                                        const range = new vscode.Range(document.positionAt(startOffsetMark), document.positionAt(endOffsetMark));
+                                        const text = document.getText(range);
+
+                                        file.appendFile(text.trim());
+                                    };
+                                    
+                                    line += (mkl.endLine - mkl.startLine);
+                                }
+
+                                file.appendFile("\r\n```\r\n");
+                                file.appendFile(mkl.description);
+                            }
+                        };
+                    }
+
+                    file.close();
+                }
+            });
+        }
+
     }
 
     /**
@@ -730,11 +843,12 @@ export class MarkManager {
                 //搜索 commentCommandUri 快速定位
 
                 contents.isTrusted = true;
-                if (isShow == false)
+                if (isShow === false) {
                     return undefined;
-                else
+                }
+                else {
                     return new vscode.Hover(contents);
-
+                }
             }
         }
         );

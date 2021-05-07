@@ -97,6 +97,10 @@
 			{
 				"command": "codenotes.showMarkDown.previewAndEdit",
 				"title": "Preview And Edit"
+			},
+			{
+				"command": "codenotes.generate",
+				"title": "CodeNotes Generate"
 			}
 		],
 		"submenus": [
@@ -132,6 +136,11 @@
 					"when": "editorFocus",
 					"command": "codenotes.openWebview",
 					"group": "0_codenotes@4"
+				},
+				{
+					"when": "editorFocus",
+					"command": "codenotes.generate",
+					"group": "0_codenotes@5"
 				}
 
 				

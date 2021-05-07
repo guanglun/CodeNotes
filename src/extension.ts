@@ -185,6 +185,12 @@ export function activate(context: vscode.ExtensionContext) {
 		ViewMarks.ViewMarksPanel.createOrShow(context.extensionUri,mm,db);
 	}));
 
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.generate', function (uri) {
+		if(!mm.checkDBInit())
+			return;
+		mm.generate();
+	}));
+
 	mm.load();
 	context.subscriptions.push(mm.getHoverProvider(db));
 

@@ -30,6 +30,12 @@ export class DataBase {
         );";
 
     public mkmap: Map<number, mark.Mark> = new Map<number, mark.Mark>();
+
+    public mkmapDefault: Map<number, mark.Mark> = new Map<number, mark.Mark>();
+    public mkmapLine: Map<number, mark.Mark> = new Map<number, mark.Mark>();
+    public mkmapFunction: Map<number, mark.Mark> = new Map<number, mark.Mark>();
+
+
     public context: vscode.ExtensionContext;
     private sidebar: Sidebar.Sidebar | undefined;
 
@@ -76,6 +82,37 @@ export class DataBase {
         });
     }
 
+    public mkmapSet(mk:mark.Mark)
+    {
+        this.mkmap.set(mk.id, mk);
+        if(mk.flag === mark.Mark.FLAG_DEFAULT)
+        {
+            this.mkmapDefault.set(mk.id, mk);
+        }else if(mk.flag === mark.Mark.FLAG_LINE)
+        {
+            this.mkmapLine.set(mk.id, mk);
+        }else if(mk.flag === mark.Mark.FLAG_FUNCTION)
+        {
+            this.mkmapFunction.set(mk.id, mk);
+        }
+    }
+
+    public mkmapClear()
+    {
+        this.mkmap.clear();
+        this.mkmapDefault.clear();
+        this.mkmapLine.clear();
+        this.mkmapFunction.clear();
+    }
+
+    public mkmapDelete(id:number)
+    {
+        this.mkmap.delete(id);
+        this.mkmapDefault.delete(id);
+        this.mkmapLine.delete(id);
+        this.mkmapFunction.delete(id);
+    }
+
     /**
      * 加载数据库内容
      */
@@ -84,7 +121,7 @@ export class DataBase {
         promise.then((res: any) => {
             //console.log(res);
             if (res.length) {
-                this.mkmap.clear();
+                this.mkmapClear();
                 for (let i = 0; i < res.length; i++) {
                     const mk = new mark.Mark(
                         res[i].id,
@@ -104,7 +141,8 @@ export class DataBase {
                         res[i].jumpLink,
                         res[i].description,
                     );
-                    this.mkmap.set(mk.id, mk);
+                    this.mkmapSet(mk);
+
                     this.sidebar?.elAll?.insert(mk);
                 }
                 this.lastId = res[res.length - 1].id;
