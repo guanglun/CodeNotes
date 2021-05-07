@@ -1,3 +1,6 @@
+### Version 0.0.12
+- 功能优化，生成函数md文件初步完成
+
 ### Version 0.0.11
 - 初步完成Line，Function的添加
 

@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.11",
+	"version": "0.0.12",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -281,10 +281,10 @@
 					"default": false,
 					"description": "Disable Color CodeNotes"
 				},
-				"CodeNotes.showHello": {
+				"CodeNotes.generatePath": {
 					"type": "string",
-					"default": "Hello",
-					"description": "show hello test"
+					"default": "",
+					"description": "Generate Path"
 				}
 			}
 		}

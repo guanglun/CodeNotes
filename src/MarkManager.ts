@@ -95,7 +95,7 @@ export class MarkManager {
 
                 for (line = te.selection.start.line; line <= te.selection.end.line; line++) {
                     this.db?.mkmap.forEach((value, key, map) => {
-                        if (value.flag === mark.Mark.FLAG_LINE) {
+                        if (value.flag === mark.Mark.FLAG_LINE && value.filePath === te.document.fileName) {
                             if (MarkManager.checkLine(line, value)) {
                                 vscode.window.setStatusBarMessage('Line Set Used', 2000);
                                 checkline = true;
@@ -116,12 +116,16 @@ export class MarkManager {
 
                 for (line = te.selection.start.line; line <= te.selection.end.line; line++) {
                     this.db?.mkmap.forEach((value, key, map) => {
-                        if (value.flag === mark.Mark.FLAG_FUNCTION || (line === te.selection.start.line && value.flag === mark.Mark.FLAG_LINE)) {
-                            if (MarkManager.checkLine(line, value)) {
-                                vscode.window.setStatusBarMessage('Fun Set Used', 2000);
-                                checkline = true;
+                        if(value.filePath === te.document.fileName)
+                        {
+                            if (value.flag === mark.Mark.FLAG_FUNCTION || (line === te.selection.start.line && value.flag === mark.Mark.FLAG_LINE)) {
+                                if (MarkManager.checkLine(line, value)) {
+                                    vscode.window.setStatusBarMessage('Fun Set Used', 2000);
+                                    checkline = true;
+                                }
                             }
                         }
+
                         if (checkline) {
                             return;
                         }
@@ -614,45 +618,34 @@ export class MarkManager {
         }
     }
 
-    public async readLine(file: string, line: number): Promise<string> {
-        let num: number = 0;
-        const fileStream = fs.createReadStream(file);
-
-        const rl = readline.createInterface({
-            input: fileStream,
-            crlfDelay: Infinity
-        });
-
-        for await (const lineStr of rl) {
-            if (num === line) {
-                fileStream.close();
-                return lineStr;
-            }
-            num++;
-        }
-        fileStream.close();
-        return "";
-    }
-
     public async generate() {
         if (!vscode.workspace.workspaceFolders) {
             return;
         }
+
+        const gPath = <string>vscode.workspace.getConfiguration().get('CodeNotes.generatePath');
+        if(gPath.length === 0)
+        {
+            return;
+        }
+
         if (this.db) {
-            const rootUri = vscode.workspace.workspaceFolders[0].uri;
+
             this.db?.mkmapFunction.forEach(async (mkf, key, map) => {
                 if (this.db) {
+                    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
                     const head =
                         `---
 title: ${mkf.name}
-date: 2021-04-30 18:17:14
-categories: Linux
+date: ${date}
+categories: kernelGenerate
 tags: 
     - Linux 
     - Kernel
+    - CodeNotes
 ---
 `;
-                    const mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/" + mkf.name + ".md");
+                    const mDUri = vscode.Uri.file(gPath + "/" + mkf.name + ".md");
                     const file = await pfs.open(mDUri.fsPath, 'w+');
 
                     file.appendFile(head);
@@ -668,6 +661,7 @@ tags:
                             const range = new vscode.Range(document.positionAt(startOffsetMark), document.positionAt(endOffsetMark));
                             const text = document.getText(range);
     
+
                             file.appendFile(text.trim());
                         }
                         file.appendFile("\r\n```\r\n");
@@ -698,9 +692,12 @@ tags:
                                         const startOffsetMark = document.offsetAt(new Position(mkl.startLine, 0));
                                         const endOffsetMark = document.offsetAt(new Position(mkl.endLine, 999999));
                                         const range = new vscode.Range(document.positionAt(startOffsetMark), document.positionAt(endOffsetMark));
-                                        const text = document.getText(range);
-
-                                        file.appendFile(text.trim());
+                                        let text = document.getText(range);
+                                        if(mkl.startLine === mkl.endLine)
+                                        {
+                                            text = text.trim();
+                                        }
+                                        file.appendFile(text);
                                     };
                                     
                                     line += (mkl.endLine - mkl.startLine);
