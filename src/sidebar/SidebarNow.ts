@@ -52,7 +52,7 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
         if(mk.name)
         {
             const entryItem = new sidebar.EntryItem(mk.name,vscode.TreeItemCollapsibleState.None);
-        
+            sidebar.Sidebar.setIcon(mk,entryItem);
             entryItem.command = {command:"sidebar_marks_now.openChild", 
             title:"codenotes",
             arguments:[mk.id] 
