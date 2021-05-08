@@ -82,31 +82,25 @@ export class DataBase {
         });
     }
 
-    public mkmapSet(mk:mark.Mark)
-    {
+    public mkmapSet(mk: mark.Mark) {
         this.mkmap.set(mk.id, mk);
-        if(mk.flag === mark.Mark.FLAG_DEFAULT)
-        {
+        if (mk.flag === mark.Mark.FLAG_DEFAULT) {
             this.mkmapDefault.set(mk.id, mk);
-        }else if(mk.flag === mark.Mark.FLAG_LINE)
-        {
+        } else if (mk.flag === mark.Mark.FLAG_LINE) {
             this.mkmapLine.set(mk.id, mk);
-        }else if(mk.flag === mark.Mark.FLAG_FUNCTION)
-        {
+        } else if (mk.flag === mark.Mark.FLAG_FUNCTION) {
             this.mkmapFunction.set(mk.id, mk);
         }
     }
 
-    public mkmapClear()
-    {
+    public mkmapClear() {
         this.mkmap.clear();
         this.mkmapDefault.clear();
         this.mkmapLine.clear();
         this.mkmapFunction.clear();
     }
 
-    public mkmapDelete(id:number)
-    {
+    public mkmapDelete(id: number) {
         this.mkmap.delete(id);
         this.mkmapDefault.delete(id);
         this.mkmapLine.delete(id);
@@ -330,7 +324,7 @@ export class DataBase {
         }
     }
 
-    public async insertDB(mk: mark.Mark):Promise<boolean> {
+    public async insertDB(mk: mark.Mark): Promise<boolean> {
 
         if (this.db) {
             const dbexc = "insert into " + DataBase.tableName + " values ( " +
