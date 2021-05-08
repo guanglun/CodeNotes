@@ -250,7 +250,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event =>{
-		vscode.window.setStatusBarMessage(event.textEditor.document.fileName + " " +event.selections[0].active.line, 2000);
+		//vscode.window.setStatusBarMessage(event.textEditor.document.fileName + " " +event.selections[0].active.line, 2000);
 		mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
 
 	}));

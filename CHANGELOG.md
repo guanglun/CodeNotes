@@ -1,3 +1,6 @@
+### Version 0.0.14
+- 添加分类图标
+
 ### Version 0.0.13
 - 功能优化,添加Web Code Path设置项
 
