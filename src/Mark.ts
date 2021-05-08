@@ -111,10 +111,43 @@ export class Mdata {
     public eitemAll: sidebar.EntryItem | undefined;
     public eitemNow: sidebar.EntryItem | undefined;
 
+    public eitemMark: sidebar.EntryItem | undefined;
+    public eitemLine: sidebar.EntryItem | undefined;
+    public eitemFunction: sidebar.EntryItem | undefined;
+
+    public eitemNowMark: sidebar.EntryItem | undefined;
+    public eitemNowLine: sidebar.EntryItem | undefined;
+    public eitemNowFunction: sidebar.EntryItem | undefined;
+
     public jb:JumpLink[] = [];
 
     public setEntryItemAll(el: sidebar.EntryItem) {
         this.eitemAll = el;
+    }
+    public setEntryItemAllEach(mk:Mark,el: sidebar.EntryItem){
+        if(mk.flag === Mark.FLAG_DEFAULT)
+        {
+            this.eitemMark = el;
+        }else if(mk.flag === Mark.FLAG_LINE)
+        {
+            this.eitemLine = el;
+        }else if(mk.flag === Mark.FLAG_FUNCTION)
+        {
+            this.eitemFunction = el;
+        }
+    }
+
+    public setEntryItemNowEach(mk:Mark,el: sidebar.EntryItem){
+        if(mk.flag === Mark.FLAG_DEFAULT)
+        {
+            this.eitemNowMark = el;
+        }else if(mk.flag === Mark.FLAG_LINE)
+        {
+            this.eitemNowLine = el;
+        }else if(mk.flag === Mark.FLAG_FUNCTION)
+        {
+            this.eitemNowFunction = el;
+        }
     }
 
     public setEntryItemNow(el: sidebar.EntryItem) {

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as mark  from '../Mark';
+import * as mark from '../Mark';
 import * as database from '../DataBase';
 import * as sidebar from './Sidebar';
 import * as path from 'path';
@@ -26,52 +26,64 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
     }
 
     getChildren(element?: sidebar.EntryItem): vscode.ProviderResult<sidebar.EntryItem[]> {
-        //if (element) {
-            const item: sidebar.EntryItem[] = [];
-            this.db?.mkmap.forEach((value, key, map)=>
-            {
-                if(value.mdata?.eitemAll)
-                {
-                    item.push(value.mdata.eitemAll);
+        let item: sidebar.EntryItem[] = [];
+        if (element?.label === "Mark") {
+
+            this.db?.mkmap.forEach((value, key, map) => {
+                if (value.mdata?.eitemMark) {
+                    item.push(value.mdata.eitemMark);
                 }
             });
             return item;
-        // } 
-        // else { //根节点
-        //     return [new sidebar.EntryItem("root",vscode.TreeItemCollapsibleState.Collapsed)];
-        // }
+        } else if (element?.label === "Line") {
+            this.db?.mkmap.forEach((value, key, map) => {
+                if (value.mdata?.eitemLine) {
+                    item.push(value.mdata.eitemLine);
+                }
+            });
+            return item;
+        } else if (element?.label === "Function") {
+
+            this.db?.mkmap.forEach((value, key, map) => {
+                if (value.mdata?.eitemFunction) {
+                    item.push(value.mdata.eitemFunction);
+                }
+            });
+            return item;
+        }
+        else { //根节点
+            return [new sidebar.EntryItem("Mark", vscode.TreeItemCollapsibleState.Collapsed),
+            new sidebar.EntryItem("Line", vscode.TreeItemCollapsibleState.Collapsed),
+            new sidebar.EntryItem("Function", vscode.TreeItemCollapsibleState.Collapsed)];
+        }
     }
 
-    public refresh(){
+    public refresh() {
         this._onDidChangeTreeData.fire();
     }
 
 
-    public insert(mk: mark.Mark){
-        if(mk.name)
-        {
-            const entryItem = new sidebar.EntryItem(mk.name,vscode.TreeItemCollapsibleState.None);
+    public insert(mk: mark.Mark) {
+        if (mk.name) {
+            const entryItem = new sidebar.EntryItem(mk.name, vscode.TreeItemCollapsibleState.None);
 
-            
-
-            sidebar.Sidebar.setIcon(mk,entryItem);
-            entryItem.command = {command:"sidebar_marks_all.openChild", 
-            title:"codenotes",
-            arguments:[mk.id] 
+            sidebar.Sidebar.setIcon(mk, entryItem);
+            entryItem.command = {
+                command: "sidebar_marks_all.openChild",
+                title: "codenotes",
+                arguments: [mk.id]
             };
 
-            mk.mdata?.setEntryItemAll(entryItem);
+            mk.mdata?.setEntryItemAllEach(mk, entryItem);
         }
     }
 
-    public reloadItemName(mk: mark.Mark)
-    {        
-        if(mk.name)
-        {
-            if(mk.mdata.eitemAll)
-            {
-                delete mk.mdata.eitemAll;
-            }
+    public reloadItemName(mk: mark.Mark) {
+        if (mk.name) {
+            delete mk.mdata.eitemAll;
+            delete mk.mdata.eitemMark;
+            delete mk.mdata.eitemLine;
+            delete mk.mdata.eitemFunction;
             this.insert(mk);
         }
     }

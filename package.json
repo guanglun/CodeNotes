@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.14",
+	"version": "0.0.15",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -284,12 +284,17 @@
 				"CodeNotes.generatePath": {
 					"type": "string",
 					"default": "",
-					"description": "Generate Path"
+					"description": "Generate File Path"
 				},
-				"CodeNotes.webCodePath": {
+				"CodeNotes.generateWebCodePath": {
 					"type": "string",
 					"default": "",
-					"description": "Web Code Path"
+					"description": "Generate Web Code Path"
+				},
+				"CodeNotes.generateCategories": {
+					"type": "string",
+					"default": "",
+					"description": "Generate Categories"
 				}
 			}
 		}

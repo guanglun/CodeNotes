@@ -274,7 +274,7 @@ export class DataBase {
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
             var pathDB = rootUri.fsPath + "/" + DataBase.databasePath + "/notes.db";
 
-            console.log("database path: " + pathDB);
+            //console.log("database path: " + pathDB);
 
             const promise = DataBase.existPromise(pathDB);
             promise.then((res: any) => {

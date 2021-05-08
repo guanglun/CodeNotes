@@ -79,7 +79,10 @@ export class MarkManager {
         }
     }
 
-    public insert(te: vscode.TextEditor, type: number): boolean {
+    public async insert(tee: vscode.TextEditor, type: number): Promise<boolean> {
+
+        let te = Object.assign({}, tee);
+
         if (this.db && this.sidebar) {
 
             let checkline = false;
@@ -116,8 +119,7 @@ export class MarkManager {
 
                 for (line = te.selection.start.line; line <= te.selection.end.line; line++) {
                     this.db?.mkmap.forEach((value, key, map) => {
-                        if(value.filePath === te.document.fileName)
-                        {
+                        if (value.filePath === te.document.fileName) {
                             if (value.flag === mark.Mark.FLAG_FUNCTION || (line === te.selection.start.line && value.flag === mark.Mark.FLAG_LINE)) {
                                 if (MarkManager.checkLine(line, value)) {
                                     vscode.window.setStatusBarMessage('Fun Set Used', 2000);
@@ -140,15 +142,33 @@ export class MarkManager {
                 return false;
             }
 
-            if (name.length === 0) {
+            if (name.length === 0 || type === mark.Mark.FLAG_LINE) {
                 name = "[" + path.basename(te.document.fileName) + "] " + te.selection.active.line + "-" + te.selection.anchor.character;
+            }
+
+            if (type === mark.Mark.FLAG_FUNCTION) {
+                const input = await vscode.window.showInputBox(
+                    { // 这个对象中所有参数都是可选参数
+                        password: false, 			// 输入内容是否是密码
+                        ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
+                        placeHolder: 'Function Name', 	// 在输入框内的提示信息
+                        prompt: 'Input Function Name', 	// 在输入框下方的提示信息
+                        validateInput: (text) => {
+                            return text.length > 0 ? null : 'NULL Error';
+                        },
+                    });
+                if (input) {
+                    name = input;
+                } else {
+                    vscode.window.setStatusBarMessage('Function Name Error', 2000);
+                    return false;
+                }
             }
 
             if (name.length > 64) {
                 name = name.slice(0, 63);
             }
             const rPath = MarkManager.pathAbsoluteToRelative(te.document.fileName);
-
 
             const mk = new mark.Mark(++this.db.lastId,
                 name,
@@ -256,8 +276,6 @@ export class MarkManager {
                 }
 
             }
-
-
         }
 
     }
@@ -279,32 +297,65 @@ export class MarkManager {
             const name = mk?.name;
 
             let btName = await vscode.window.showInputBox({
-                password: false, 			// 输入内容是否是密码
-                ignoreFocusOut: true, 		// 默认false，设置为true时鼠标点击别的地方输入框不会消失
-                placeHolder: 'Jumper Name', // 在输入框内的提示信息
+                password: false, 			        // 输入内容是否是密码
+                ignoreFocusOut: true, 		        // 默认false，设置为true时鼠标点击别的地方输入框不会消失
+                placeHolder: 'Jump To Function',    // 在输入框内的提示信息
                 prompt: 'Input Jumper Name', 		// 在输入框下方的提示信息
-                //validateInput:function(text){return text;} // 对输入内容进行验证并返回
-                validateInput: (text) => {
-                    return text.length > 0 ? null : 'null is error';
-                },
             }
             );
+            if (btName?.length == 0) {
+                btName = 'Jump To Function';
+            }
 
-            if (btName) {
+
+            if (btName && mk && this.db) {
                 let items: vscode.QuickPickItem[] = [];
+                const itemsFlag = [
+                    {
+                        label: 'Function',
+                        description: 'select from function',
+                        detail: 'number: ' + this.db.mkmapFunction.size
+                    },
+                    {
+                        label: 'Line',
+                        description: 'select from line',
+                        detail: 'number: ' + this.db.mkmapLine.size
+                    },
+                    {
+                        label: 'Default(Marks)',
+                        description: 'select from default',
+                        detail: 'number: ' + this.db.mkmapDefault.size
+                    },
+                ];
 
-                this.db?.mkmap.forEach((value, key, map) => {
-                    items.push(this.getQuickPickItem(value));
-                });
 
-                let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct Jump To Mark' });
+                let type = await vscode.window.showQuickPick(itemsFlag, { placeHolder: 'Sletct ' + mk?.name + ' Jump To Type' });
 
-                if (value && mk) {
-                    const jumpId = Number(value?.description?.split('id:')[1]);
-                    mk.mdata.jb.push(new mark.JumpLink(btName, jumpId));
-                    let json = JSON.stringify(mk.mdata.jb);
-                    mk.jumpLink = json;
-                    this.db.updateJumpLink(id, mk.jumpLink);
+                if (type) {
+                    if (type?.label === 'Function') {
+                        this.db.mkmapFunction.forEach((value, key, map) => {
+                            items.push(this.getQuickPickItem(value));
+                        });
+                    } else if (type?.label === 'Line') {
+                        this.db.mkmapLine.forEach((value, key, map) => {
+                            items.push(this.getQuickPickItem(value));
+                        });
+                    } else if (type?.label === 'Default(Marks)') {
+                        this.db.mkmapDefault.forEach((value, key, map) => {
+                            items.push(this.getQuickPickItem(value));
+                        });
+                    }
+                    let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct ' + mk?.name + ' Jump To ' });
+
+                    if (value && mk) {
+                        const jumpId = Number(value?.description?.split('id:')[1]);
+                        mk.mdata.jb.push(new mark.JumpLink(btName, jumpId));
+                        let json = JSON.stringify(mk.mdata.jb);
+                        mk.jumpLink = json;
+                        this.db.updateJumpLink(id, mk.jumpLink);
+    
+                        vscode.window.setStatusBarMessage('Jumper Add Success', 2000);
+                    }
                 }
             }
         }
@@ -367,8 +418,8 @@ export class MarkManager {
 
             if (value.filePath === fileName) {
                 if ((value.flag === mark.Mark.FLAG_LINE && MarkManager.checkLine(line, value)) ||
-                (value.flag === mark.Mark.FLAG_FUNCTION && line === value.startLine)) {
-                    
+                    (value.flag === mark.Mark.FLAG_FUNCTION && line === value.startLine)) {
+
                     this.editMarkDown(value.id);
                 }
             }
@@ -389,12 +440,12 @@ export class MarkManager {
                 if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
                     await vscode.workspace.openTextDocument(mDUri).then(document => {
                         vscode.window.showTextDocument(document);
-                        
+
                     });
                     await vscode.commands.executeCommand("workbench.action.moveEditorToRightGroup");
                 }
-                await vscode.commands.executeCommand("markdown.showLockedPreviewToSide", mDUri);
-                
+                await vscode.commands.executeCommand("markdown.showPreviewToSide", mDUri);
+
                 if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
                     await vscode.commands.executeCommand("workbench.action.moveActiveEditorGroupDown");
                     await vscode.commands.executeCommand("workbench.action.moveActiveEditorGroupUp");
@@ -413,23 +464,19 @@ export class MarkManager {
                 var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
 
                 this.lineId = mk.id;
-                
-                if(mk.description.length === 0)
-                {
-                    await pfs.writeFile(mDUri.fsPath,"-");
-                }else
-                {
-                    await pfs.writeFile(mDUri.fsPath,mk.description);
+
+                if (mk.description.length === 0) {
+                    await pfs.writeFile(mDUri.fsPath, "-");
+                } else {
+                    await pfs.writeFile(mDUri.fsPath, mk.description);
                 }
-                
-                
+
                 // if(this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT)
                 // {
                 //     await vscode.workspace.openTextDocument(mDUri).then(document => {
                 //         vscode.window.showTextDocument(document,vscode.ViewColumn.Three,true);
                 //     });
                 // }
-
             }
         }
 
@@ -549,9 +596,9 @@ export class MarkManager {
         }
 
         if (en === ShowColorType.sctClick && mk.flag === mark.Mark.FLAG_DEFAULT) {
-            // textEditor.selection = new vscode.Selection(
-            //     textEditor.document.positionAt(mk.startOffsetMark),
-            //     textEditor.document.positionAt(mk.endOffsetMark));
+            textEditor.selection = new vscode.Selection(
+                textEditor.document.positionAt(mk.startOffsetMark),
+                textEditor.document.positionAt(mk.startOffsetMark));
 
             textEditor.revealRange(new vscode.Range(
                 textEditor.document.positionAt(mk.startOffsetMark),
@@ -559,9 +606,9 @@ export class MarkManager {
         }
 
         if (en === ShowColorType.sctClick && (mk.flag === mark.Mark.FLAG_LINE || mk.flag === mark.Mark.FLAG_FUNCTION)) {
-            // textEditor.selection = new vscode.Selection(
-            //     textEditor.document.positionAt(mk.startOffsetMark),
-            //     textEditor.document.positionAt(mk.endOffsetMark));
+            textEditor.selection = new vscode.Selection(
+                textEditor.document.positionAt(mk.startOffsetMark),
+                textEditor.document.positionAt(mk.startOffsetMark));
 
             textEditor.revealRange(new vscode.Range(
                 textEditor.document.positionAt(mk.startOffsetMark),
@@ -638,43 +685,47 @@ export class MarkManager {
         if (!vscode.workspace.workspaceFolders) {
             return;
         }
-
+        vscode.window.setStatusBarMessage('Generate Start...', 2000);
+        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
         const gPath = <string>vscode.workspace.getConfiguration().get('CodeNotes.generatePath');
-        const webCodePath = <string>vscode.workspace.getConfiguration().get('CodeNotes.webCodePath');
-        if(gPath.length === 0)
-        {
+        const webCodePath = <string>vscode.workspace.getConfiguration().get('CodeNotes.generateWebCodePath');
+        const gCategories = <string>vscode.workspace.getConfiguration().get('CodeNotes.generateCategories');
+        
+        if (gPath.length === 0) {
             return;
         }
 
         if (this.db) {
-
-            this.db?.mkmapFunction.forEach(async (mkf, key, map) => {
+            const arrFunction = Array.from(this.db.mkmapFunction);
+            for (let cFunction = 0; cFunction < arrFunction.length; cFunction++) {
+                const mkf = arrFunction[cFunction][1];
+                
+            //this.db?.mkmapFunction.forEach(async (mkf, key, map) => {
                 if (this.db) {
-                    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+                    
                     const head =
                         `---
 title: ${mkf.name}
 date: ${date}
-categories: kernelGenerate
-tags: 
-    - Linux 
-    - Kernel
-    - CodeNotes
+categories: ${gCategories}
 ---
 `;
                     const mDUri = vscode.Uri.file(gPath + "/" + mkf.name + ".md");
                     const file = await pfs.open(mDUri.fsPath, 'w+');
 
-                    file.appendFile(head);
+                    await file.appendFile(head);
 
-                    if(mkf.filePath)
-                    {
-                        if(webCodePath.length !== 0 && mkf.relativePath)
-                        {
-                            file.appendFile("\r\n[Code](" + webCodePath + "/blob/master" + mkf.relativePath.replace(/\\/g,"/") + "#L" + (mkf.startLine + 1) + ")");
+                    if (mkf.filePath) {
+                        if (webCodePath.length !== 0 && mkf.relativePath) {
+                            const source = "[SourceCode](" + webCodePath + "/blob/master" + mkf.relativePath.replace(/\\/g, "/") + "#L" + (mkf.startLine + 1) + ")";
+                            const fPath = mkf.relativePath.replace(/\\/g, "/")
+                            await file.appendFile(
+`\r\n|查看函数源码  |路径  |
+|---|---|
+|${source}| ${fPath} |`);
                         }
 
-                        file.appendFile("\r\n```c\r\n");
+                        await file.appendFile("  \r\n```c\r\n");
                         const document = await vscode.workspace.openTextDocument(mkf.filePath);
 
                         if (document) {
@@ -682,31 +733,28 @@ tags:
                             const endOffsetMark = document.offsetAt(new Position(mkf.startLine, 999999));
                             const range = new vscode.Range(document.positionAt(startOffsetMark), document.positionAt(endOffsetMark));
                             const text = document.getText(range);
-    
 
-                            file.appendFile(text.trim());
+
+                            await file.appendFile(text.trim());
                         }
-                        file.appendFile("\r\n```\r\n");
+                        await file.appendFile("\r\n```  \r\n\r\n");
                     }
-
-                    file.appendFile(mkf.description + "\r\n");
+                    
+                    await file.appendFile(mkf.description + "  \r\n\r\n");
 
                     let line: number;
                     for (line = mkf.startLine; line <= mkf.endLine; line++) {
 
                         const arr = Array.from(this.db?.mkmapLine);
 
-                        for(let count = 0;count<arr.length;count++)
-                        {
+                        for (let count = 0; count < arr.length; count++) {
                             const mkl = arr[count][1];
-                        //}
-                        //this.db?.mkmapLine.forEach((mkl, key, map) => {
 
                             if (mkl.startLine <= line && mkl.endLine >= line && mkl.filePath === mkf.filePath)//match
                             {
-                                file.appendFile("\r\n```c\r\n");
+                                await file.appendFile("  \r\n```c\r\n");
                                 if (mkl.filePath) {
-                                    
+
 
                                     const document = await vscode.workspace.openTextDocument(mkl.filePath);
 
@@ -715,25 +763,70 @@ tags:
                                         const endOffsetMark = document.offsetAt(new Position(mkl.endLine, 999999));
                                         const range = new vscode.Range(document.positionAt(startOffsetMark), document.positionAt(endOffsetMark));
                                         let text = document.getText(range);
-                                        if(mkl.startLine === mkl.endLine)
-                                        {
+                                        if (mkl.startLine === mkl.endLine) {
                                             text = text.trim();
                                         }
-                                        file.appendFile(text);
+                                        await file.appendFile(text);
                                     };
-                                    
+
                                     line += (mkl.endLine - mkl.startLine);
+
+                                    
                                 }
 
-                                file.appendFile("\r\n```\r\n");
-                                file.appendFile(mkl.description);
+                                await file.appendFile("\r\n```  \r\n\r\n");
+
+                                const arrMark = Array.from(this.db?.mkmapDefault);
+                                
+                                
+                                for (let cc = 0; cc < arrMark.length; cc++) {
+                                    const mkd = arrMark[cc][1];
+                                    
+                                    if(mkl.startLine <= mkd.startLine && mkl.endLine >= mkd.startLine && mkl.filePath === mkd.filePath)
+                                    {
+                            
+                                        for (let cjb = 0; cjb < mkd.mdata.jb.length; cjb++) {
+                                            const jb = mkd.mdata.jb[cjb];
+                                            if(jb)
+                                            {
+                                                const jbName = jb.name;
+                                                const mkk = this.db?.mkmap.get(jb.id);
+                                                const fName = mkk?.name;
+                                                const fPath = date.split(" ")[0].replace(/-/g,"/");
+                                                let type="";
+                                                if(mkk?.flag == mark.Mark.FLAG_DEFAULT)
+                                                {
+                                                    type = "标签";
+                                                }else if(mkk?.flag == mark.Mark.FLAG_LINE)
+                                                {
+                                                    type = "行";
+                                                }else if(mkk?.flag == mark.Mark.FLAG_FUNCTION)
+                                                {
+                                                    type = "函数";
+                                                }
+                                                if(jbName && fName)
+                                                {
+                                                    await file.appendFile(`* [查看${fName}${type}](${fPath}/${gCategories}/${fName})  \r\n\r\n`);
+                                                }
+                                            }
+
+                                            
+                                        }
+                                        
+                                    }
+
+                                }
+
+                                await file.appendFile(mkl.description + "\r\n\r\n");
                             }
                         };
                     }
 
-                    file.close();
+                    await file.close();
+                    vscode.window.setStatusBarMessage('Generate Success.', 2000);
                 }
-            });
+            //});
+            };
         }
 
     }
@@ -771,29 +864,52 @@ tags:
      */
     public static checkPoint(doc: vscode.TextDocument, mk: mark.Mark, p: Position): boolean {
         const docOffset = doc.offsetAt(p);
-        if (mk.startOffsetMark <= docOffset && docOffset <= mk.endOffsetMark) {
+
+        if (mk.flag === mark.Mark.FLAG_FUNCTION) {
+            if (mk.startLine === p.line) {
+                return true;
+            }
+        } else if (mk.flag === mark.Mark.FLAG_LINE) {
+            if (mk.startLine <= p.line && mk.endLine >= p.line) {
+                return true;
+            }
+        } else if (mk.startOffsetMark <= docOffset && docOffset <= mk.endOffsetMark) {
             return true;
         }
         return false;
     }
 
-    public async selectWhitch(te: vscode.TextEditor, work: string) {
+    public async selectWhitch(te: vscode.TextEditor, work: string,type?:number | undefined) {
         //console.log(te);
         let items: vscode.QuickPickItem[] = [];
         this.db?.mkmap.forEach((value, key, map) => {
-
-
-            if (value.filePath === te.document.fileName && value.flag === mark.Mark.FLAG_DEFAULT) {
-                if (MarkManager.checkPoint(te.document, value, te.selection.anchor) === true) {
-                    //console.log(value);
-                    items.push(this.getQuickPickItem(value));
-                }
-            } else if (value.filePath === te.document.fileName && (value.flag === mark.Mark.FLAG_LINE || value.flag === mark.Mark.FLAG_FUNCTION)) {
-                if (MarkManager.checkLine(te.selection.start.line, value) === true) {
-                    //console.log(value);
-                    items.push(this.getQuickPickItem(value));
+            
+            if (value.filePath === te.document.fileName) {
+                if(type !== undefined)
+                {
+                    if(value.flag === type)
+                    {
+                        if (MarkManager.checkPoint(te.document, value, te.selection.anchor) === true) {
+                            items.push(this.getQuickPickItem(value));
+                        }
+                    }
+                }else{
+                    if (value.flag === mark.Mark.FLAG_DEFAULT) {
+                        if (MarkManager.checkPoint(te.document, value, te.selection.anchor) === true) {
+                            items.push(this.getQuickPickItem(value));
+                        }
+                    } else if (value.flag === mark.Mark.FLAG_LINE) {
+                        if (MarkManager.checkLine(te.selection.start.line, value) === true) {
+                            items.push(this.getQuickPickItem(value));
+                        }
+                    } else if (value.flag === mark.Mark.FLAG_FUNCTION) {
+                        if (te.selection.start.line === value.startLine) {
+                            items.push(this.getQuickPickItem(value));
+                        }
+                    }
                 }
             }
+
         });
 
         if (items.length > 1) {

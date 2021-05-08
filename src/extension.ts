@@ -109,8 +109,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.addJumpLinkMark', async function (textEditor, edit) {
 		if(!mm.checkDBInit())
 			return;
-		await mm.addJump( await mm.selectWhitch(textEditor,'Add Jump Link'));
-
+		await mm.addJump( await mm.selectWhitch(textEditor,'Add Jump Link',Mark.Mark.FLAG_DEFAULT));
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteJumpLinkMark', async function (textEditor, edit) {
@@ -209,8 +208,6 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((editor => {  
-		//console.log(editor.fileName);
-
 		mm.saveMarkDown(editor);
 		db?.mkmap.forEach((mk, key, map)=>
 		{

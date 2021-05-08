@@ -27,20 +27,36 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
     }
 
     getChildren(element?: sidebar.EntryItem): vscode.ProviderResult<sidebar.EntryItem[]> {
-        //if (element) {
-            const item: sidebar.EntryItem[] = [];
-            this.db?.mkmap.forEach((value, key, map)=>
-            {
-                if(value.mdata?.eitemNow)
-                {
-                    item.push(value.mdata.eitemNow);
+        let item: sidebar.EntryItem[] = [];
+        if (element?.label === "Mark") {
+
+            this.db?.mkmap.forEach((value, key, map) => {
+                if (value.mdata?.eitemNowMark) {
+                    item.push(value.mdata.eitemNowMark);
                 }
             });
             return item;
-        // } 
-        // else { //根节点
-        //     return [new sidebar.EntryItem("root",vscode.TreeItemCollapsibleState.Collapsed)];
-        // }
+        } else if (element?.label === "Line") {
+            this.db?.mkmap.forEach((value, key, map) => {
+                if (value.mdata?.eitemNowLine) {
+                    item.push(value.mdata.eitemNowLine);
+                }
+            });
+            return item;
+        } else if (element?.label === "Function") {
+
+            this.db?.mkmap.forEach((value, key, map) => {
+                if (value.mdata?.eitemNowFunction) {
+                    item.push(value.mdata.eitemNowFunction);
+                }
+            });
+            return item;
+        }
+        else { //根节点
+            return [new sidebar.EntryItem("Mark", vscode.TreeItemCollapsibleState.Collapsed),
+            new sidebar.EntryItem("Line", vscode.TreeItemCollapsibleState.Collapsed),
+            new sidebar.EntryItem("Function", vscode.TreeItemCollapsibleState.Collapsed)];
+        }
     }
 
     public refresh(){
@@ -58,7 +74,7 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
             arguments:[mk.id] 
             };
 
-            mk.mdata?.setEntryItemNow(entryItem);
+            mk.mdata?.setEntryItemNowEach(mk,entryItem);
         }
     }
 
@@ -66,10 +82,10 @@ export class EntryList implements vscode.TreeDataProvider<sidebar.EntryItem>
     {        
         if(mk.name)
         {
-            if(mk.mdata.eitemAll)
-            {
-                delete mk.mdata.eitemAll;
-            }
+            delete mk.mdata.eitemNow;
+            delete mk.mdata.eitemNowMark;
+            delete mk.mdata.eitemNowLine;
+            delete mk.mdata.eitemNowFunction;
             this.insert(mk);
         }
     }
