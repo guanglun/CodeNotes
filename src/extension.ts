@@ -224,7 +224,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((cevent =>{
 		if (cevent.affectsConfiguration("CodeNotes.disableColor")) {
-			console.log("affectsConfiguration");
+			//console.log("affectsConfiguration");
 			mm.reloadAllDocColor();
             // if(vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === true)
             // {
@@ -250,6 +250,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event =>{
+		vscode.window.setStatusBarMessage(event.textEditor.document.fileName + " " +event.selections[0].active.line, 2000);
 		mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
 
 	}));

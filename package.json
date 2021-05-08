@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.12",
+	"version": "0.0.13",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -285,6 +285,11 @@
 					"type": "string",
 					"default": "",
 					"description": "Generate Path"
+				},
+				"CodeNotes.webCodePath": {
+					"type": "string",
+					"default": "",
+					"description": "Web Code Path"
 				}
 			}
 		}

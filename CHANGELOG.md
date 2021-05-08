@@ -1,3 +1,6 @@
+### Version 0.0.13
+- 功能优化,添加Web Code Path设置项
+
 ### Version 0.0.12
 - 功能优化，生成函数md文件初步完成
 

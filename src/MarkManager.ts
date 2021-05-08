@@ -386,17 +386,19 @@ export class MarkManager {
                 const file = await pfs.open(mDUri.fsPath, 'w+');
                 file.close();
 
-                await vscode.commands.executeCommand("markdown.showLockedPreviewToSide", mDUri);
-
                 if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
-                    vscode.workspace.openTextDocument(mDUri).then(document => {
-                        vscode.window.showTextDocument(document, vscode.ViewColumn.Beside, true);
+                    await vscode.workspace.openTextDocument(mDUri).then(document => {
+                        vscode.window.showTextDocument(document);
+                        
                     });
+                    await vscode.commands.executeCommand("workbench.action.moveEditorToRightGroup");
                 }
-                // if (vscode.window.visibleTextEditors)
-                //     vscode.window.showTextDocument(vscode.window.visibleTextEditors[0].document).then(textEditor => {
-                // });
-
+                await vscode.commands.executeCommand("markdown.showLockedPreviewToSide", mDUri);
+                
+                if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
+                    await vscode.commands.executeCommand("workbench.action.moveActiveEditorGroupDown");
+                    await vscode.commands.executeCommand("workbench.action.moveActiveEditorGroupUp");
+                }
             }
         }
     }
@@ -411,8 +413,22 @@ export class MarkManager {
                 var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
 
                 this.lineId = mk.id;
-                console.log(mk.description);
-                await pfs.writeFile(mDUri.fsPath, mk.description);
+                
+                if(mk.description.length === 0)
+                {
+                    await pfs.writeFile(mDUri.fsPath,"-");
+                }else
+                {
+                    await pfs.writeFile(mDUri.fsPath,mk.description);
+                }
+                
+                
+                // if(this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT)
+                // {
+                //     await vscode.workspace.openTextDocument(mDUri).then(document => {
+                //         vscode.window.showTextDocument(document,vscode.ViewColumn.Three,true);
+                //     });
+                // }
 
             }
         }
@@ -624,6 +640,7 @@ export class MarkManager {
         }
 
         const gPath = <string>vscode.workspace.getConfiguration().get('CodeNotes.generatePath');
+        const webCodePath = <string>vscode.workspace.getConfiguration().get('CodeNotes.webCodePath');
         if(gPath.length === 0)
         {
             return;
@@ -652,6 +669,11 @@ tags:
 
                     if(mkf.filePath)
                     {
+                        if(webCodePath.length !== 0 && mkf.relativePath)
+                        {
+                            file.appendFile("\r\n[Code](" + webCodePath + "/blob/master" + mkf.relativePath.replace(/\\/g,"/") + "#L" + (mkf.startLine + 1) + ")");
+                        }
+
                         file.appendFile("\r\n```c\r\n");
                         const document = await vscode.workspace.openTextDocument(mkf.filePath);
 
