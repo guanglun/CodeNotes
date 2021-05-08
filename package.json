@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.15",
+	"version": "0.0.16",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -295,6 +295,11 @@
 					"type": "string",
 					"default": "",
 					"description": "Generate Categories"
+				},
+				"CodeNotes.generateHexoPath": {
+					"type": "string",
+					"default": "",
+					"description": "Generate Hexo Path"
 				}
 			}
 		}

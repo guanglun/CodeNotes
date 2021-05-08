@@ -690,7 +690,8 @@ export class MarkManager {
         const gPath = <string>vscode.workspace.getConfiguration().get('CodeNotes.generatePath');
         const webCodePath = <string>vscode.workspace.getConfiguration().get('CodeNotes.generateWebCodePath');
         const gCategories = <string>vscode.workspace.getConfiguration().get('CodeNotes.generateCategories');
-        
+        const gHexoPath = <string>vscode.workspace.getConfiguration().get('CodeNotes.generateHexoPath');
+
         if (gPath.length === 0) {
             return;
         }
@@ -806,7 +807,7 @@ categories: ${gCategories}
                                                 }
                                                 if(jbName && fName)
                                                 {
-                                                    await file.appendFile(`* [查看${fName}${type}](${fPath}/${gCategories}/${fName})  \r\n\r\n`);
+                                                    await file.appendFile(`* [查看${fName}${type}](${gHexoPath}/${fPath}/${gCategories}/${fName})  \r\n\r\n`);
                                                 }
                                             }
 

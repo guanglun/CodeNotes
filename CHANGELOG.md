@@ -1,3 +1,6 @@
+### Version 0.0.16
+- 添加HexoPath路径设置
+
 ### Version 0.0.15
 - gen功能优化
 - 添加设置项
