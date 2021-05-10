@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.17",
+	"version": "0.0.18",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -25,7 +25,31 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"keybindings": [{
+			"command": "codenotes.jumpTo",
+			"key": "ctrl+j"
+		},
+		{
+			"command": "codenotes.jumpToLink",
+			"key": "ctrl+right"
+		}],
 		"commands": [
+			{
+				"command": "codenotes.jumpTo",
+				"title": "CodeNotes jpto"
+			},		
+			{
+				"command": "codenotes.jumpToMark",
+				"title": "CodeNotes jpto mark"
+			},	
+			{
+				"command": "codenotes.jumpToLine",
+				"title": "CodeNotes jpto line"
+			},	
+			{
+				"command": "codenotes.jumpToFunction",
+				"title": "CodeNotes jpto function"
+			},		
 			{
 				"command": "codenotes.jumpToLink",
 				"title": "CodeNotes Jump"

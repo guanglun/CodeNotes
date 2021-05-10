@@ -87,7 +87,7 @@ export class MarkManager {
 
             let checkline = false;
             let name = te.document.getText(te.selection);
-
+            name = name.replace(/\"/g, '');
             if (name.length === 0 && type === mark.Mark.FLAG_DEFAULT) {
                 vscode.window.setStatusBarMessage('Not Found Select String', 2000);
                 return false;
@@ -616,7 +616,7 @@ export class MarkManager {
 
 
 
-        if (en === ShowColorType.sctShow) {
+        if (en === ShowColorType.sctShow || en === ShowColorType.sctClear) {
 
             let color;
             if (mk.color) {
@@ -625,57 +625,93 @@ export class MarkManager {
                 color = "#FF0000";
             }
 
-            let decorationType;
-            let range;
+            let decorationType:vscode.TextEditorDecorationType[]=[];
+            let range:vscode.Range[] = [];
 
             if (mk.flag === mark.Mark.FLAG_DEFAULT) {
-                decorationType = vscode.window.createTextEditorDecorationType({
-                    gutterIconSize: "14px",
-                    backgroundColor: color + "50",
-                    opacity: "1",
-                    borderRadius: "4px",
-                });
-                range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                    textEditor.document.positionAt(mk.endOffsetMark));
+                if(en === ShowColorType.sctShow)
+                {
+                    decorationType.push(vscode.window.createTextEditorDecorationType({
+                        gutterIconSize: "14px",
+                        backgroundColor: color + "50",
+                        opacity: "1",
+                        borderRadius: "4px",
+                    }));
+                }
+                range.push(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+                    textEditor.document.positionAt(mk.endOffsetMark)));
+
             } else if (mk.flag === mark.Mark.FLAG_LINE) {
-                decorationType = vscode.window.createTextEditorDecorationType({
-                    gutterIconSize: "14px",
-                    gutterIconPath: path.join(this.context.extensionPath, "images/code-line.png"),
-                });
-                range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                    textEditor.document.positionAt(mk.endOffsetMark));
+
+                if((mk.endLine - mk.startLine) === 0)
+                {
+                    if(en === ShowColorType.sctShow)
+                    {
+                        decorationType.push(vscode.window.createTextEditorDecorationType({
+                            gutterIconSize: "14px",
+                            gutterIconPath: path.join(this.context.extensionPath, "images/code-line.png"),
+                        }));
+                    }
+    
+    
+                    range.push(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+                        textEditor.document.positionAt(mk.endOffsetMark)));
+                }else{
+                    if(en === ShowColorType.sctShow)
+                    {
+                        decorationType.push(vscode.window.createTextEditorDecorationType({
+                            gutterIconSize: "14px",
+                            gutterIconPath: path.join(this.context.extensionPath, "images/line-top.png"),
+                        }));
+                        decorationType.push(vscode.window.createTextEditorDecorationType({
+                            gutterIconSize: "14px",
+                            gutterIconPath: path.join(this.context.extensionPath, "images/line-down.png"),
+                        }));                        
+                    }
+    
+    
+                    range.push(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+                        textEditor.document.positionAt(mk.startOffsetMark)));
+                    range.push(new vscode.Range(textEditor.document.positionAt(mk.endOffsetMark),
+                        textEditor.document.positionAt(mk.endOffsetMark)));
+                }
             } else if (mk.flag === mark.Mark.FLAG_FUNCTION) {
-                decorationType = vscode.window.createTextEditorDecorationType({
-                    gutterIconSize: "14px",
-                    gutterIconPath: path.join(this.context.extensionPath, "images/functions.png"),
-                });
-                range = new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                    textEditor.document.positionAt(mk.startOffsetMark));
+                if(en === ShowColorType.sctShow)
+                {
+                    decorationType.push(vscode.window.createTextEditorDecorationType({
+                        gutterIconSize: "14px",
+                        gutterIconPath: path.join(this.context.extensionPath, "images/functions.png"),
+                    }));
+                }
+                range.push(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
+                    textEditor.document.positionAt(mk.startOffsetMark)));
             }
 
-
-
-
-            if (mk.mdata?.decorationType) {
-                mk.mdata.decorationType.dispose();
+            if (mk.mdata?.decorationType?.length && en === ShowColorType.sctShow) {
+                mk.mdata.decorationType.splice(0,mk.mdata.decorationType.length);
             }
 
             if (decorationType && range) {
-                mk.mdata?.setDecorationType(decorationType);
-                if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
-                    textEditor.setDecorations(decorationType, [range]);
+                if(en === ShowColorType.sctShow)
+                {
+                    mk.mdata?.setDecorationType(decorationType);
+                    if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
+                        if(mk.mdata.decorationType)
+                        for (let i=0;i<mk.mdata.decorationType.length;i++) {
+                            textEditor.setDecorations(decorationType[i], [range[i]]);
+                        }
+                    }
+                }else if (en === ShowColorType.sctClear)
+                {
+                    if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
+                        if(mk.mdata.decorationType)
+                        for (let i=0;i<mk.mdata.decorationType.length;i++) {
+                            mk.mdata.decorationType[i].dispose();
+                            textEditor.setDecorations(mk.mdata.decorationType[i], [range[i]]);
+                        }
+                    }
                 }
-            }
 
-        }
-
-        if (en === ShowColorType.sctClear) {
-
-            if (mk.mdata?.decorationType) {
-                mk.mdata.decorationType.dispose();
-
-                textEditor.setDecorations(mk.mdata.decorationType, [new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
-                    textEditor.document.positionAt(mk.endOffsetMark))]);
             }
         }
     }
@@ -846,12 +882,58 @@ categories: ${gCategories}
                 if (mk.filePath) {
                     const uri = vscode.Uri.file(mk.filePath);
                     vscode.workspace.openTextDocument(uri).then(document => {
-                        vscode.window.showTextDocument(document).then(textEditor => {
+                        vscode.window.showTextDocument(document,vscode.ViewColumn.One,false).then(textEditor => {
                             this.showColor(textEditor, mk, ShowColorType.sctClick);
                         });
                     });
                 }
             }
+        }
+    }
+
+    public async jumpTo(type?:number | undefined)
+    {
+        let items: vscode.QuickPickItem[] = [];
+        if(type === undefined && this.db)
+        {
+            const arr = Array.from(this.db.mkmap);         
+            for (let i = 0; i < arr.length; i++) {
+                const mk = arr[i][1];
+                items.push(this.getQuickPickItem(mk));
+            }
+        }else if(type === mark.Mark.FLAG_DEFAULT && this.db)
+        {
+            const arr = Array.from(this.db.mkmapDefault);         
+            for (let i = 0; i < arr.length; i++) {
+                const mk = arr[i][1];
+                items.push(this.getQuickPickItem(mk));
+            }
+        }else if(type === mark.Mark.FLAG_LINE && this.db)
+        {
+            const arr = Array.from(this.db.mkmapLine);         
+            for (let i = 0; i < arr.length; i++) {
+                const mk = arr[i][1];
+                items.push(this.getQuickPickItem(mk));
+            }
+        }else if(type === mark.Mark.FLAG_FUNCTION && this.db)
+        {
+            const arr = Array.from(this.db.mkmapFunction);         
+            for (let i = 0; i < arr.length; i++) {
+                const mk = arr[i][1];
+                items.push(this.getQuickPickItem(mk));
+            }
+        }
+        if (items.length > 1) {
+            let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct JumpTo' });
+            if(value)
+            {
+                const jumpId = Number(value?.description?.split('id:')[1]);
+                if(jumpId)
+                {
+                    this.click(jumpId);
+                }
+            }
+
         }
     }
 

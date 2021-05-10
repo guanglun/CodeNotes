@@ -31,6 +31,30 @@ export function activate(context: vscode.ExtensionContext) {
 	if(sd.sweb){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_web", sd.sweb,{webviewOptions: {retainContextWhenHidden: true}}));}
 	if(sd.smark){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_mark", sd.smark,{webviewOptions: {retainContextWhenHidden: true}}));}
 
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.jumpTo', (res) => {
+		if(!mm.checkDBInit())
+			return;		
+		mm.jumpTo();
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.jumpToMark', (res) => {
+		if(!mm.checkDBInit())
+			return;		
+		mm.jumpTo(Mark.Mark.FLAG_DEFAULT);
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.jumpToLine', (res) => {
+		if(!mm.checkDBInit())
+			return;		
+		mm.jumpTo(Mark.Mark.FLAG_LINE);
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.jumpToFunction', (res) => {
+		if(!mm.checkDBInit())
+			return;		
+		mm.jumpTo(Mark.Mark.FLAG_FUNCTION);
+	}));
+
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.deleteItem', (res: Sidebar.EntryItem) => {
 		if(!mm.checkDBInit())
 			return;

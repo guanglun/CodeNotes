@@ -113,7 +113,7 @@ export class Mark {
 
 export class Mdata {
 
-    public decorationType: vscode.TextEditorDecorationType | undefined;
+    public decorationType: vscode.TextEditorDecorationType[] | undefined;
 
     public eitemAll: sidebar.EntryItem | undefined;
     public eitemNow: sidebar.EntryItem | undefined;
@@ -161,7 +161,7 @@ export class Mdata {
         this.eitemNow = el;
     }
 
-    public setDecorationType(dt: vscode.TextEditorDecorationType) {
+    public setDecorationType(dt: vscode.TextEditorDecorationType[]) {
         this.decorationType = dt;
     }
 }
