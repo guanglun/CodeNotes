@@ -1,3 +1,6 @@
+### Version 0.0.17
+- 添加JumpTo右击菜单按键
+
 ### Version 0.0.16
 - 添加HexoPath路径设置
 

@@ -232,23 +232,22 @@ export class MarkManager {
     }
 
     public async deleteJump(id: number) {
-        if (this.db && this.sidebar) {
-            const mk = this.db.mkmap.get(id);
-
-            if (mk?.mdata.jb[0] === null && mk?.mdata.jb.length === 1) {
+        const mk = this.db?.mkmap.get(id);
+        if (this.db && this.sidebar && mk) {
+            if (mk.mdata.jb.length === 0) {
                 vscode.window.setStatusBarMessage('No one Jump Link', 2000);
             } else {
-                const name = mk?.name;
+                const name = mk.name;
 
                 let items: vscode.QuickPickItem[] = [];
 
-                mk?.mdata.jb.forEach((value, key, map) => {
+                for(let i=0;i<mk.mdata.jb.length;i++){
                     items.push({
-                        label: value.name ? value.name : "null",
-                        description: 'id:' + value.id,
+                        label: mk.mdata.jb[i].name ? mk.mdata.jb[i].name : "null",
+                        description: 'id:' + mk.mdata.jb[i].id,
                         detail: "click delete"
                     });
-                });
+                };
 
                 if (items.length > 0) {
                     let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct Delete Jump' });
@@ -265,8 +264,8 @@ export class MarkManager {
                             }
 
                         }
-
-                        delete mk?.mdata.jb[mk?.mdata.jb.findIndex(findJb)];
+                        
+                        mk.mdata.jb.splice(mk.mdata.jb.findIndex(findJb),1);
                         let json = JSON.stringify(mk.mdata.jb);
                         mk.jumpLink = json;
                         this.db.updateJumpLink(id, mk.jumpLink);
@@ -856,6 +855,28 @@ categories: ${gCategories}
         }
     }
 
+    public jumpToFunction(id: number) {
+        const mk = this.db?.mkmap.get(id);
+        if(mk && mk.mdata.jb && mk.mdata.jb.length !== 0)
+        {
+            let index = 0;
+            if(mk.mdata.jb.length == 1)
+            {
+                index = 0;
+            }else{
+                for(let i=0;i<mk.mdata.jb.length;i++)
+                {
+                    
+                    if(mk.mdata.jb[i].name === "Jump To Function")
+                    {
+                        index = i;
+                    }
+                }
+            }
+
+            this.click(mk.mdata.jb[index].id);
+        }
+    }
     /**
      * 检查point在文件中的位置是否符合段内
      * @param doc 

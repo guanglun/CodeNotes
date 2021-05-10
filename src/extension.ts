@@ -112,6 +112,12 @@ export function activate(context: vscode.ExtensionContext) {
 		await mm.addJump( await mm.selectWhitch(textEditor,'Add Jump Link',Mark.Mark.FLAG_DEFAULT));
 	}));
 
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.jumpToLink', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+			return;
+		await mm.jumpToFunction(await mm.selectWhitch(textEditor,'Select Mark Jump',Mark.Mark.FLAG_DEFAULT));
+	}));
+
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteJumpLinkMark', async function (textEditor, edit) {
 		if(!mm.checkDBInit())
 			return;		

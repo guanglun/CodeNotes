@@ -46,7 +46,14 @@ export class SidebarMark implements vscode.WebviewViewProvider {
   }
 
   public updateMarkEdit(mk:Mark.Mark) {
-    this._view?.webview.postMessage({ mark: {id:mk.id,name:mk.name,filePath:mk.filePath,color:mk.color,description:mk.description} });
+    this._view?.webview.postMessage({ mark: {
+      id:mk.id,
+      name:mk.name,
+      filePath:mk.filePath,
+      color:mk.color,
+      description:mk.description,
+      selection:`[${mk.startLine},${mk.startCharacter}]-[${mk.endLine},${mk.endCharacter}]`,
+      jumper:mk.mdata.jb.length} });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
@@ -68,16 +75,19 @@ export class SidebarMark implements vscode.WebviewViewProvider {
     
     
       <input type="color" id="colorSelect" onchange="colorChange()" />
-    
-      <div style="margin-top:6px;">notes(support markdown):</div>
-    
-      <textarea id="taDescription" onchange="taOnChange()" cols="80" rows="10"
-        style="margin-top:6px;resize: none;width:100%;color: white; background-color: #2E2E2E;"></textarea>
+      <br>
+
     
       <div id="textId" style="margin-top:6px;">Id:</div>
       <div id="textFilePath" style="margin-top:6px;">Path:</div>
+      <div id="textSelection" style="margin-top:6px;">Selection:</div>
+      <div id="textJumper" style="margin-top:6px;">Jumper:</div>
+
+      <br>
+      <div style="margin-top:6px;">Notes(support markdown):</div>
     
-    
+      <textarea id="taDescription" onchange="taOnChange()" cols="80" rows="10"
+        style="margin-top:6px;resize: none;width:100%;color: white; background-color: #2E2E2E;"></textarea>
     
     
       <script type="text/javascript">
@@ -85,8 +95,10 @@ export class SidebarMark implements vscode.WebviewViewProvider {
     
         var textMarkName = document.getElementById("textMarkName");
         var textFilePath = document.getElementById("textFilePath");
+        var textJumper = document.getElementById("textJumper");
         var colorSelect = document.getElementById("colorSelect");
         var taDescription = document.getElementById("taDescription");
+        var textSelection = document.getElementById("textSelection");
         var textId = document.getElementById("textId");
         var markId;
     
@@ -97,9 +109,12 @@ export class SidebarMark implements vscode.WebviewViewProvider {
             textMarkName.value = message.mark.name;
             textFilePath.innerText = "Path: " + message.mark.filePath;
             textId.innerText = "Id: " + message.mark.id;
+            textSelection.innerText = "Selection: " + message.mark.selection;
+            textJumper.innerText = "Jumper: " + message.mark.jumper;
             markId = message.mark.id;
             colorSelect.value = message.mark.color;
             taDescription.value = message.mark.description;
+            
           }
         });
     

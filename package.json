@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.16",
+	"version": "0.0.17",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -26,6 +26,10 @@
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
+			{
+				"command": "codenotes.jumpToLink",
+				"title": "CodeNotes Jump"
+			},
 			{
 				"command": "codenotes.insertMark",
 				"title": "Insert Mark"
@@ -134,15 +138,20 @@
 				},
 				{
 					"when": "editorFocus",
-					"command": "codenotes.openWebview",
+					"command": "codenotes.jumpToLink",
 					"group": "0_codenotes@4"
+				},				
+				{
+					"when": "editorFocus",
+					"command": "codenotes.openWebview",
+					"group": "0_codenotes@5"
 				},
 				{
 					"when": "editorFocus",
 					"command": "codenotes.generate",
-					"group": "0_codenotes@5"
+					"group": "0_codenotes@6"
 				}
-
+				
 				
 			],
 			"codenotes.mark": [

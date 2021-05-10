@@ -84,6 +84,13 @@ export class Mark {
         }
     }
 
+    public updateJb()
+    {
+        try{
+            this.mdata.jb = JSON.parse(this.jumpLink);
+        }catch{}
+    }
+
     public setName(name: string) {
         this.name = name;
     }
