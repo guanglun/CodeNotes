@@ -36,6 +36,11 @@ export class MarkManager {
 
     private db: database.DataBase | undefined;
 
+    private mkJPPrevious: mark.Mark[][] = [];
+    private mkPrevious: mark.Mark[] = [];
+    private mkJPNext: mark.Mark[][] = [];
+    private mkNext: mark.Mark[] = [];
+
     private lineId: number = 0;
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -241,7 +246,7 @@ export class MarkManager {
 
                 let items: vscode.QuickPickItem[] = [];
 
-                for(let i=0;i<mk.mdata.jb.length;i++){
+                for (let i = 0; i < mk.mdata.jb.length; i++) {
                     items.push({
                         label: mk.mdata.jb[i].name ? mk.mdata.jb[i].name : "null",
                         description: 'id:' + mk.mdata.jb[i].id,
@@ -264,8 +269,8 @@ export class MarkManager {
                             }
 
                         }
-                        
-                        mk.mdata.jb.splice(mk.mdata.jb.findIndex(findJb),1);
+
+                        mk.mdata.jb.splice(mk.mdata.jb.findIndex(findJb), 1);
                         let json = JSON.stringify(mk.mdata.jb);
                         mk.jumpLink = json;
                         this.db.updateJumpLink(id, mk.jumpLink);
@@ -352,7 +357,7 @@ export class MarkManager {
                         let json = JSON.stringify(mk.mdata.jb);
                         mk.jumpLink = json;
                         this.db.updateJumpLink(id, mk.jumpLink);
-    
+
                         vscode.window.setStatusBarMessage('Jumper Add Success', 2000);
                     }
                 }
@@ -405,9 +410,72 @@ export class MarkManager {
         }
 
     }
+
+    public loadCursorJumper(event: vscode.TextEditorSelectionChangeEvent) {
+        let mkNum = 0;
+        let numMkPrevious = 0;
+        let numMkJPPrevious = 0;
+        let numMkNext = 0;
+        let numMkJPNext = 0;
+
+        let mkArry = this.getSelectMarkArry(event.textEditor);
+
+        mkNum = mkArry.length;
+
+        this.mkJPPrevious.splice(0,this.mkJPPrevious.length);
+        this.mkPrevious.splice(0,this.mkPrevious.length);
+        this.mkJPNext.splice(0,this.mkJPNext.length);
+        this.mkNext.splice(0,this.mkNext.length);
+
+        if (this.db && mkArry.length > 0) {
+            const arr = Array.from(this.db.mkmap);
+            for (let i = 0; i < mkArry.length; i++) {
+
+                let numArry: mark.Mark[] = [];
+
+                for (let ii = 0; ii < arr.length; ii++) {
+                    const mk = arr[ii][1];
+                    for (let iii = 0; iii < mk.mdata.jb.length; iii++) {
+
+                        if (mk.mdata.jb[iii].id === mkArry[i].id) {
+                            numArry.push(mk);
+                        }
+                    }
+                }
+                if(numArry.length > 0)
+                {
+                    numMkJPPrevious += numArry.length;
+                    this.mkJPPrevious.push(numArry);
+                    this.mkPrevious.push(mkArry[i]);
+                }
+
+
+                let numArryNext: mark.Mark[] = [];
+                for(let count =0;count < mkArry[i].mdata.jb.length;count++)
+                {
+                    const k = this.db.mkmap.get(mkArry[i].mdata.jb[count].id);
+                    if(k)
+                    {
+                        numArryNext.push(k);
+                    }
+                }
+
+                if(numArryNext.length > 0)
+                {
+                    numMkJPNext += numArryNext.length;
+                    this.mkJPNext.push(numArryNext);
+                    this.mkNext.push(mkArry[i]);
+                }
+            }
+            numMkPrevious = this.mkJPPrevious.length;
+            numMkNext = this.mkJPNext.length;
+        }
+
+
+        vscode.window.setStatusBarMessage(`${mkNum} < ${numMkJPPrevious} ${numMkPrevious} | ${numMkNext} ${numMkJPNext} >`);
+    }
+
     public showMarkDown(fileName: string, line: number) {
-
-
 
         if (this.showMarkDownType === MarkManager.MD_STYPE_DISABLE) {
             return;
@@ -426,7 +494,8 @@ export class MarkManager {
     }
 
     public async typeMarkDown() {
-
+        
+        //console.log(vscode.workspace.textDocuments);        
         await vscode.commands.executeCommand("workbench.action.closeEditorsInOtherGroups");
 
         if (this.showMarkDownType !== MarkManager.MD_STYPE_DISABLE) {
@@ -439,7 +508,6 @@ export class MarkManager {
                 if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
                     await vscode.workspace.openTextDocument(mDUri).then(document => {
                         vscode.window.showTextDocument(document);
-
                     });
                     await vscode.commands.executeCommand("workbench.action.moveEditorToRightGroup");
                 }
@@ -625,12 +693,11 @@ export class MarkManager {
                 color = "#FF0000";
             }
 
-            let decorationType:vscode.TextEditorDecorationType[]=[];
-            let range:vscode.Range[] = [];
+            let decorationType: vscode.TextEditorDecorationType[] = [];
+            let range: vscode.Range[] = [];
 
             if (mk.flag === mark.Mark.FLAG_DEFAULT) {
-                if(en === ShowColorType.sctShow)
-                {
+                if (en === ShowColorType.sctShow) {
                     decorationType.push(vscode.window.createTextEditorDecorationType({
                         gutterIconSize: "14px",
                         backgroundColor: color + "50",
@@ -643,22 +710,19 @@ export class MarkManager {
 
             } else if (mk.flag === mark.Mark.FLAG_LINE) {
 
-                if((mk.endLine - mk.startLine) === 0)
-                {
-                    if(en === ShowColorType.sctShow)
-                    {
+                if ((mk.endLine - mk.startLine) === 0) {
+                    if (en === ShowColorType.sctShow) {
                         decorationType.push(vscode.window.createTextEditorDecorationType({
                             gutterIconSize: "14px",
                             gutterIconPath: path.join(this.context.extensionPath, "images/code-line.png"),
                         }));
                     }
-    
-    
+
+
                     range.push(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
                         textEditor.document.positionAt(mk.endOffsetMark)));
-                }else{
-                    if(en === ShowColorType.sctShow)
-                    {
+                } else {
+                    if (en === ShowColorType.sctShow) {
                         decorationType.push(vscode.window.createTextEditorDecorationType({
                             gutterIconSize: "14px",
                             gutterIconPath: path.join(this.context.extensionPath, "images/line-top.png"),
@@ -666,18 +730,17 @@ export class MarkManager {
                         decorationType.push(vscode.window.createTextEditorDecorationType({
                             gutterIconSize: "14px",
                             gutterIconPath: path.join(this.context.extensionPath, "images/line-down.png"),
-                        }));                        
+                        }));
                     }
-    
-    
+
+
                     range.push(new vscode.Range(textEditor.document.positionAt(mk.startOffsetMark),
                         textEditor.document.positionAt(mk.startOffsetMark)));
                     range.push(new vscode.Range(textEditor.document.positionAt(mk.endOffsetMark),
                         textEditor.document.positionAt(mk.endOffsetMark)));
                 }
             } else if (mk.flag === mark.Mark.FLAG_FUNCTION) {
-                if(en === ShowColorType.sctShow)
-                {
+                if (en === ShowColorType.sctShow) {
                     decorationType.push(vscode.window.createTextEditorDecorationType({
                         gutterIconSize: "14px",
                         gutterIconPath: path.join(this.context.extensionPath, "images/functions.png"),
@@ -688,27 +751,25 @@ export class MarkManager {
             }
 
             if (mk.mdata?.decorationType?.length && en === ShowColorType.sctShow) {
-                mk.mdata.decorationType.splice(0,mk.mdata.decorationType.length);
+                mk.mdata.decorationType.splice(0, mk.mdata.decorationType.length);
             }
 
             if (decorationType && range) {
-                if(en === ShowColorType.sctShow)
-                {
+                if (en === ShowColorType.sctShow) {
                     mk.mdata?.setDecorationType(decorationType);
                     if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
-                        if(mk.mdata.decorationType)
-                        for (let i=0;i<mk.mdata.decorationType.length;i++) {
-                            textEditor.setDecorations(decorationType[i], [range[i]]);
-                        }
+                        if (mk.mdata.decorationType)
+                            for (let i = 0; i < mk.mdata.decorationType.length; i++) {
+                                textEditor.setDecorations(decorationType[i], [range[i]]);
+                            }
                     }
-                }else if (en === ShowColorType.sctClear)
-                {
+                } else if (en === ShowColorType.sctClear) {
                     if (vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === false) {
-                        if(mk.mdata.decorationType)
-                        for (let i=0;i<mk.mdata.decorationType.length;i++) {
-                            mk.mdata.decorationType[i].dispose();
-                            textEditor.setDecorations(mk.mdata.decorationType[i], [range[i]]);
-                        }
+                        if (mk.mdata.decorationType)
+                            for (let i = 0; i < mk.mdata.decorationType.length; i++) {
+                                mk.mdata.decorationType[i].dispose();
+                                textEditor.setDecorations(mk.mdata.decorationType[i], [range[i]]);
+                            }
                     }
                 }
 
@@ -735,10 +796,10 @@ export class MarkManager {
             const arrFunction = Array.from(this.db.mkmapFunction);
             for (let cFunction = 0; cFunction < arrFunction.length; cFunction++) {
                 const mkf = arrFunction[cFunction][1];
-                
-            //this.db?.mkmapFunction.forEach(async (mkf, key, map) => {
+
+                //this.db?.mkmapFunction.forEach(async (mkf, key, map) => {
                 if (this.db) {
-                    
+
                     const head =
                         `---
 title: ${mkf.name}
@@ -756,7 +817,7 @@ categories: ${gCategories}
                             const source = "[SourceCode](" + webCodePath + "/blob/master" + mkf.relativePath.replace(/\\/g, "/") + "#L" + (mkf.startLine + 1) + ")";
                             const fPath = mkf.relativePath.replace(/\\/g, "/")
                             await file.appendFile(
-`\r\n|查看函数源码  |路径  |
+                                `\r\n|查看函数源码  |路径  |
 |---|---|
 |${source}| ${fPath} |`);
                         }
@@ -775,7 +836,7 @@ categories: ${gCategories}
                         }
                         await file.appendFile("\r\n```  \r\n\r\n");
                     }
-                    
+
                     await file.appendFile(mkf.description + "  \r\n\r\n");
 
                     let line: number;
@@ -807,48 +868,42 @@ categories: ${gCategories}
 
                                     line += (mkl.endLine - mkl.startLine);
 
-                                    
+
                                 }
 
                                 await file.appendFile("\r\n```  \r\n\r\n");
 
                                 const arrMark = Array.from(this.db?.mkmapDefault);
-                                
-                                
+
+
                                 for (let cc = 0; cc < arrMark.length; cc++) {
                                     const mkd = arrMark[cc][1];
-                                    
-                                    if(mkl.startLine <= mkd.startLine && mkl.endLine >= mkd.startLine && mkl.filePath === mkd.filePath)
-                                    {
-                            
+
+                                    if (mkl.startLine <= mkd.startLine && mkl.endLine >= mkd.startLine && mkl.filePath === mkd.filePath) {
+
                                         for (let cjb = 0; cjb < mkd.mdata.jb.length; cjb++) {
                                             const jb = mkd.mdata.jb[cjb];
-                                            if(jb)
-                                            {
+                                            if (jb) {
                                                 const jbName = jb.name;
                                                 const mkk = this.db?.mkmap.get(jb.id);
                                                 const fName = mkk?.name;
-                                                const fPath = date.split(" ")[0].replace(/-/g,"/");
-                                                let type="";
-                                                if(mkk?.flag == mark.Mark.FLAG_DEFAULT)
-                                                {
+                                                const fPath = date.split(" ")[0].replace(/-/g, "/");
+                                                let type = "";
+                                                if (mkk?.flag == mark.Mark.FLAG_DEFAULT) {
                                                     type = "标签";
-                                                }else if(mkk?.flag == mark.Mark.FLAG_LINE)
-                                                {
+                                                } else if (mkk?.flag == mark.Mark.FLAG_LINE) {
                                                     type = "行";
-                                                }else if(mkk?.flag == mark.Mark.FLAG_FUNCTION)
-                                                {
+                                                } else if (mkk?.flag == mark.Mark.FLAG_FUNCTION) {
                                                     type = "函数";
                                                 }
-                                                if(jbName && fName)
-                                                {
+                                                if (jbName && fName) {
                                                     await file.appendFile(`* [查看${fName}${type}](${gHexoPath}/${fPath}/${gCategories}/${fName})  \r\n\r\n`);
                                                 }
                                             }
 
-                                            
+
                                         }
-                                        
+
                                     }
 
                                 }
@@ -861,7 +916,7 @@ categories: ${gCategories}
                     await file.close();
                     vscode.window.setStatusBarMessage('Generate Success.', 2000);
                 }
-            //});
+                //});
             };
         }
 
@@ -882,7 +937,7 @@ categories: ${gCategories}
                 if (mk.filePath) {
                     const uri = vscode.Uri.file(mk.filePath);
                     vscode.workspace.openTextDocument(uri).then(document => {
-                        vscode.window.showTextDocument(document,vscode.ViewColumn.One,false).then(textEditor => {
+                        vscode.window.showTextDocument(document, vscode.ViewColumn.One, false).then(textEditor => {
                             this.showColor(textEditor, mk, ShowColorType.sctClick);
                         });
                     });
@@ -891,33 +946,28 @@ categories: ${gCategories}
         }
     }
 
-    public async jumpTo(type?:number | undefined)
-    {
+    public async jumpTo(type?: number | undefined) {
         let items: vscode.QuickPickItem[] = [];
-        if(type === undefined && this.db)
-        {
-            const arr = Array.from(this.db.mkmap);         
+        if (type === undefined && this.db) {
+            const arr = Array.from(this.db.mkmap);
             for (let i = 0; i < arr.length; i++) {
                 const mk = arr[i][1];
                 items.push(this.getQuickPickItem(mk));
             }
-        }else if(type === mark.Mark.FLAG_DEFAULT && this.db)
-        {
-            const arr = Array.from(this.db.mkmapDefault);         
+        } else if (type === mark.Mark.FLAG_DEFAULT && this.db) {
+            const arr = Array.from(this.db.mkmapDefault);
             for (let i = 0; i < arr.length; i++) {
                 const mk = arr[i][1];
                 items.push(this.getQuickPickItem(mk));
             }
-        }else if(type === mark.Mark.FLAG_LINE && this.db)
-        {
-            const arr = Array.from(this.db.mkmapLine);         
+        } else if (type === mark.Mark.FLAG_LINE && this.db) {
+            const arr = Array.from(this.db.mkmapLine);
             for (let i = 0; i < arr.length; i++) {
                 const mk = arr[i][1];
                 items.push(this.getQuickPickItem(mk));
             }
-        }else if(type === mark.Mark.FLAG_FUNCTION && this.db)
-        {
-            const arr = Array.from(this.db.mkmapFunction);         
+        } else if (type === mark.Mark.FLAG_FUNCTION && this.db) {
+            const arr = Array.from(this.db.mkmapFunction);
             for (let i = 0; i < arr.length; i++) {
                 const mk = arr[i][1];
                 items.push(this.getQuickPickItem(mk));
@@ -925,11 +975,9 @@ categories: ${gCategories}
         }
         if (items.length > 1) {
             let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct JumpTo' });
-            if(value)
-            {
+            if (value) {
                 const jumpId = Number(value?.description?.split('id:')[1]);
-                if(jumpId)
-                {
+                if (jumpId) {
                     this.click(jumpId);
                 }
             }
@@ -937,28 +985,91 @@ categories: ${gCategories}
         }
     }
 
-    public jumpToFunction(id: number) {
-        const mk = this.db?.mkmap.get(id);
-        if(mk && mk.mdata.jb && mk.mdata.jb.length !== 0)
+    // public jumpToNext(id: number) {
+    //     const mk = this.db?.mkmap.get(id);
+    //     if (mk && mk.mdata.jb && mk.mdata.jb.length !== 0) {
+    //         let index = 0;
+    //         if (mk.mdata.jb.length === 1) {
+    //             index = 0;
+    //         } else {
+    //             for (let i = 0; i < mk.mdata.jb.length; i++) {
+
+    //                 if (mk.mdata.jb[i].name === "Jump To Function") {
+    //                     index = i;
+    //                 }
+    //             }
+    //         }
+
+    //         this.click(mk.mdata.jb[index].id);
+    //     }
+    // }
+
+    public async jumpToNext() {
+        if(this.mkNext.length > 0)
         {
-            let index = 0;
-            if(mk.mdata.jb.length == 1)
+            const id = await this.getQuickPickItemId(this.mkNext);
+            if(id)
             {
-                index = 0;
-            }else{
-                for(let i=0;i<mk.mdata.jb.length;i++)
+                let i=0;
+                for(i=0;i<this.mkNext.length;i++)
                 {
-                    
-                    if(mk.mdata.jb[i].name === "Jump To Function")
+                    if(this.mkNext[i].id === id)
                     {
-                        index = i;
+                        break;
                     }
                 }
+                const idjp = await this.getQuickPickItemId(this.mkJPNext[i]);
+                if(idjp)
+                {
+                    this.click(idjp);
+                }
             }
-
-            this.click(mk.mdata.jb[index].id);
         }
     }
+
+    public async jumpToPrevious() {
+        if(this.mkPrevious.length > 0)
+        {
+            const id = await this.getQuickPickItemId(this.mkPrevious);
+            if(id)
+            {
+                let i=0;
+                for(i=0;i<this.mkPrevious.length;i++)
+                {
+                    if(this.mkPrevious[i].id === id)
+                    {
+                        break;
+                    }
+                }
+                const idjp = await this.getQuickPickItemId(this.mkJPPrevious[i]);
+                if(idjp)
+                {
+                    this.click(idjp);
+                }
+            }
+        }
+    }
+
+    public async getQuickPickItemId(mkArry: mark.Mark[]):Promise<number>
+    {
+        let items = this.mkArryToQuickPickItem(mkArry);
+
+        if (items.length > 1) {
+            let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct Previous Mark' });
+
+            if (value) {
+                const jumpId = Number(value?.description?.split('id:')[1]);
+                return jumpId;
+            }
+        } else if (items.length === 1 && items[0] !== null) {
+            return Number(items[0]?.description?.split('id:')[1]);
+        } else {
+            vscode.window.setStatusBarMessage('Not Found Marks', 2000);
+            return 0;
+        }
+        return 0;
+    }
+
     /**
      * 检查point在文件中的位置是否符合段内
      * @param doc 
@@ -983,38 +1094,55 @@ categories: ${gCategories}
         return false;
     }
 
-    public async selectWhitch(te: vscode.TextEditor, work: string,type?:number | undefined) {
-        //console.log(te);
-        let items: vscode.QuickPickItem[] = [];
+    public getSelectMarkArry(te: vscode.TextEditor, type?: number | undefined): mark.Mark[] {
+        let arry: mark.Mark[] = [];
+
         this.db?.mkmap.forEach((value, key, map) => {
-            
+
             if (value.filePath === te.document.fileName) {
-                if(type !== undefined)
-                {
-                    if(value.flag === type)
-                    {
+                if (type !== undefined) {
+                    if (value.flag === type) {
                         if (MarkManager.checkPoint(te.document, value, te.selection.anchor) === true) {
-                            items.push(this.getQuickPickItem(value));
+                            arry.push(value);
                         }
                     }
-                }else{
+                } else {
                     if (value.flag === mark.Mark.FLAG_DEFAULT) {
                         if (MarkManager.checkPoint(te.document, value, te.selection.anchor) === true) {
-                            items.push(this.getQuickPickItem(value));
+                            arry.push(value);
                         }
                     } else if (value.flag === mark.Mark.FLAG_LINE) {
                         if (MarkManager.checkLine(te.selection.start.line, value) === true) {
-                            items.push(this.getQuickPickItem(value));
+                            arry.push(value);
                         }
                     } else if (value.flag === mark.Mark.FLAG_FUNCTION) {
                         if (te.selection.start.line === value.startLine) {
-                            items.push(this.getQuickPickItem(value));
+                            arry.push(value);
                         }
                     }
                 }
             }
-
         });
+
+        return arry;
+    }
+
+    public mkArryToQuickPickItem(mkArry: mark.Mark[]): vscode.QuickPickItem[] {
+        let items: vscode.QuickPickItem[] = [];
+        if (mkArry) {
+            for (let i = 0; i < mkArry.length; i++) {
+                items.push(this.getQuickPickItem(mkArry[i]));
+            }
+        }
+        return items;
+    }
+
+    public async selectWhitch(te: vscode.TextEditor, work: string, type?: number | undefined) {
+
+
+        let mkArry = this.getSelectMarkArry(te, type);
+
+        let items = this.mkArryToQuickPickItem(mkArry);
 
         if (items.length > 1) {
             let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct ' + work + ' Mark' });
@@ -1023,7 +1151,7 @@ categories: ${gCategories}
                 const jumpId = Number(value?.description?.split('id:')[1]);
                 return jumpId;
             }
-        } else if (items.length == 1 && items[0] != null) {
+        } else if (items.length === 1 && items[0] !== null) {
             return Number(items[0]?.description?.split('id:')[1]);
         } else {
             vscode.window.setStatusBarMessage('Not Found Marks', 2000);

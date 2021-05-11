@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.18",
+	"version": "0.0.19",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -30,8 +30,24 @@
 			"key": "ctrl+j"
 		},
 		{
-			"command": "codenotes.jumpToLink",
+			"command": "codenotes.jumpToPrevious",
+			"key": "ctrl+left"
+		},
+		{
+			"command": "codenotes.jumpToNext",
 			"key": "ctrl+right"
+		},
+		{
+			"command": "codenotes.showMarkDown.disable",
+			"key": "ctrl+f1"
+		},
+		{
+			"command": "codenotes.showMarkDown.onlyPreview",
+			"key": "ctrl+f2"
+		},
+		{
+			"command": "codenotes.showMarkDown.previewAndEdit",
+			"key": "ctrl+f3"
 		}],
 		"commands": [
 			{
@@ -51,8 +67,12 @@
 				"title": "CodeNotes jpto function"
 			},		
 			{
-				"command": "codenotes.jumpToLink",
-				"title": "CodeNotes Jump"
+				"command": "codenotes.jumpToNext",
+				"title": "CodeNotes Jump To Next"
+			},
+			{
+				"command": "codenotes.jumpToPrevious",
+				"title": "CodeNotes Jump To Previous"
 			},
 			{
 				"command": "codenotes.insertMark",
@@ -162,18 +182,23 @@
 				},
 				{
 					"when": "editorFocus",
-					"command": "codenotes.jumpToLink",
+					"command": "codenotes.jumpToNext",
 					"group": "0_codenotes@4"
-				},				
+				},		
+				{
+					"when": "editorFocus",
+					"command": "codenotes.jumpToPrevious",
+					"group": "0_codenotes@5"
+				},			
 				{
 					"when": "editorFocus",
 					"command": "codenotes.openWebview",
-					"group": "0_codenotes@5"
+					"group": "0_codenotes@6"
 				},
 				{
 					"when": "editorFocus",
 					"command": "codenotes.generate",
-					"group": "0_codenotes@6"
+					"group": "0_codenotes@7"
 				}
 				
 				
