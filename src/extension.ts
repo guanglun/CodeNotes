@@ -351,18 +351,8 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event =>{
-<<<<<<< HEAD
-		if(event.textEditor.viewColumn === vscode.ViewColumn.One)
-		{
-			mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
-			mm.loadCursorJumper(event);
-		}
-=======
 		mm.loadCursorJumper(event.textEditor);
-		
 		mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
-
->>>>>>> 7efa4147681c5ec35f205b17e3bba1fb0791c130
 	}));
 	// if (vscode.window.registerWebviewPanelSerializer) {
 	// 	// Make sure we register a serializer in activation event
