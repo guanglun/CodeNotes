@@ -411,14 +411,14 @@ export class MarkManager {
 
     }
 
-    public loadCursorJumper(event: vscode.TextEditorSelectionChangeEvent) {
+    public loadCursorJumper(te: vscode.TextEditor) {
         let mkNum = 0;
         let numMkPrevious = 0;
         let numMkJPPrevious = 0;
         let numMkNext = 0;
         let numMkJPNext = 0;
 
-        let mkArry = this.getSelectMarkArry(event.textEditor);
+        let mkArry = this.getSelectMarkArry(te);
 
         mkNum = mkArry.length;
 
@@ -944,6 +944,7 @@ categories: ${gCategories}
                     vscode.workspace.openTextDocument(uri).then(document => {
                         vscode.window.showTextDocument(document, vscode.ViewColumn.One, false).then(textEditor => {
                             this.showColor(textEditor, mk, ShowColorType.sctClick);
+                            this.loadCursorJumper(textEditor);
                         });
                     });
                 }
