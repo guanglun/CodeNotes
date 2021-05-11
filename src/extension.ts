@@ -337,7 +337,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event =>{
-		mm.loadCursorJumper(event);
+		mm.loadCursorJumper(event.textEditor);
 		
 		mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
 
