@@ -1,3 +1,7 @@
+### Version 0.0.20
+- Mark上色BUG修复
+- 添加Mark删除后上级节点存在该ID Jumper的BUG
+
 ### Version 0.0.19
 - 添加向上级跳转功能
 - 添加跳转选择功能

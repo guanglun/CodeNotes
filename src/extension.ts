@@ -281,7 +281,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	mm.load();
-	context.subscriptions.push(mm.getHoverProvider(db));
+	//context.subscriptions.push(mm.getHoverProvider(db));
 
 	context.subscriptions.push (vscode.window.onDidChangeActiveTextEditor(editor => {  
 		if(editor) { 
@@ -289,6 +289,7 @@ export function activate(context: vscode.ExtensionContext) {
             {
                 if(value.filePath === editor.document.fileName)
 				{
+					mm.showColor(editor,value,markmanager.ShowColorType.sctClear);
 					mm.showColor(editor,value,markmanager.ShowColorType.sctShow);
 				}
             });
@@ -338,7 +339,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event =>{
 		mm.loadCursorJumper(event);
-		
 		mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
 
 	}));

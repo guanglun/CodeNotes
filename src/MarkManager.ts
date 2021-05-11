@@ -457,6 +457,11 @@ export class MarkManager {
                     if(k)
                     {
                         numArryNext.push(k);
+                    }else{
+                        mkArry[i].mdata.jb.splice(count, 1);
+                        let json = JSON.stringify(mkArry[i].mdata.jb);
+                        mkArry[i].jumpLink = json;
+                        this.db.updateJumpLink(mkArry[i].id, mkArry[i].jumpLink);
                     }
                 }
 
