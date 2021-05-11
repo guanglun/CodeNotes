@@ -1,3 +1,6 @@
+### Version 0.0.22
+- 与Git上传同步问题修复
+
 ### Version 0.0.21
 - 修复打开md后页面上下跳转BUG
 - activationEvents设置为.codenotes存在时触发
