@@ -1,3 +1,8 @@
+### Version 0.0.21
+- 修复打开md后页面上下跳转BUG
+- activationEvents设置为.codenotes存在时触发
+- 添加Linux下objdump快捷功能
+
 ### Version 0.0.20
 - Mark上色BUG修复
 - 添加Mark删除后上级节点存在该ID Jumper的BUG

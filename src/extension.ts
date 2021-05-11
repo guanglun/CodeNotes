@@ -9,6 +9,7 @@ import * as SidebarMark from './sidebar/SidebarMark';
 import * as ViewMarks from './webview/ViewMarks';
 import * as Mark from './Mark';
 import * as path from 'path';
+import { exec } from 'node:child_process';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -30,6 +31,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 	if(sd.sweb){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_web", sd.sweb,{webviewOptions: {retainContextWhenHidden: true}}));}
 	if(sd.smark){context.subscriptions.push (vscode.window.registerWebviewViewProvider("codenotes.sidebar_mark", sd.smark,{webviewOptions: {retainContextWhenHidden: true}}));}
+
+	context.subscriptions.push(vscode.commands.registerCommand('codenotes.objdump', (res) => {
+		const os = require('os');
+		const objdumpPath = <string>vscode.workspace.getConfiguration().get('CodeNotes.objdumpPath');
+		if(objdumpPath && os.platform() === "linux")
+		{
+			const spl = res.path.split(".o");
+			const cp = require('child_process')
+			cp.exec(`${objdumpPath} -s -d ${res.path} >  ${spl[0]}.txt`);
+		}
+
+	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.jumpTo', (res) => {
 		if(!mm.checkDBInit())
@@ -338,9 +351,11 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event =>{
-		mm.loadCursorJumper(event);
-		mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
-
+		if(event.textEditor.viewColumn === vscode.ViewColumn.One)
+		{
+			mm.showMarkDown(event.textEditor.document.fileName,event.selections[0].active.line);
+			mm.loadCursorJumper(event);
+		}
 	}));
 	// if (vscode.window.registerWebviewPanelSerializer) {
 	// 	// Make sure we register a serializer in activation event

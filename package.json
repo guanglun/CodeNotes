@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.20",
+	"version": "0.0.21",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -18,10 +18,7 @@
 	],
 	"icon": "images/icon.png",
 	"activationEvents": [
-		"onView:sidebar_marks_now",
-		"onView:sidebar_marks_all",
-		"onView:codenotes.sidebar_web",
-		"onView:codenotes.sidebar_mark"
+		"workspaceContains:.codenotes"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -50,6 +47,10 @@
 			"key": "ctrl+f3"
 		}],
 		"commands": [
+			{
+				"command": "codenotes.objdump",
+				"title": "CodeNotes Objdump"
+			},			
 			{
 				"command": "codenotes.jumpTo",
 				"title": "CodeNotes jpto"
@@ -165,43 +166,53 @@
 				"label": "CodeNotes Show MarkDown"
 			}
 		  ],
+		  
 		"menus": {
-
+			"explorer/context": [
+				{
+					"when": "resourceExtname == .o && extension == codenotes",
+					"command": "codenotes.objdump",
+					"group": "0_codenotes@1"
+				}
+			],
 			"editor/context": [
 				{
+					"when": "debuggersAvailable || extension == guanglun.codenotes",
 					"submenu": "codenotes.insert",
 					"group": "0_codenotes@1"
 				},
 				{
-				  "submenu": "codenotes.mark",
-				  "group": "0_codenotes@2"
+					"when": "debuggersAvailable || extension == guanglun.codenotes",
+				  	"submenu": "codenotes.mark",
+				  	"group": "0_codenotes@2"
 				},
 				{
-				  "submenu": "codenotes.showMarkDown",
-				  "group": "0_codenotes@3"
+					"when": "debuggersAvailable || extension == guanglun.codenotes",
+				  	"submenu": "codenotes.showMarkDown",
+				  	"group": "0_codenotes@3"
 				},
 				{
-					"when": "editorFocus",
+					"when": "debuggersAvailable || extension == guanglun.codenotes",
 					"command": "codenotes.jumpToNext",
 					"group": "0_codenotes@4"
 				},		
 				{
-					"when": "editorFocus",
+					"when": "debuggersAvailable || extension == guanglun.codenotes",
 					"command": "codenotes.jumpToPrevious",
 					"group": "0_codenotes@5"
 				},			
 				{
-					"when": "editorFocus",
+					"when": "debuggersAvailable || extension == guanglun.codenotes",
 					"command": "codenotes.openWebview",
 					"group": "0_codenotes@6"
 				},
 				{
-					"when": "editorFocus",
+					"when": "debuggersAvailable || extension == guanglun.codenotes",
 					"command": "codenotes.generate",
 					"group": "0_codenotes@7"
 				}
 				
-				
+					
 			],
 			"codenotes.mark": [
 				{
@@ -358,6 +369,11 @@
 					"type": "string",
 					"default": "",
 					"description": "Generate Hexo Path"
+				},
+				"CodeNotes.objdumpPath": {
+					"type": "string",
+					"default": "",
+					"description": "Generate Objdump Path (Only Linux)"
 				}
 			}
 		}
