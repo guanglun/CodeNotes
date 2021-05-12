@@ -22,14 +22,19 @@ export enum TEColorManagerType {
     tecmtShow,
     tecmtClear
 }
+export enum MDStype {
+    disable,
+    onlyMd,
+    mdEdit
+}
+export enum QuickPickItemType {
+    mark,
+    jumper
+}
 
 export class MarkManager {
 
-    public static MD_STYPE_DISABLE = 0;
-    public static MD_STYPE_ONLYMD = 1;
-    public static MD_STYPE_MD_EDIT = 2;
-
-    public showMarkDownType: number = 0;
+    public showMarkDownType: MDStype = MDStype.disable;
 
     private context: vscode.ExtensionContext;
     private sidebar: Sidebar.Sidebar | undefined;
@@ -40,6 +45,7 @@ export class MarkManager {
     private mkPrevious: mark.Mark[] = [];
     private mkJPNext: mark.Mark[][] = [];
     private mkNext: mark.Mark[] = [];
+    private mkJpNameNext: string[][] = [];
 
     private lineId: number = 0;
     constructor(context: vscode.ExtensionContext) {
@@ -284,12 +290,30 @@ export class MarkManager {
 
     }
 
-    public getQuickPickItem(mk: mark.Mark) {
-        return {
-            label: mk.name ? "id:" + mk.id + " " + mk.name : "id:" + mk.id,
-            description: mk.relativePath + ' id:' + mk.id,
-            detail: 'jump num:' + mk.mdata.jb.length + ' flag: ' + mark.Mark.flagStr[mk.flag]
+
+    public getQuickPickItem(mk: mark.Mark,type?:QuickPickItemType,jpName?:string) {
+        if(type === undefined || type === QuickPickItemType.mark)
+        {
+            return {
+                label: mk.name ? "id:" + mk.id + " " + mk.name : "id:" + mk.id,
+                description: mk.relativePath + ' id:' + mk.id,
+                detail: 'jump num:' + mk.mdata.jb.length + ' flag: ' + mark.Mark.flagStr[mk.flag]
+            };
         }
+        else if(type === QuickPickItemType.jumper && jpName){
+            return {
+                label: jpName + " id:" + mk.id ,
+                description: mk.relativePath + ' id:' + mk.id,
+                detail: mk.name + ' flag: ' + mark.Mark.flagStr[mk.flag]
+            };
+        }else{
+            return {
+                label: "",
+                description: "",
+                detail: ""
+            };
+        }
+
     }
 
     public async addJump(id: number) {
@@ -307,7 +331,7 @@ export class MarkManager {
                 prompt: 'Input Jumper Name', 		// 在输入框下方的提示信息
             }
             );
-            if (btName?.length == 0) {
+            if (btName?.length === 0) {
                 btName = 'Jump To Function';
             }
 
@@ -416,6 +440,7 @@ export class MarkManager {
 
     public async saveMarkDown(editor: vscode.TextDocument) {
         if (editor && vscode.workspace.workspaceFolders) {
+
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
             var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
 
@@ -425,10 +450,8 @@ export class MarkManager {
                 if (data) {
                     this.setDescription(this.lineId, data.toString());
                 }
-
             }
         }
-
     }
 
     public loadCursorJumper(te: vscode.TextEditor) {
@@ -446,6 +469,7 @@ export class MarkManager {
         this.mkPrevious.splice(0, this.mkPrevious.length);
         this.mkJPNext.splice(0, this.mkJPNext.length);
         this.mkNext.splice(0, this.mkNext.length);
+        this.mkJpNameNext.splice(0, this.mkJpNameNext.length);
 
         if (this.db && mkArry.length > 0) {
             const arr = Array.from(this.db.mkmap);
@@ -470,10 +494,12 @@ export class MarkManager {
 
 
                 let numArryNext: mark.Mark[] = [];
+                let jpNameNext: string[] = [];
                 for (let count = 0; count < mkArry[i].mdata.jb.length; count++) {
                     const k = this.db.mkmap.get(mkArry[i].mdata.jb[count].id);
                     if (k) {
                         numArryNext.push(k);
+                        jpNameNext.push(mkArry[i].mdata.jb[count].name);
                     } else {
                         mkArry[i].mdata.jb.splice(count, 1);
                         let json = JSON.stringify(mkArry[i].mdata.jb);
@@ -485,6 +511,7 @@ export class MarkManager {
                 if (numArryNext.length > 0) {
                     numMkJPNext += numArryNext.length;
                     this.mkJPNext.push(numArryNext);
+                    this.mkJpNameNext.push(jpNameNext);
                     this.mkNext.push(mkArry[i]);
                 }
             }
@@ -524,7 +551,7 @@ export class MarkManager {
 
     public showMarkDown(fileName: string, line: number) {
 
-        if (this.showMarkDownType === MarkManager.MD_STYPE_DISABLE) {
+        if (this.showMarkDownType === MDStype.disable) {
             return;
         }
 
@@ -545,14 +572,15 @@ export class MarkManager {
         //console.log(vscode.workspace.textDocuments);        
         await vscode.commands.executeCommand("workbench.action.closeEditorsInOtherGroups");
 
-        if (this.showMarkDownType !== MarkManager.MD_STYPE_DISABLE) {
+        if (this.showMarkDownType !== MDStype.disable) {
             if (vscode.workspace.workspaceFolders) {
+
                 var rootUri = vscode.workspace.workspaceFolders[0].uri;
                 var mDUri = vscode.Uri.file(rootUri.fsPath + "/" + database.DataBase.databasePath + "/line.md");
                 const file = await pfs.open(mDUri.fsPath, 'w+');
                 file.close();
 
-                if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
+                if (this.showMarkDownType === MDStype.mdEdit) {
                     await vscode.workspace.openTextDocument(mDUri).then(document => {
                         vscode.window.showTextDocument(document);
                     });
@@ -560,7 +588,7 @@ export class MarkManager {
                 }
                 await vscode.commands.executeCommand("markdown.showPreviewToSide", mDUri);
 
-                if (this.showMarkDownType === MarkManager.MD_STYPE_MD_EDIT) {
+                if (this.showMarkDownType === MDStype.mdEdit) {
                     await vscode.commands.executeCommand("workbench.action.moveActiveEditorGroupDown");
                     await vscode.commands.executeCommand("workbench.action.moveActiveEditorGroupUp");
                 }
@@ -1062,7 +1090,7 @@ categories: ${gCategories}
                         break;
                     }
                 }
-                const idjp = await this.getQuickPickItemId(this.mkJPNext[i]);
+                const idjp = await this.getQuickPickItemId(this.mkJPNext[i],QuickPickItemType.jumper,this.mkJpNameNext[i]);
                 if (idjp) {
                     this.click(idjp);
                 }
@@ -1088,8 +1116,20 @@ categories: ${gCategories}
         }
     }
 
-    public async getQuickPickItemId(mkArry: mark.Mark[]): Promise<number> {
-        let items = this.mkArryToQuickPickItem(mkArry);
+    public async getQuickPickItemId(mkArry: mark.Mark[],type?:QuickPickItemType,jpName?:string[]): Promise<number> {
+        let items;
+        if(type === undefined || type === QuickPickItemType.mark)
+        {
+            items = this.mkArryToQuickPickItem(mkArry);
+        }else if(type === QuickPickItemType.jumper && jpName)
+        {
+            items = this.mkArryToQuickPickItem(mkArry,type,jpName);
+        }
+         
+        if(items === undefined)
+        {
+            return 0;
+        }
 
         if (items.length > 1) {
             let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct Previous Mark' });
@@ -1164,11 +1204,17 @@ categories: ${gCategories}
         return arry;
     }
 
-    public mkArryToQuickPickItem(mkArry: mark.Mark[]): vscode.QuickPickItem[] {
+    public mkArryToQuickPickItem(mkArry: mark.Mark[],type?:QuickPickItemType,jpName?:string[]): vscode.QuickPickItem[] {
         let items: vscode.QuickPickItem[] = [];
         if (mkArry) {
             for (let i = 0; i < mkArry.length; i++) {
-                items.push(this.getQuickPickItem(mkArry[i]));
+                if(type === undefined || type === QuickPickItemType.mark)
+                {
+                    items.push(this.getQuickPickItem(mkArry[i]));
+                }else if(type === QuickPickItemType.jumper && jpName){
+                    items.push(this.getQuickPickItem(mkArry[i],type,jpName[i]));
+                }
+                
             }
         }
         return items;

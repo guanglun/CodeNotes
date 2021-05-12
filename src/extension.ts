@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 		if(objdumpPath && os.platform() === "linux")
 		{
 			const spl = res.path.split(".o");
-			const cp = require('child_process')
+			const cp = require('child_process');
 			cp.exec(`${objdumpPath} -s -d ${res.path} >  ${spl[0]}.txt`);
 		}
 
@@ -131,7 +131,7 @@ export function activate(context: vscode.ExtensionContext) {
 		{
 			return;
 		}		
-		mm.showMarkDownType = markmanager.MarkManager.MD_STYPE_DISABLE;
+		mm.showMarkDownType = markmanager.MDStype.disable;
 		mm.typeMarkDown();
 	}));
 
@@ -140,7 +140,7 @@ export function activate(context: vscode.ExtensionContext) {
 		{
 			return;
 		}		
-		mm.showMarkDownType = markmanager.MarkManager.MD_STYPE_ONLYMD;
+		mm.showMarkDownType = markmanager.MDStype.onlyMd;
 		mm.typeMarkDown();
 	}));
 
@@ -149,7 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
 		{
 			return;
 		}		
-		mm.showMarkDownType = markmanager.MarkManager.MD_STYPE_MD_EDIT;
+		mm.showMarkDownType = markmanager.MDStype.mdEdit;
 		mm.typeMarkDown();
 	}));
 	
@@ -159,7 +159,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}		
 		await mm.delete( await mm.selectWhitch(textEditor,'Delete'));
-
+		mm.loadCursorJumper(textEditor);
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.renameMark', async function (textEditor, edit) {
@@ -169,14 +169,6 @@ export function activate(context: vscode.ExtensionContext) {
 		}		
 		await mm.renameItem( await mm.selectWhitch(textEditor,'Rename'));
 
-	}));
-
-	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.addJumpLinkMark', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
-		{
-			return;
-		}
-		await mm.addJump( await mm.selectWhitch(textEditor,'Add Jump Link',Mark.Mark.FLAG_DEFAULT));
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.jumpToNext', async function (textEditor, edit) {
@@ -195,13 +187,22 @@ export function activate(context: vscode.ExtensionContext) {
 		await mm.jumpToPrevious();
 	}));
 
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.addJumpLinkMark', async function (textEditor, edit) {
+		if(!mm.checkDBInit())
+		{
+			return;
+		}
+		await mm.addJump( await mm.selectWhitch(textEditor,'Add Jump Link'));
+		mm.loadCursorJumper(textEditor);
+	}));
+
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteJumpLinkMark', async function (textEditor, edit) {
 		if(!mm.checkDBInit())
 		{
 			return;
 		}		
 		await mm.deleteJump( await mm.selectWhitch(textEditor,'Delete Jump Link'));
-
+		mm.loadCursorJumper(textEditor);
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.addJumpLink', (res: Sidebar.EntryItem) => {
@@ -231,7 +232,9 @@ export function activate(context: vscode.ExtensionContext) {
 		{
 			return;
 		}		
+		
 		mm.insert(textEditor,Mark.Mark.FLAG_DEFAULT);
+		mm.loadCursorJumper(textEditor);
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertLine', async function (textEditor, edit) {
@@ -241,6 +244,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}		
 		mm.insert(textEditor,Mark.Mark.FLAG_LINE);
 		mm.showMarkDown(textEditor.document.fileName,textEditor.selection.active.line);
+		mm.loadCursorJumper(textEditor);
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertFunction', async function (textEditor, edit) {
@@ -250,6 +254,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}		
 		mm.insert(textEditor,Mark.Mark.FLAG_FUNCTION);
 		mm.showMarkDown(textEditor.document.fileName,textEditor.selection.active.line);
+		mm.loadCursorJumper(textEditor);
 	}));
 
 	context.subscriptions.push(vscode.window.registerTreeDataProvider("sidebar_marks_all", sd.elAll));
@@ -293,6 +298,7 @@ export function activate(context: vscode.ExtensionContext) {
 		mm.generate();
 	}));
 
+	
 	mm.load();
 	//context.subscriptions.push(mm.getHoverProvider(db));
 
@@ -312,6 +318,10 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((editor => {  
+		if(!mm.checkDBInit())
+		{
+			return;
+		}		
 		mm.saveMarkDown(editor);
 		db?.mkmap.forEach((mk, key, map)=>
 		{
@@ -325,12 +335,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((cevent =>{
 		if (cevent.affectsConfiguration("CodeNotes.disableColor")) {
-			//console.log("affectsConfiguration");
 			mm.reloadAllDocColor();
-            // if(vscode.workspace.getConfiguration().get('CodeNotes.disableColor') === true)
-            // {
-			// 	mm.reloadNowItem();
-			// }
 		}
 	})));
 
@@ -342,7 +347,6 @@ export function activate(context: vscode.ExtensionContext) {
 			{
 				if(mk.filePath === doc.document.fileName)
 				{
-				
 					mm.onChangeDoc(mk,cc,doc);
 				}
 			});
@@ -357,17 +361,6 @@ export function activate(context: vscode.ExtensionContext) {
 			mm.loadCursorJumper(event.textEditor);
 		}
 	}));
-	// if (vscode.window.registerWebviewPanelSerializer) {
-	// 	// Make sure we register a serializer in activation event
-	// 	vscode.window.registerWebviewPanelSerializer(ViewMarks.ViewMarksPanel.viewType, {
-	// 		async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
-	// 			console.log(`Got state: ${state}`);
-	// 			// Reset the webview options so we use latest uri for `localResourceRoots`.
-	// 			webviewPanel.webview.options = ViewMarks.ViewMarksPanel.getWebviewOptions(context.extensionUri);
-	// 			ViewMarks.ViewMarksPanel.revive(webviewPanel, context.extensionUri);
-	// 		}
-	// 	});
-	// }
 }
 
 

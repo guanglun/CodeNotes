@@ -4,7 +4,8 @@ import * as fs from 'fs';
 import * as mark from './Mark';
 import * as Sidebar from './sidebar/Sidebar';
 import * as markmanager from './MarkManager';
-
+import * as path from 'path';
+import * as util from 'util';
 export class DataBase {
 
     public static databasePath = ".codenotes";
@@ -269,31 +270,33 @@ export class DataBase {
     /**
      * 检查数据库状态
      */
-    public checkLoadDB() {
+    public async checkLoadDB() {
+        
         if (vscode.workspace.workspaceFolders) {
+
+            const codenotesPath = <string>vscode.workspace.getConfiguration().get('CodeNotes.codenotesPath');
+            if(codenotesPath)
+            {
+                DataBase.databasePath = codenotesPath;
+            }
+
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
-            var pathDB = rootUri.fsPath + "/" + DataBase.databasePath + "/notes.db";
+            const pathDB =path.join(rootUri.fsPath,DataBase.databasePath,"notes.db");
+            vscode.window.setStatusBarMessage("database path: " + pathDB);
+            const ret = await util.promisify(fs.exists)(pathDB); 
 
-            //console.log("database path: " + pathDB);
-
-            const promise = DataBase.existPromise(pathDB);
-            promise.then((res: any) => {
-                if (res === true) {
-                    new Promise((resolve, reject) => {
-                        this.db = new sqlite3.Database(pathDB, function (err) {
-                            if (err) {
-                                vscode.window.showErrorMessage(err.toString());
-                                console.error(err);
-                            }
-                            else { resolve(true); }
-                        });
-                    }).then((res: any) => {
-                        this.loadDB();
-                        this.isDBInit = true;
-                        this.sidebar?.sweb?.webShowMenu();
-                    });
+            if(ret)
+            {
+                this.db = await new sqlite3.Database(pathDB);
+                if(this.db)
+                {
+                    this.loadDB();
+                    this.isDBInit = true;
+                    this.sidebar?.sweb?.webShowMenu();
+                }else{
+                    vscode.window.showErrorMessage("database load error");
                 }
-            });
+            }
         }
     }
 
@@ -302,6 +305,7 @@ export class DataBase {
      */
     public creatCodeNotes() {
         if (vscode.workspace.workspaceFolders && this.isDBInit === false) {
+
             var rootUri = vscode.workspace.workspaceFolders[0].uri;
             var folderUri = vscode.Uri.file(rootUri.fsPath + "/" + DataBase.databasePath);
 

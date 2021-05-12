@@ -18,7 +18,11 @@
 	],
 	"icon": "images/icon.png",
 	"activationEvents": [
-		"workspaceContains:.codenotes"
+		"workspaceContains:**/notes.db",
+		"onView:sidebar_marks_now",
+		"onView:sidebar_marks_all",
+		"onView:codenotes.sidebar_web",
+		"onView:codenotes.sidebar_mark"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -345,6 +349,11 @@
 			"type": "object",
 			"title": "CodeNotes",
 			"properties": {
+				"CodeNotes.codenotesPath": {
+					"type": "string",
+					"default": ".codenotes",
+					"description": "DataBase Folder Path"
+				},
 				"CodeNotes.disableColor": {
 					"type": "boolean",
 					"default": false,
