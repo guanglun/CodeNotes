@@ -8,6 +8,8 @@ import { mkdir } from 'node:fs';
 import { isDate } from 'node:util';
 import { promises as pfs } from 'fs';
 import * as fs from 'fs';
+import * as util from 'util';
+
 const readline = require('readline');
 
 
@@ -46,7 +48,8 @@ export class MarkManager {
     private mkJPNext: mark.Mark[][] = [];
     private mkNext: mark.Mark[] = [];
     private mkJpNameNext: string[][] = [];
-
+    private mkJpNamePrevious: string[][] = [];
+    
     private lineId: number = 0;
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -60,7 +63,7 @@ export class MarkManager {
     public static pathRelativeToAbsolute(rPath: string) {
         if (vscode.workspace.workspaceFolders) {
             const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            return path.join(workspacePath, rPath);
+            return path.join(workspacePath, rPath.substr(1).replace(/\\/g, '/'));
         }
         return undefined;
     }
@@ -303,7 +306,7 @@ export class MarkManager {
         else if(type === QuickPickItemType.jumper && jpName){
             return {
                 label: jpName + " id:" + mk.id ,
-                description: mk.relativePath + ' id:' + mk.id,
+                description: mk.relativePath?.substr(1).replace(/\\/g, '/') + ' id:' + mk.id,
                 detail: mk.name + ' flag: ' + mark.Mark.flagStr[mk.flag]
             };
         }else{
@@ -454,7 +457,7 @@ export class MarkManager {
         }
     }
 
-    public loadCursorJumper(te: vscode.TextEditor) {
+    public async loadCursorJumper(te: vscode.TextEditor) {
         let mkNum = 0;
         let numMkPrevious = 0;
         let numMkJPPrevious = 0;
@@ -470,34 +473,42 @@ export class MarkManager {
         this.mkJPNext.splice(0, this.mkJPNext.length);
         this.mkNext.splice(0, this.mkNext.length);
         this.mkJpNameNext.splice(0, this.mkJpNameNext.length);
+        this.mkJpNamePrevious.splice(0, this.mkJpNamePrevious.length);
 
         if (this.db && mkArry.length > 0) {
             const arr = Array.from(this.db.mkmap);
             for (let i = 0; i < mkArry.length; i++) {
 
                 let numArry: mark.Mark[] = [];
-
+                let jpName: string[] = [];
                 for (let ii = 0; ii < arr.length; ii++) {
                     const mk = arr[ii][1];
                     for (let iii = 0; iii < mk.mdata.jb.length; iii++) {
 
                         if (mk.mdata.jb[iii].id === mkArry[i].id) {
                             numArry.push(mk);
+                            jpName.push(mk.mdata.jb[iii].name);
                         }
                     }
                 }
                 if (numArry.length > 0) {
                     numMkJPPrevious += numArry.length;
                     this.mkJPPrevious.push(numArry);
+                    this.mkJpNamePrevious.push(jpName);
                     this.mkPrevious.push(mkArry[i]);
                 }
-
 
                 let numArryNext: mark.Mark[] = [];
                 let jpNameNext: string[] = [];
                 for (let count = 0; count < mkArry[i].mdata.jb.length; count++) {
                     const k = this.db.mkmap.get(mkArry[i].mdata.jb[count].id);
-                    if (k) {
+                    let ret = undefined;
+                    if(k && k.filePath)
+                    {
+                        ret = await util.promisify(fs.exists)(k.filePath); 
+                    }
+                    
+                    if (k && ret) {
                         numArryNext.push(k);
                         jpNameNext.push(mkArry[i].mdata.jb[count].name);
                     } else {
@@ -1082,36 +1093,60 @@ categories: ${gCategories}
 
     public async jumpToNext() {
         if (this.mkNext.length > 0) {
-            const id = await this.getQuickPickItemId(this.mkNext);
-            if (id) {
-                let i = 0;
-                for (i = 0; i < this.mkNext.length; i++) {
-                    if (this.mkNext[i].id === id) {
-                        break;
-                    }
-                }
-                const idjp = await this.getQuickPickItemId(this.mkJPNext[i],QuickPickItemType.jumper,this.mkJpNameNext[i]);
-                if (idjp) {
-                    this.click(idjp);
-                }
+            // const id = await this.getQuickPickItemId(this.mkNext);
+            // if (id) {
+            //     let i = 0;
+            //     for (i = 0; i < this.mkNext.length; i++) {
+            //         if (this.mkNext[i].id === id) {
+            //             break;
+            //         }
+            //     }
+            //     const idjp = await this.getQuickPickItemId(this.mkJPNext[i],QuickPickItemType.jumper,this.mkJpNameNext[i]);
+            //     if (idjp) {
+            //         this.click(idjp);
+            //     }
+            // }
+
+            let mkArry: mark.Mark[] = [];
+            let jpName:string[] = [];
+            for (let i = 0; i < this.mkNext.length; i++) {
+                mkArry.push.apply(mkArry,this.mkJPNext[i]);
+                jpName.push.apply(jpName,this.mkJpNameNext[i]);
+            }
+            
+            const idjp = await this.getQuickPickItemId(mkArry,QuickPickItemType.jumper,jpName);
+            if (idjp) {
+                this.click(idjp);
             }
         }
     }
 
     public async jumpToPrevious() {
         if (this.mkPrevious.length > 0) {
-            const id = await this.getQuickPickItemId(this.mkPrevious);
-            if (id) {
-                let i = 0;
-                for (i = 0; i < this.mkPrevious.length; i++) {
-                    if (this.mkPrevious[i].id === id) {
-                        break;
-                    }
-                }
-                const idjp = await this.getQuickPickItemId(this.mkJPPrevious[i]);
-                if (idjp) {
-                    this.click(idjp);
-                }
+            // const id = await this.getQuickPickItemId(this.mkPrevious);
+            // if (id) {
+            //     let i = 0;
+            //     for (i = 0; i < this.mkPrevious.length; i++) {
+            //         if (this.mkPrevious[i].id === id) {
+            //             break;
+            //         }
+            //     }
+            //     const idjp = await this.getQuickPickItemId(this.mkJPPrevious[i]);
+            //     if (idjp) {
+            //         this.click(idjp);
+            //     }
+            // }
+
+            let mkArry: mark.Mark[] = [];
+            let jpName:string[] = [];
+            for (let i = 0; i < this.mkPrevious.length; i++) {
+                mkArry.push.apply(mkArry,this.mkJPPrevious[i]);
+                jpName.push.apply(jpName,this.mkJpNamePrevious[i]);
+            }
+            
+            const idjp = await this.getQuickPickItemId(mkArry,QuickPickItemType.jumper,jpName);
+            if (idjp) {
+                this.click(idjp);
             }
         }
     }
