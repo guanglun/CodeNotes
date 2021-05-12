@@ -204,7 +204,7 @@ export class MarkManager {
                     this.sidebar?.elNow?.refresh();
                 }
                 this.sidebar?.smark?.updateMarkEdit(mk);
-
+                vscode.window.setStatusBarMessage(`Insert Success ${mk.id}`);
             }
             return true;
         }
@@ -286,8 +286,8 @@ export class MarkManager {
 
     public getQuickPickItem(mk: mark.Mark) {
         return {
-            label: mk.name ? mk.name : "null",
-            description: 'id:' + mk.id,
+            label: mk.name ? "id:" + mk.id + " " + mk.name : "id:" + mk.id,
+            description: mk.relativePath + ' id:' + mk.id,
             detail: 'jump num:' + mk.mdata.jb.length + ' flag: ' + mark.Mark.flagStr[mk.flag]
         }
     }
@@ -311,57 +311,77 @@ export class MarkManager {
                 btName = 'Jump To Function';
             }
 
-
             if (btName && mk && this.db) {
                 let items: vscode.QuickPickItem[] = [];
-                const itemsFlag = [
-                    {
-                        label: 'Function',
-                        description: 'select from function',
-                        detail: 'number: ' + this.db.mkmapFunction.size
-                    },
-                    {
-                        label: 'Line',
-                        description: 'select from line',
-                        detail: 'number: ' + this.db.mkmapLine.size
-                    },
-                    {
-                        label: 'Default(Marks)',
-                        description: 'select from default',
-                        detail: 'number: ' + this.db.mkmapDefault.size
-                    },
-                ];
 
+                this.db.mkmap.forEach((value) => {
+                    items.push(this.getQuickPickItem(value));
+                });
 
-                let type = await vscode.window.showQuickPick(itemsFlag, { placeHolder: 'Sletct ' + mk?.name + ' Jump To Type' });
+                let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct ' + mk?.name + ' Jump To ' });
 
-                if (type) {
-                    if (type?.label === 'Function') {
-                        this.db.mkmapFunction.forEach((value, key, map) => {
-                            items.push(this.getQuickPickItem(value));
-                        });
-                    } else if (type?.label === 'Line') {
-                        this.db.mkmapLine.forEach((value, key, map) => {
-                            items.push(this.getQuickPickItem(value));
-                        });
-                    } else if (type?.label === 'Default(Marks)') {
-                        this.db.mkmapDefault.forEach((value, key, map) => {
-                            items.push(this.getQuickPickItem(value));
-                        });
-                    }
-                    let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct ' + mk?.name + ' Jump To ' });
+                if (value && mk) {
+                    const jumpId = Number(value?.description?.split('id:')[1]);
+                    mk.mdata.jb.push(new mark.JumpLink(btName, jumpId));
+                    let json = JSON.stringify(mk.mdata.jb);
+                    mk.jumpLink = json;
+                    this.db.updateJumpLink(id, mk.jumpLink);
 
-                    if (value && mk) {
-                        const jumpId = Number(value?.description?.split('id:')[1]);
-                        mk.mdata.jb.push(new mark.JumpLink(btName, jumpId));
-                        let json = JSON.stringify(mk.mdata.jb);
-                        mk.jumpLink = json;
-                        this.db.updateJumpLink(id, mk.jumpLink);
-
-                        vscode.window.setStatusBarMessage('Jumper Add Success', 2000);
-                    }
+                    vscode.window.setStatusBarMessage(`Jumper Add Success ${mk.id} to ${jumpId}`);
                 }
+
             }
+
+            // if (btName && mk && this.db) {
+            //     let items: vscode.QuickPickItem[] = [];
+            //     const itemsFlag = [
+            //         {
+            //             label: 'Function',
+            //             description: 'select from function',
+            //             detail: 'number: ' + this.db.mkmapFunction.size
+            //         },
+            //         {
+            //             label: 'Line',
+            //             description: 'select from line',
+            //             detail: 'number: ' + this.db.mkmapLine.size
+            //         },
+            //         {
+            //             label: 'Default(Marks)',
+            //             description: 'select from default',
+            //             detail: 'number: ' + this.db.mkmapDefault.size
+            //         },
+            //     ];
+
+
+            //     let type = await vscode.window.showQuickPick(itemsFlag, { placeHolder: 'Sletct ' + mk?.name + ' Jump To Type' });
+
+            //     if (type) {
+            //         if (type?.label === 'Function') {
+            //             this.db.mkmapFunction.forEach((value, key, map) => {
+            //                 items.push(this.getQuickPickItem(value));
+            //             });
+            //         } else if (type?.label === 'Line') {
+            //             this.db.mkmapLine.forEach((value, key, map) => {
+            //                 items.push(this.getQuickPickItem(value));
+            //             });
+            //         } else if (type?.label === 'Default(Marks)') {
+            //             this.db.mkmapDefault.forEach((value, key, map) => {
+            //                 items.push(this.getQuickPickItem(value));
+            //             });
+            //         }
+            //         let value = await vscode.window.showQuickPick(items, { placeHolder: 'Sletct ' + mk?.name + ' Jump To ' });
+
+            //         if (value && mk) {
+            //             const jumpId = Number(value?.description?.split('id:')[1]);
+            //             mk.mdata.jb.push(new mark.JumpLink(btName, jumpId));
+            //             let json = JSON.stringify(mk.mdata.jb);
+            //             mk.jumpLink = json;
+            //             this.db.updateJumpLink(id, mk.jumpLink);
+
+            //             vscode.window.setStatusBarMessage('Jumper Add Success', 2000);
+            //         }
+            //     }
+            // }
         }
     }
 
@@ -422,10 +442,10 @@ export class MarkManager {
 
         mkNum = mkArry.length;
 
-        this.mkJPPrevious.splice(0,this.mkJPPrevious.length);
-        this.mkPrevious.splice(0,this.mkPrevious.length);
-        this.mkJPNext.splice(0,this.mkJPNext.length);
-        this.mkNext.splice(0,this.mkNext.length);
+        this.mkJPPrevious.splice(0, this.mkJPPrevious.length);
+        this.mkPrevious.splice(0, this.mkPrevious.length);
+        this.mkJPNext.splice(0, this.mkJPNext.length);
+        this.mkNext.splice(0, this.mkNext.length);
 
         if (this.db && mkArry.length > 0) {
             const arr = Array.from(this.db.mkmap);
@@ -442,8 +462,7 @@ export class MarkManager {
                         }
                     }
                 }
-                if(numArry.length > 0)
-                {
+                if (numArry.length > 0) {
                     numMkJPPrevious += numArry.length;
                     this.mkJPPrevious.push(numArry);
                     this.mkPrevious.push(mkArry[i]);
@@ -451,13 +470,11 @@ export class MarkManager {
 
 
                 let numArryNext: mark.Mark[] = [];
-                for(let count =0;count < mkArry[i].mdata.jb.length;count++)
-                {
+                for (let count = 0; count < mkArry[i].mdata.jb.length; count++) {
                     const k = this.db.mkmap.get(mkArry[i].mdata.jb[count].id);
-                    if(k)
-                    {
+                    if (k) {
                         numArryNext.push(k);
-                    }else{
+                    } else {
                         mkArry[i].mdata.jb.splice(count, 1);
                         let json = JSON.stringify(mkArry[i].mdata.jb);
                         mkArry[i].jumpLink = json;
@@ -465,8 +482,7 @@ export class MarkManager {
                     }
                 }
 
-                if(numArryNext.length > 0)
-                {
+                if (numArryNext.length > 0) {
                     numMkJPNext += numArryNext.length;
                     this.mkJPNext.push(numArryNext);
                     this.mkNext.push(mkArry[i]);
@@ -476,8 +492,34 @@ export class MarkManager {
             numMkNext = this.mkJPNext.length;
         }
 
-
-        vscode.window.setStatusBarMessage(`${mkNum} < ${numMkJPPrevious} ${numMkPrevious} | ${numMkNext} ${numMkJPNext} >`);
+        let str = "";
+        for(let i=0;i<mkArry.length;i++)
+        {
+            if(mkArry[i].flag === mark.Mark.FLAG_FUNCTION)
+            {
+                str += " ";
+                str += mkArry[i].id;
+            }
+        }
+        for(let i=0;i<mkArry.length;i++)
+        {
+            if(mkArry[i].flag === mark.Mark.FLAG_LINE)
+            {
+                str += " ";
+                str += mkArry[i].id;
+            }
+        }
+        for(let i=0;i<mkArry.length;i++)
+        {
+            if(mkArry[i].flag === mark.Mark.FLAG_DEFAULT)
+            {
+                str += " ";
+                str += mkArry[i].id;
+            }
+        }
+        str += " ";
+            
+        vscode.window.setStatusBarMessage(`${mkNum} [${str}] < ${numMkJPPrevious} ${numMkPrevious} | ${numMkNext} ${numMkJPNext} >`);
     }
 
     public showMarkDown(fileName: string, line: number) {
@@ -499,7 +541,7 @@ export class MarkManager {
     }
 
     public async typeMarkDown() {
-        
+
         //console.log(vscode.workspace.textDocuments);        
         await vscode.commands.executeCommand("workbench.action.closeEditorsInOtherGroups");
 
@@ -1011,22 +1053,17 @@ categories: ${gCategories}
     // }
 
     public async jumpToNext() {
-        if(this.mkNext.length > 0)
-        {
+        if (this.mkNext.length > 0) {
             const id = await this.getQuickPickItemId(this.mkNext);
-            if(id)
-            {
-                let i=0;
-                for(i=0;i<this.mkNext.length;i++)
-                {
-                    if(this.mkNext[i].id === id)
-                    {
+            if (id) {
+                let i = 0;
+                for (i = 0; i < this.mkNext.length; i++) {
+                    if (this.mkNext[i].id === id) {
                         break;
                     }
                 }
                 const idjp = await this.getQuickPickItemId(this.mkJPNext[i]);
-                if(idjp)
-                {
+                if (idjp) {
                     this.click(idjp);
                 }
             }
@@ -1034,30 +1071,24 @@ categories: ${gCategories}
     }
 
     public async jumpToPrevious() {
-        if(this.mkPrevious.length > 0)
-        {
+        if (this.mkPrevious.length > 0) {
             const id = await this.getQuickPickItemId(this.mkPrevious);
-            if(id)
-            {
-                let i=0;
-                for(i=0;i<this.mkPrevious.length;i++)
-                {
-                    if(this.mkPrevious[i].id === id)
-                    {
+            if (id) {
+                let i = 0;
+                for (i = 0; i < this.mkPrevious.length; i++) {
+                    if (this.mkPrevious[i].id === id) {
                         break;
                     }
                 }
                 const idjp = await this.getQuickPickItemId(this.mkJPPrevious[i]);
-                if(idjp)
-                {
+                if (idjp) {
                     this.click(idjp);
                 }
             }
         }
     }
 
-    public async getQuickPickItemId(mkArry: mark.Mark[]):Promise<number>
-    {
+    public async getQuickPickItemId(mkArry: mark.Mark[]): Promise<number> {
         let items = this.mkArryToQuickPickItem(mkArry);
 
         if (items.length > 1) {

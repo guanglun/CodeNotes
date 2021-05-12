@@ -9,7 +9,7 @@
 		"notes"
 	],
 	"publisher": "guanglun",
-	"version": "0.0.22",
+	"version": "0.0.23",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -170,7 +170,7 @@
 		"menus": {
 			"explorer/context": [
 				{
-					"when": "resourceExtname == .o && extension == codenotes",
+					"when": "resourceExtname == .o",
 					"command": "codenotes.objdump",
 					"group": "0_codenotes@1"
 				}
