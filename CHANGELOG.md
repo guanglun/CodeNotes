@@ -1,3 +1,6 @@
+### Version 0.0.25
+- 修复初始化Codenotes提醒出现触发条件
+
 ### Version 0.0.24
 - 修复Linux与Windows移动notes.db文件相对路径错误问题
 - 修改上下跳转为直接选择，选择信息更为详尽

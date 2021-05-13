@@ -220,8 +220,8 @@ export class MarkManager {
         return false;
     }
 
-    public checkDBInit() {
-        if (this.db?.isDBInit === false) {
+    public checkDBInit(showError?:boolean) {
+        if (this.db?.isDBInit === false && showError && showError === true) {
             vscode.window.showErrorMessage("Please Initialize CodeNotes");
         }
 

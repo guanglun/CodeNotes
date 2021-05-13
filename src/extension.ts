@@ -110,7 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.editMark', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -119,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.editMarkDown', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -127,7 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.showMarkDown.disable', (res) => {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -136,7 +136,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.showMarkDown.onlyPreview', (res) => {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -145,7 +145,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.showMarkDown.previewAndEdit', (res) => {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -154,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteMark', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -163,7 +163,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.renameMark', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -172,7 +172,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.jumpToNext', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}
@@ -180,7 +180,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.jumpToPrevious', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}
@@ -188,7 +188,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.addJumpLinkMark', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}
@@ -197,7 +197,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.deleteJumpLinkMark', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -206,7 +206,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.addJumpLink', (res: Sidebar.EntryItem) => {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -217,7 +217,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.deleteJumpLink', (res: Sidebar.EntryItem) => {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -228,7 +228,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertMark', function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -238,7 +238,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertLine', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -248,7 +248,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand('codenotes.insertFunction', async function (textEditor, edit) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}		
@@ -282,7 +282,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// });
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.openWebview', function (uri) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}
@@ -291,7 +291,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('codenotes.generate', function (uri) {
-		if(!mm.checkDBInit())
+		if(!mm.checkDBInit(true))
 		{
 			return;
 		}
